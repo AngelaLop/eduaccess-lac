@@ -1,0 +1,2 @@
+Shubham Chandra • Apr 22
+Oh wow, this is a very interesting idea. I don't have much knowledge but if you can get this right I can see it being very valuable. I think this is going to be an exercise in building an app but will really turn into a data exercise. To be clear, that's not a bad thing at all but I would really spend time thinking about how youll use agents for each part of the analysis and how to explain the robustness of reccomendations.
