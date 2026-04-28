@@ -13,19 +13,6 @@ import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { validateSQL } from '@/lib/sql-validator';
 
-// ── clients ───────────────────────────────────────────────────────────────────
-
-const groq = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: 'https://api.groq.com/openai/v1',
-});
-
-// Service role key — server-side only, never NEXT_PUBLIC_
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 // ── schema prompt ─────────────────────────────────────────────────────────────
 
 const SCHEMA_PROMPT = `
@@ -56,7 +43,7 @@ HARD RULES — any violation makes the SQL invalid:
 1. SELECT only. No INSERT/UPDATE/DELETE/DROP/CREATE/ALTER/TRUNCATE.
 2. Only reference v_panama_indicators. No other tables or views.
 3. Include LIMIT N where N ≤ 50.
-4. Always include cod_dist in the SELECT list (needed for map highlights).
+4. Include cod_dist in SELECT for district-level results (needed for map highlights). Province-level aggregates may omit it.
 5. No semicolons. No pg_* functions. No information_schema.
 
 EXAMPLES:
@@ -91,6 +78,17 @@ export async function POST(req: NextRequest) {
   }
 
   const { question } = parsed.data;
+
+  const apiKey = process.env.GROQ_API_KEY;
+  const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supaKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!apiKey || !supaUrl || !supaKey) {
+    console.error('[ask] Missing required env vars');
+    return NextResponse.json({ error: 'Server configuration error.' }, { status: 500 });
+  }
+  const groq = new OpenAI({ apiKey, baseURL: 'https://api.groq.com/openai/v1' });
+  const supabase = createClient(supaUrl, supaKey);
+
   let sql = '';
   let narrative = '';
   let lastError = '';
@@ -144,10 +142,8 @@ export async function POST(req: NextRequest) {
   const { data, error: dbError } = await supabase.rpc('run_sql', { query: sql });
 
   if (dbError) {
-    return NextResponse.json(
-      { error: `Query execution failed: ${dbError.message}`, sql },
-      { status: 422 }
-    );
+    console.error('[ask] DB error:', dbError);
+    return NextResponse.json({ error: 'Query execution failed.', sql }, { status: 422 });
   }
 
   const rows = (data as Record<string, unknown>[]) ?? [];
