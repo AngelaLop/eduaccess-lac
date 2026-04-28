@@ -61,3 +61,7 @@ data/scratch/
 # Agent transcripts
 .claude/
 .agents/
+
+# Screenshots of credentials — never commit
+keys.png
+keys*.png
