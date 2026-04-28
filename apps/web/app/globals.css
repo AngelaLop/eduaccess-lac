@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7faf7;
+  --foreground: #14211d;
+  --surface: rgba(255, 252, 247, 0.82);
+  --surface-strong: #fffdf9;
+  --line: rgba(20, 33, 29, 0.09);
+  --muted: #61706a;
+  --teal: #1c4e4a;
+  --teal-deep: #123430;
+  --clay: #b67347;
 }
 
 @theme inline {
@@ -10,15 +17,104 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-geist-sans);
+}
+
+html {
+  min-height: 100%;
+  background: linear-gradient(180deg, #fafcf9 0%, #f6f9f6 100%);
 }
 
 body {
+  min-height: 100%;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), sans-serif;
 }
 
-/* App fills the full viewport — no scroll at root level */
-html, body, body > div:first-child {
-  height: 100%;
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image:
+    linear-gradient(rgba(20, 33, 29, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 33, 29, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), transparent 92%);
+}
+
+body > div:first-child {
+  min-height: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+.font-display {
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+.glass-panel {
+  background: var(--surface);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--line);
+  box-shadow: 0 18px 50px rgba(15, 26, 23, 0.08);
+}
+
+.soft-panel {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 30px rgba(15, 26, 23, 0.06);
+}
+
+.section-divider {
+  border-top: 1px solid var(--line);
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s ease-out both;
+}
+
+.animate-fade-up-delay {
+  animation: fade-up 0.9s ease-out 0.12s both;
+}
+
+.animate-drift {
+  animation: drift 13s ease-in-out infinite;
+}
+
+.animate-drift-slow {
+  animation: drift 18s ease-in-out infinite reverse;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes drift {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes blink-caret {
+  0%, 45% {
+    opacity: 1;
+  }
+  46%, 100% {
+    opacity: 0;
+  }
 }

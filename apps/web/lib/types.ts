@@ -1,10 +1,25 @@
 export type AgeGroup = 'all' | 'primary' | 'secondary' | 'highschool';
+export type TransportMode = 'walking' | 'motorized';
+
+export const AGE_GROUPS: AgeGroup[] = ['all', 'primary', 'secondary', 'highschool'];
 
 export const AGE_GROUP_LABELS: Record<AgeGroup, string> = {
   all: 'All school-age',
-  primary: 'Primary (6–11)',
-  secondary: 'Lower secondary (12–14)',
-  highschool: 'High school (15–17)',
+  primary: 'Primary (6-11)',
+  secondary: 'Lower secondary (12-14)',
+  highschool: 'High school (15-17)',
+};
+
+export const AGE_GROUP_SHORT_LABELS: Record<AgeGroup, string> = {
+  all: 'All',
+  primary: 'Primary',
+  secondary: 'Secondary',
+  highschool: 'High school',
+};
+
+export const TRANSPORT_LABELS: Record<TransportMode, string> = {
+  walking: 'Walking',
+  motorized: 'Motorized',
 };
 
 export interface IndicatorRow {
@@ -23,8 +38,5 @@ export interface IndicatorRow {
   data_completeness_pct: number;
 }
 
-/** All 4 age-group rows for a single district, keyed by age_group. */
 export type DistrictIndicators = Partial<Record<AgeGroup, IndicatorRow>>;
-
-/** All districts, keyed by cod_dist. */
 export type IndicatorsByDist = Record<string, DistrictIndicators>;
