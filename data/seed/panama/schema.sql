@@ -61,3 +61,25 @@ alter table panama_district_geometries enable row level security;
 
 create policy "public read" on panama_district_indicators for select using (true);
 create policy "public read" on panama_district_geometries for select using (true);
+
+-- run_sql: executes a validated SELECT and returns rows as JSONB.
+-- Called by /api/ask (server-side, service_role key only).
+-- SQL is pre-validated by the app before this function is ever called.
+create or replace function run_sql(query text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  result jsonb;
+begin
+  execute 'select coalesce(json_agg(row_to_json(t)),''[]''::json) from (' || query || ') t'
+    into result;
+  return result;
+end;
+$$;
+
+-- Restrict to service_role only — anon/authenticated cannot call this.
+revoke execute on function run_sql(text) from public, anon, authenticated;
+grant  execute on function run_sql(text) to service_role;
