@@ -5,14 +5,12 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import IndicatorPanel from './IndicatorPanel';
-import type {
-  AgeGroup,
-  IndicatorRow,
-  IndicatorsByDist,
-  TransportMode,
-} from '@/lib/types';
+import type { AgeGroup, IndicatorRow, IndicatorsByDist, TransportMode } from '@/lib/types';
+import { AGE_GROUPS, AGE_GROUP_SHORT_LABELS, TRANSPORT_LABELS } from '@/lib/types';
 
 const PanamaMap = dynamic(() => import('./PanamaMap'), { ssr: false });
+
+// ── constants ─────────────────────────────────────────────────────────────────
 
 const SEEDED_PROMPTS = [
   'Top 5 districts with the worst walking access for high schoolers',
@@ -21,6 +19,14 @@ const SEEDED_PROMPTS = [
   'Compare primary vs high school walking access in the districts of Panama province',
   'Rank provinces by their average % of population within 15 minutes of a school',
 ] as const;
+
+const LEGEND_STOPS = [
+  '#7f1d1d', '#dc2626', '#f97316', '#eab308', '#16a34a',
+] as const;
+
+const NO_DATA_COLOR = '#d1d5db';
+
+// ── types ─────────────────────────────────────────────────────────────────────
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -48,10 +54,30 @@ interface ScenarioRow {
   pct_le60: number;
 }
 
-const EMPTY_INDICATORS: Record<TransportMode, IndicatorsByDist> = {
-  walking: {},
-  motorized: {},
-};
+const EMPTY_INDICATORS: Record<TransportMode, IndicatorsByDist> = { walking: {}, motorized: {} };
+
+const COLS =
+  'cod_dist,nomb_dist,nomb_prov,age_group,friction,pop_total,pop_le15,pop_le30,pop_le60,pop_nodata,pct_le15,pct_le30,pct_le60';
+
+function ingestRows(
+  rows: ScenarioRow[],
+  mode: TransportMode,
+  target: Record<TransportMode, IndicatorsByDist>
+) {
+  for (const raw of rows) {
+    const row: IndicatorRow = {
+      ...raw,
+      data_completeness_pct:
+        raw.pop_total > 0
+          ? Number((((raw.pop_total - raw.pop_nodata) / raw.pop_total) * 100).toFixed(1))
+          : 0,
+    };
+    if (!target[mode][row.cod_dist]) target[mode][row.cod_dist] = {};
+    target[mode][row.cod_dist][row.age_group] = row;
+  }
+}
+
+// ── component ─────────────────────────────────────────────────────────────────
 
 export default function AppShell() {
   const [indicatorsByTransport, setIndicatorsByTransport] =
@@ -67,62 +93,41 @@ export default function AppShell() {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    supabase
-      .from('panama_district_indicators')
-      .select(
-        'cod_dist,nomb_dist,nomb_prov,age_group,friction,pop_total,pop_le15,pop_le30,pop_le60,pop_nodata,pct_le15,pct_le30,pct_le60'
-      )
-      .eq('pop_source', 'worldpop')
-      .eq('friction_source', 'map')
-      .in('friction', ['walking', 'motorized'])
-      .then(({ data, error }) => {
-        if (error || !data) {
-          console.error('Failed to load indicators:', error);
-          return;
-        }
+    const grouped: Record<TransportMode, IndicatorsByDist> = { walking: {}, motorized: {} };
 
-        const grouped: Record<TransportMode, IndicatorsByDist> = {
-          walking: {},
-          motorized: {},
-        };
-
-        for (const rawRow of data as ScenarioRow[]) {
-          const typedRow: IndicatorRow = {
-            ...rawRow,
-            data_completeness_pct:
-              rawRow.pop_total > 0
-                ? Number(
-                    (((rawRow.pop_total - rawRow.pop_nodata) / rawRow.pop_total) * 100).toFixed(1)
-                  )
-                : 0,
-          };
-
-          if (!grouped[rawRow.friction][typedRow.cod_dist]) {
-            grouped[rawRow.friction][typedRow.cod_dist] = {};
-          }
-          grouped[rawRow.friction][typedRow.cod_dist][typedRow.age_group] = typedRow;
-        }
-
-        setIndicatorsByTransport(grouped);
-        setIsLoading(false);
-      });
+    Promise.all([
+      // Canonical walking scenario: WorldPop + MAP friction + walking
+      supabase.from('panama_district_indicators').select(COLS)
+        .eq('pop_source', 'worldpop').eq('friction_source', 'map').eq('friction', 'walking'),
+      // Motorized scenario: WorldPop + OSM road network + motorized
+      supabase.from('panama_district_indicators').select(COLS)
+        .eq('pop_source', 'worldpop').eq('friction_source', 'osm').eq('friction', 'motorized'),
+    ]).then(([walkRes, motoRes]) => {
+      if (walkRes.error || motoRes.error) {
+        console.error('Failed to load indicators:', walkRes.error ?? motoRes.error);
+        return;
+      }
+      ingestRows(walkRes.data as ScenarioRow[], 'walking', grouped);
+      ingestRows(motoRes.data as ScenarioRow[], 'motorized', grouped);
+      setIndicatorsByTransport(grouped);
+      setIsLoading(false);
+    });
   }, []);
 
   const indicators = indicatorsByTransport[selectedTransport] ?? {};
 
   const top5Worst = useMemo<IndicatorRow[]>(() => {
     const rows = Object.values(indicators)
-      .map((district) => district[selectedAgeGroup])
-      .filter((row): row is IndicatorRow => row !== undefined)
-      .filter((row) => row.data_completeness_pct > 0);
-
+      .map((d) => d[selectedAgeGroup])
+      .filter((r): r is IndicatorRow => r !== undefined)
+      .filter((r) => r.data_completeness_pct > 0);
     return rows.sort((a, b) => a.pct_le30 - b.pct_le30).slice(0, 5);
   }, [indicators, selectedAgeGroup]);
 
-  const highlightedDists = useMemo(() => {
-    if (chatHighlights.length > 0) return chatHighlights;
-    return top5Worst.map((row) => row.cod_dist);
-  }, [chatHighlights, top5Worst]);
+  const highlightedDists = useMemo(
+    () => (chatHighlights.length > 0 ? chatHighlights : top5Worst.map((r) => r.cod_dist)),
+    [chatHighlights, top5Worst]
+  );
 
   const distIndicators = selectedDist ? (indicators[selectedDist] ?? null) : null;
 
@@ -132,10 +137,9 @@ export default function AppShell() {
 
   async function ask(q: string) {
     if (!q.trim() || isAsking) return;
-
     setIsAsking(true);
     setQuestion('');
-    setMessages((current) => [...current, { role: 'user', question: q }]);
+    setMessages((m) => [...m, { role: 'user', question: q }]);
 
     try {
       const res = await fetch('/api/ask', {
@@ -146,13 +150,10 @@ export default function AppShell() {
       const data = await res.json();
 
       if (!res.ok || data.error) {
-        setMessages((current) => [
-          ...current,
-          { role: 'assistant', error: data.error ?? 'Unknown error.' },
-        ]);
+        setMessages((m) => [...m, { role: 'assistant', error: data.error ?? 'Unknown error.' }]);
       } else {
-        setMessages((current) => [
-          ...current,
+        setMessages((m) => [
+          ...m,
           {
             role: 'assistant',
             sql: data.sql,
@@ -161,17 +162,13 @@ export default function AppShell() {
             narrative: data.narrative,
           },
         ]);
-
         if (data.highlightCodDist?.length) {
           setChatHighlights(data.highlightCodDist);
           setSelectedDist(null);
         }
       }
     } catch {
-      setMessages((current) => [
-        ...current,
-        { role: 'assistant', error: 'Network error. Try again.' },
-      ]);
+      setMessages((m) => [...m, { role: 'assistant', error: 'Network error. Try again.' }]);
     } finally {
       setIsAsking(false);
     }
@@ -179,6 +176,7 @@ export default function AppShell() {
 
   return (
     <div className="flex h-full flex-col md:flex-row">
+      {/* ── Map ─────────────────────────────────────────────────────────────── */}
       <div className="relative min-h-[50vh] flex-1 md:min-h-0 md:basis-[65%]">
         {isLoading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-neutral-100">
@@ -197,24 +195,90 @@ export default function AppShell() {
         />
       </div>
 
+      {/* ── Side panel ──────────────────────────────────────────────────────── */}
       <aside className="flex flex-col overflow-hidden border-t border-neutral-200 bg-white md:basis-[35%] md:border-l md:border-t-0">
-        <div className="shrink-0 border-b border-neutral-100 px-5 py-4">
-          <div className="flex items-start justify-between gap-4">
+
+        {/* Header + controls — always visible, never scrolls away */}
+        <div className="shrink-0 border-b border-neutral-200 px-5 pb-3 pt-4">
+          <div className="mb-3 flex items-center justify-between">
             <div>
               <h1 className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
                 EduAccess LAC
               </h1>
-              <p className="mt-0.5 text-xs text-neutral-400">Panama preview</p>
+              <p className="mt-0.5 text-xs text-neutral-400">Panama · school access</p>
             </div>
             <Link
               href="/"
-              className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-50 hover:text-neutral-800"
+              className="text-xs text-neutral-400 transition-colors hover:text-neutral-600"
             >
-              Home
+              ← Home
             </Link>
+          </div>
+
+          {/* Transport */}
+          <div className="mb-2 flex items-center gap-3">
+            <span className="w-16 shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+              Transport
+            </span>
+            <div className="flex gap-0.5 rounded-md bg-neutral-100 p-0.5">
+              {(Object.keys(TRANSPORT_LABELS) as TransportMode[]).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setSelectedTransport(t)}
+                  className={`rounded px-3 py-1 text-xs font-medium whitespace-nowrap transition-colors ${
+                    selectedTransport === t
+                      ? 'bg-white text-emerald-700 shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-700'
+                  }`}
+                >
+                  {TRANSPORT_LABELS[t]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Education level */}
+          <div className="mb-3 flex items-center gap-3">
+            <span className="w-16 shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+              Level
+            </span>
+            <div className="flex gap-0.5 rounded-md bg-neutral-100 p-0.5">
+              {AGE_GROUPS.map((g) => (
+                <button
+                  key={g}
+                  onClick={() => setSelectedAgeGroup(g)}
+                  className={`rounded px-2 py-1 text-xs font-medium whitespace-nowrap transition-colors ${
+                    selectedAgeGroup === g
+                      ? 'bg-white text-emerald-700 shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-700'
+                  }`}
+                >
+                  {AGE_GROUP_SHORT_LABELS[g]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="flex items-center gap-1">
+            <span className="mr-0.5 text-[10px] text-neutral-400">Worse</span>
+            {LEGEND_STOPS.map((color) => (
+              <span
+                key={color}
+                className="inline-block h-2 w-5 shrink-0 rounded-sm"
+                style={{ backgroundColor: color }}
+              />
+            ))}
+            <span className="ml-0.5 mr-3 text-[10px] text-neutral-400">Better</span>
+            <span
+              className="inline-block h-2 w-5 shrink-0 rounded-sm"
+              style={{ backgroundColor: NO_DATA_COLOR }}
+            />
+            <span className="ml-0.5 text-[10px] text-neutral-400">No data</span>
           </div>
         </div>
 
+        {/* Scrollable indicator content */}
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
           <IndicatorPanel
             isLoading={isLoading}
@@ -223,8 +287,6 @@ export default function AppShell() {
             distIndicators={distIndicators}
             selectedTransport={selectedTransport}
             selectedAgeGroup={selectedAgeGroup}
-            onTransportChange={setSelectedTransport}
-            onAgeGroupChange={setSelectedAgeGroup}
             onSelectDist={(cod) => {
               setSelectedDist(cod);
               setChatHighlights([]);
@@ -233,17 +295,18 @@ export default function AppShell() {
           />
         </div>
 
+        {/* Chat */}
         <div className="flex max-h-[45vh] shrink-0 flex-col border-t border-neutral-200 bg-white">
           {messages.length === 0 && (
             <div className="flex flex-wrap gap-1.5 px-4 pb-2 pt-3">
-              {SEEDED_PROMPTS.map((prompt) => (
+              {SEEDED_PROMPTS.map((p) => (
                 <button
-                  key={prompt}
-                  onClick={() => ask(prompt)}
+                  key={p}
+                  onClick={() => ask(p)}
                   disabled={isAsking}
                   className="rounded-full border border-neutral-200 px-2.5 py-1 text-left text-xs text-neutral-600 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
                 >
-                  {prompt}
+                  {p}
                 </button>
               ))}
             </div>
@@ -260,10 +323,7 @@ export default function AppShell() {
           )}
 
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              ask(question);
-            }}
+            onSubmit={(e) => { e.preventDefault(); ask(question); }}
             className="flex gap-2 border-t border-neutral-100 px-4 py-3"
           >
             <input
@@ -283,15 +343,18 @@ export default function AppShell() {
           </form>
         </div>
 
+        {/* Footer */}
         <div className="shrink-0 border-t border-neutral-100 px-5 py-2">
           <p className="text-xs text-neutral-400">
-            Data: IDB Accessibility Platform - v1 preview - 2026
+            Data: IDB Accessibility Platform · v1 preview · 2026
           </p>
         </div>
       </aside>
     </div>
   );
 }
+
+// ── chat bubble ───────────────────────────────────────────────────────────────
 
 function ChatBubble({ msg }: { msg: ChatMessage }) {
   const [showSql, setShowSql] = useState(false);
@@ -321,12 +384,12 @@ function ChatBubble({ msg }: { msg: ChatMessage }) {
           <table className="w-full text-xs">
             <thead className="bg-neutral-50">
               <tr>
-                {msg.columns?.map((column) => (
+                {msg.columns?.map((c) => (
                   <th
-                    key={column}
+                    key={c}
                     className="whitespace-nowrap px-2 py-1.5 text-left font-medium text-neutral-500"
                   >
-                    {column}
+                    {c}
                   </th>
                 ))}
               </tr>
@@ -334,12 +397,9 @@ function ChatBubble({ msg }: { msg: ChatMessage }) {
             <tbody>
               {msg.rows.map((row, i) => (
                 <tr key={i} className="border-t border-neutral-100 hover:bg-neutral-50">
-                  {msg.columns?.map((column) => (
-                    <td
-                      key={column}
-                      className="whitespace-nowrap px-2 py-1.5 text-neutral-700"
-                    >
-                      {String(row[column] ?? '')}
+                  {msg.columns?.map((c) => (
+                    <td key={c} className="whitespace-nowrap px-2 py-1.5 text-neutral-700">
+                      {String(row[c] ?? '')}
                     </td>
                   ))}
                 </tr>
@@ -349,15 +409,17 @@ function ChatBubble({ msg }: { msg: ChatMessage }) {
         </div>
       )}
 
-      {msg.rows?.length === 0 && <p className="text-xs text-neutral-400">No results found.</p>}
+      {msg.rows?.length === 0 && (
+        <p className="text-xs text-neutral-400">No results found.</p>
+      )}
 
       {msg.sql && (
         <div>
           <button
-            onClick={() => setShowSql((current) => !current)}
+            onClick={() => setShowSql((s) => !s)}
             className="text-xs text-neutral-400 hover:text-neutral-600"
           >
-            {showSql ? 'Hide SQL' : 'Show SQL'}
+            {showSql ? '▲ Hide SQL' : '▼ Show SQL'}
           </button>
           {showSql && (
             <pre className="mt-1 overflow-x-auto rounded-md border border-neutral-200 bg-neutral-50 p-2 text-xs text-neutral-600">
