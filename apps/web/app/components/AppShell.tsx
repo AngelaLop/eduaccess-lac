@@ -177,7 +177,7 @@ export default function AppShell() {
   return (
     <div className="flex h-full flex-col md:flex-row">
       {/* ── Map ─────────────────────────────────────────────────────────────── */}
-      <div className="relative min-h-[50vh] flex-1 md:min-h-0 md:basis-[65%]">
+      <div className="relative h-[42vh] shrink-0 md:h-auto md:min-h-0 md:flex-1 md:basis-[65%]">
         {isLoading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-neutral-100">
             <p className="animate-pulse text-sm text-neutral-500">Loading map data...</p>
@@ -196,11 +196,11 @@ export default function AppShell() {
       </div>
 
       {/* ── Side panel ──────────────────────────────────────────────────────── */}
-      <aside className="flex flex-col overflow-hidden border-t border-neutral-200 bg-white md:basis-[35%] md:border-l md:border-t-0">
+      <aside className="flex flex-1 flex-col overflow-hidden border-t border-neutral-200 bg-white md:flex-none md:basis-[35%] md:border-l md:border-t-0">
 
         {/* Header + controls — always visible, never scrolls away */}
-        <div className="shrink-0 border-b border-neutral-200 px-5 pb-3 pt-4">
-          <div className="mb-3 flex items-center justify-between">
+        <div className="shrink-0 border-b border-neutral-200 px-4 pb-2 pt-3 md:px-5 md:pb-3 md:pt-4">
+          <div className="mb-2 flex items-center justify-between md:mb-3">
             <div>
               <h1 className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
                 EduAccess LAC
@@ -216,16 +216,16 @@ export default function AppShell() {
           </div>
 
           {/* Transport */}
-          <div className="mb-2 flex items-center gap-3">
-            <span className="w-16 shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+          <div className="mb-1.5 flex items-center gap-2 md:mb-2 md:gap-3">
+            <span className="hidden w-16 shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 md:block">
               Transport
             </span>
-            <div className="flex gap-0.5 rounded-md bg-neutral-100 p-0.5">
+            <div className="flex w-full gap-0.5 rounded-md bg-neutral-100 p-0.5 md:w-auto">
               {(Object.keys(TRANSPORT_LABELS) as TransportMode[]).map((t) => (
                 <button
                   key={t}
                   onClick={() => setSelectedTransport(t)}
-                  className={`rounded px-3 py-1 text-xs font-medium whitespace-nowrap transition-colors ${
+                  className={`flex-1 rounded px-3 py-1 text-xs font-medium whitespace-nowrap transition-colors md:flex-none ${
                     selectedTransport === t
                       ? 'bg-white text-emerald-700 shadow-sm'
                       : 'text-neutral-500 hover:text-neutral-700'
@@ -238,16 +238,16 @@ export default function AppShell() {
           </div>
 
           {/* Education level */}
-          <div className="mb-3 flex items-center gap-3">
-            <span className="w-16 shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+          <div className="mb-2 flex items-center gap-2 md:mb-3 md:gap-3">
+            <span className="hidden w-16 shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 md:block">
               Level
             </span>
-            <div className="flex gap-0.5 rounded-md bg-neutral-100 p-0.5">
+            <div className="flex w-full gap-0.5 rounded-md bg-neutral-100 p-0.5 md:w-auto">
               {AGE_GROUPS.map((g) => (
                 <button
                   key={g}
                   onClick={() => setSelectedAgeGroup(g)}
-                  className={`rounded px-2 py-1 text-xs font-medium whitespace-nowrap transition-colors ${
+                  className={`flex-1 rounded px-2 py-1 text-xs font-medium whitespace-nowrap transition-colors md:flex-none ${
                     selectedAgeGroup === g
                       ? 'bg-white text-emerald-700 shadow-sm'
                       : 'text-neutral-500 hover:text-neutral-700'
@@ -265,13 +265,13 @@ export default function AppShell() {
             {LEGEND_STOPS.map((color) => (
               <span
                 key={color}
-                className="inline-block h-2 w-5 shrink-0 rounded-sm"
+                className="inline-block h-2 w-4 shrink-0 rounded-sm md:w-5"
                 style={{ backgroundColor: color }}
               />
             ))}
-            <span className="ml-0.5 mr-3 text-[10px] text-neutral-400">Better</span>
+            <span className="ml-0.5 mr-2 text-[10px] text-neutral-400 md:mr-3">Better</span>
             <span
-              className="inline-block h-2 w-5 shrink-0 rounded-sm"
+              className="inline-block h-2 w-4 shrink-0 rounded-sm md:w-5"
               style={{ backgroundColor: NO_DATA_COLOR }}
             />
             <span className="ml-0.5 text-[10px] text-neutral-400">No data</span>
