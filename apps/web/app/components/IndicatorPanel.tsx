@@ -10,38 +10,12 @@ import {
   TRANSPORT_LABELS,
 } from '@/lib/types';
 import type { InsightStats } from './AppShell';
+import RobustnessCard from './RobustnessCard';
+import PriorityPanel from './PriorityPanel';
+import { supabase } from '@/lib/supabase';
+import type { PriorityRow } from '@/lib/types';
 
 // ── sub-components ────────────────────────────────────────────────────────────
-
-function RobustnessCard({ row }: { row: IndicatorRow }) {
-  return (
-    <section className="rounded-md border border-neutral-200 bg-neutral-50 p-3 text-xs">
-      <p className="mb-2 font-semibold text-neutral-700">How much can we trust this?</p>
-      <ul className="space-y-1 text-neutral-600">
-        <li>
-          Data completeness:{' '}
-          <strong className="text-neutral-800">{row.data_completeness_pct}%</strong>
-          <span className="text-neutral-400">
-            {' '}({row.pop_nodata.toLocaleString()} of {row.pop_total.toLocaleString()} lack
-            travel-time data)
-          </span>
-        </li>
-        <li>
-          Population source: <strong className="text-neutral-800">WorldPop 2023</strong>
-          <span className="text-neutral-400"> (1 km raster, age-binned)</span>
-        </li>
-        <li>
-          Friction surface: <strong className="text-neutral-800">MAP (Weiss et al. 2020)</strong>
-          <span className="text-neutral-400"> — globally validated</span>
-        </li>
-        <li>Travel-time model: Fast Marching Method on 1 km grid</li>
-      </ul>
-      <p className="mt-2 text-neutral-400">
-        IDB Accessibility Platform, Panama pilot (3,617 schools).
-      </p>
-    </section>
-  );
-}
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -148,7 +122,11 @@ function DistrictDetail({
             </>
           )}
 
-          <RobustnessCard row={row} />
+          <RobustnessCard
+            cod_dist={row.cod_dist}
+            age_group={activeGroup}
+            transport_mode={selectedTransport}
+          />
         </>
       ) : (
         <p className="text-sm text-neutral-500">No data for this age group.</p>
@@ -174,6 +152,30 @@ function InsightLanding({
   const mode = TRANSPORT_LABELS[selectedTransport].toLowerCase();
   const maxUnderserved = stats.topUnderserved[0]?.underserved ?? 0;
 
+  // Worker-computed priority rows — falls back to the underserved bars when empty
+  const [priorityRows, setPriorityRows] = useState<PriorityRow[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    setPriorityRows([]);
+    supabase
+      .from('priority_scores')
+      .select('cod_dist, age_group, transport_mode, score, rank_in_country, children_underserved, pct_le30, robustness')
+      .eq('age_group', selectedAgeGroup)
+      .eq('transport_mode', selectedTransport)
+      .order('rank_in_country', { ascending: true })
+      .limit(5)
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) console.error('[InsightLanding] priority_scores:', error);
+        setPriorityRows((data as PriorityRow[]) ?? []);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedAgeGroup, selectedTransport]);
+
+  const showPriority = priorityRows.length > 0;
+
   return (
     <div className="flex flex-col gap-4">
       {/* Headline: % within 30 min */}
@@ -194,48 +196,57 @@ function InsightLanding({
         </p>
       </div>
 
-      {/* Top 5 districts by absolute kids underserved */}
-      {stats.topUnderserved.length > 0 && (
-        <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
-            Districts with the most {narrative} underserved
-          </p>
-          <ol className="space-y-1.5">
-            {stats.topUnderserved.map((entry, i) => {
-              const widthPct =
-                maxUnderserved > 0 ? (entry.underserved / maxUnderserved) * 100 : 0;
-              return (
-                <li key={entry.row.cod_dist}>
-                  <button
-                    onClick={() => onSelectDist(entry.row.cod_dist)}
-                    className="block w-full rounded-md border border-neutral-200 px-3 py-2 text-left transition-colors hover:bg-neutral-50"
-                  >
-                    <div className="mb-1 flex items-baseline justify-between gap-2">
-                      <div className="min-w-0 truncate">
-                        <span className="mr-1.5 text-xs text-neutral-400">{i + 1}.</span>
-                        <span className="text-sm font-medium text-neutral-800">
-                          {entry.row.nomb_dist}
-                        </span>
-                        <span className="ml-1 text-xs text-neutral-400">
-                          {entry.row.nomb_prov}
+      {showPriority ? (
+        <PriorityPanel
+          rows={priorityRows}
+          meta={stats.districtMeta}
+          narrative={narrative}
+          mode={mode}
+          onSelectDist={onSelectDist}
+        />
+      ) : (
+        stats.topUnderserved.length > 0 && (
+          <div>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+              Districts with the most {narrative} underserved
+            </p>
+            <ol className="space-y-1.5">
+              {stats.topUnderserved.map((entry, i) => {
+                const widthPct =
+                  maxUnderserved > 0 ? (entry.underserved / maxUnderserved) * 100 : 0;
+                return (
+                  <li key={entry.row.cod_dist}>
+                    <button
+                      onClick={() => onSelectDist(entry.row.cod_dist)}
+                      className="block w-full rounded-md border border-neutral-200 px-3 py-2 text-left transition-colors hover:bg-neutral-50"
+                    >
+                      <div className="mb-1 flex items-baseline justify-between gap-2">
+                        <div className="min-w-0 truncate">
+                          <span className="mr-1.5 text-xs text-neutral-400">{i + 1}.</span>
+                          <span className="text-sm font-medium text-neutral-800">
+                            {entry.row.nomb_dist}
+                          </span>
+                          <span className="ml-1 text-xs text-neutral-400">
+                            {entry.row.nomb_prov}
+                          </span>
+                        </div>
+                        <span className="shrink-0 text-sm font-bold text-neutral-900">
+                          {entry.underserved.toLocaleString()}
                         </span>
                       </div>
-                      <span className="shrink-0 text-sm font-bold text-neutral-900">
-                        {entry.underserved.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
-                      <div
-                        className="h-full rounded-full bg-emerald-600"
-                        style={{ width: `${Math.max(widthPct, 2)}%` }}
-                      />
-                    </div>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
-        </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+                        <div
+                          className="h-full rounded-full bg-emerald-600"
+                          style={{ width: `${Math.max(widthPct, 2)}%` }}
+                        />
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        )
       )}
 
       <p className="text-xs text-neutral-400">

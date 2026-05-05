@@ -83,3 +83,39 @@ export interface AskResponse {
   // 'out_of_scope' kind — human-readable "here's what I CAN do", ≤ 280 chars
   scopeHint?: string;
 }
+
+// ── Worker output (v2 worker) ────────────────────────────────────────────────
+// Written by apps/worker, read here via the anon key (RLS public read).
+
+export type RobustnessDimension =
+  | 'data_completeness'
+  | 'sample_size'
+  | 'friction_agreement'
+  | 'pop_agreement';
+
+export interface RobustnessReport {
+  cod_dist: string;
+  age_group: AgeGroup;
+  transport_mode: TransportMode;
+  score_data_completeness: number;
+  score_sample_size: number;
+  score_friction_agreement: number;
+  score_pop_agreement: number;
+  score_overall: number;
+  weakest_dimension: RobustnessDimension;
+  narrative: string;
+  caveats: string[];
+  audit_run_id: string;
+  computed_at: string;
+}
+
+export interface PriorityRow {
+  cod_dist: string;
+  age_group: AgeGroup;
+  transport_mode: TransportMode;
+  score: number;
+  rank_in_country: number;
+  children_underserved: number;
+  pct_le30: number;
+  robustness: number;
+}

@@ -44,6 +44,8 @@ export interface InsightStats {
   nationalPct: number;
   totalUnderserved: number;
   topUnderserved: Array<{ row: IndicatorRow; underserved: number }>;
+  // cod_dist → name + province, for ALL districts — drives priority panel labels
+  districtMeta: Record<string, { nomb_dist: string; nomb_prov: string }>;
 }
 
 // ChatMessage mirrors the AskResponse contract so Stream B can populate
@@ -164,6 +166,12 @@ export default function AppShell() {
       .map((d) => d[selectedAgeGroup])
       .filter((r): r is IndicatorRow => r !== undefined)
       .filter((r) => r.data_completeness_pct > 0);
+    // District meta: one entry per cod_dist using whichever age_group has data
+    const districtMeta: Record<string, { nomb_dist: string; nomb_prov: string }> = {};
+    for (const [cod, byAge] of Object.entries(indicators)) {
+      const sample = Object.values(byAge).find((r): r is IndicatorRow => r !== undefined);
+      if (sample) districtMeta[cod] = { nomb_dist: sample.nomb_dist, nomb_prov: sample.nomb_prov };
+    }
     if (rows.length === 0) return null;
     const totalPop = rows.reduce((s, r) => s + r.pop_total, 0);
     const totalLe30 = rows.reduce((s, r) => s + r.pop_le30, 0);
@@ -174,7 +182,7 @@ export default function AppShell() {
       .filter((x) => x.underserved > 0)
       .sort((a, b) => b.underserved - a.underserved)
       .slice(0, 5);
-    return { nationalPct, totalUnderserved, topUnderserved };
+    return { nationalPct, totalUnderserved, topUnderserved, districtMeta };
   }, [indicators, selectedAgeGroup]);
 
   // Only true chat results dim the map. The default top-5-worst still
