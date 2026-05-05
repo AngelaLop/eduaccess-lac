@@ -40,3 +40,38 @@ export interface IndicatorRow {
 
 export type DistrictIndicators = Partial<Record<AgeGroup, IndicatorRow>>;
 export type IndicatorsByDist = Record<string, DistrictIndicators>;
+
+// ── /api/ask response contract (v2) ───────────────────────────────────────────
+// Shared across the three v2 worktrees:
+//   - Stream B produces this shape server-side
+//   - Stream A consumes `kind`, `narrative`, `scopeHint`, and `actions`
+//   - Stream C consumes `resultShape` and the order of `highlightCodDist`
+
+export type PanelTab = 'insight' | 'ask';
+
+export type AskAction =
+  | { type: 'select_district'; cod_dist: string }
+  | { type: 'set_transport_mode'; mode: TransportMode }
+  | { type: 'set_education_level'; level: AgeGroup }
+  | { type: 'focus_panel_tab'; tab: PanelTab };
+
+export type AskResponseKind = 'data' | 'navigation' | 'out_of_scope';
+
+export type ResultShape = 'ranking' | 'filter' | 'comparison' | 'aggregate';
+
+export interface AskResponse {
+  kind: AskResponseKind;
+  // 'data' kind
+  sql?: string;
+  columns?: string[];
+  rows?: Record<string, unknown>[];
+  // ordered by rank when resultShape === 'ranking' (#1 first)
+  highlightCodDist?: string[];
+  resultShape?: ResultShape;
+  // 'navigation' kind
+  actions?: AskAction[];
+  // all kinds
+  narrative?: string;
+  // 'out_of_scope' kind — human-readable "here's what I CAN do", ≤ 280 chars
+  scopeHint?: string;
+}
