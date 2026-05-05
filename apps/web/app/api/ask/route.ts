@@ -33,9 +33,27 @@ interface DistrictRow {
 const DISTRICTS = districtRoster as DistrictRow[];
 const DISTRICT_BY_CODE = new Map(DISTRICTS.map((d) => [d.cod_dist, d]));
 
+// Compact form: "0810=San Miguelito,Panama" — saves ~15 chars per row vs.
+// "(province)" formatting. The full roster is ~83 lines either way.
 const DISTRICT_LIST_FOR_PROMPT = DISTRICTS.map(
-  (d) => `${d.cod_dist}=${d.nomb_dist} (${d.nomb_prov})`
+  (d) => `${d.cod_dist}=${d.nomb_dist},${d.nomb_prov}`
 ).join('\n');
+
+// In-memory cache of question → response. Survives until the dev server
+// restarts (or until the serverless instance is recycled in production).
+// Keyed on the lowercased+trimmed question to catch obvious duplicates.
+const responseCache = new Map<string, AskResponse>();
+const CACHE_MAX = 200;
+function cacheKey(q: string) {
+  return q.trim().toLowerCase();
+}
+function cachePut(q: string, r: AskResponse) {
+  if (responseCache.size >= CACHE_MAX) {
+    const firstKey = responseCache.keys().next().value;
+    if (firstKey !== undefined) responseCache.delete(firstKey);
+  }
+  responseCache.set(cacheKey(q), r);
+}
 
 // ── system prompt ─────────────────────────────────────────────────────────────
 
@@ -249,6 +267,43 @@ function trimScopeHint(hint: unknown): string {
   return trimmed.slice(0, SCOPE_HINT_MAX - 1).trimEnd() + '…';
 }
 
+// ── LLM error handler ─────────────────────────────────────────────────────────
+// Detects rate limits specifically and surfaces them as a friendly message
+// with the retry-after duration parsed from the Groq error.
+
+interface MaybeApiError {
+  status?: number;
+  message?: string;
+}
+
+function handleLlmError(err: unknown): NextResponse {
+  console.error('[ask] LLM error:', err);
+  const e = err as MaybeApiError;
+  if (e?.status === 429) {
+    const retryAfter = parseRetryAfter(e.message ?? '');
+    return NextResponse.json(
+      {
+        error:
+          retryAfter
+            ? `Daily LLM quota reached. Resets in ${retryAfter}.`
+            : 'Daily LLM quota reached. Try again later.',
+      },
+      { status: 429 }
+    );
+  }
+  return NextResponse.json({ error: 'LLM unavailable. Try again.' }, { status: 502 });
+}
+
+function parseRetryAfter(msg: string): string | null {
+  // Matches "Please try again in 3m55.008s" / "in 124s" / "in 2m3.5s" etc.
+  const match = msg.match(/try again in (\d+m)?\s?(\d+(?:\.\d+)?)s/i);
+  if (!match) return null;
+  const minutes = match[1] ? parseInt(match[1], 10) : 0;
+  const seconds = Math.round(parseFloat(match[2]));
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
+}
+
 // ── result shape coercion ─────────────────────────────────────────────────────
 
 const VALID_RESULT_SHAPES: ResultShape[] = ['ranking', 'filter', 'comparison', 'aggregate'];
@@ -274,6 +329,12 @@ export async function POST(req: NextRequest) {
 
   const { question } = parsed.data;
 
+  // Cache: same question within session → skip the LLM round trip entirely.
+  const cached = responseCache.get(cacheKey(question));
+  if (cached) {
+    return NextResponse.json(cached, { status: 200 });
+  }
+
   const apiKey = process.env.GROQ_API_KEY;
   const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supaKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -298,8 +359,7 @@ export async function POST(req: NextRequest) {
     const raw = completion.choices[0]?.message?.content ?? '{}';
     llmJson = JSON.parse(raw);
   } catch (err) {
-    console.error('[ask] LLM error:', err);
-    return NextResponse.json({ error: 'LLM unavailable. Try again.' }, { status: 502 });
+    return handleLlmError(err);
   }
 
   const kind = llmJson.kind;
@@ -308,51 +368,47 @@ export async function POST(req: NextRequest) {
   if (kind === 'navigation') {
     const validation = validateActions(llmJson.actions);
     if (!validation.ok) {
-      return NextResponse.json(
-        {
-          kind: 'out_of_scope',
-          narrative: "I tried to interpret that as a navigation command but couldn't.",
-          scopeHint: trimScopeHint(
-            'Try naming a Panama district directly, e.g. "Show me San Miguelito".'
-          ),
-        } satisfies AskResponse,
-        { status: 200 }
-      );
+      const fallback: AskResponse = {
+        kind: 'out_of_scope',
+        narrative: "I tried to interpret that as a navigation command but couldn't.",
+        scopeHint: trimScopeHint(
+          'Try naming a Panama district directly, e.g. "Show me San Miguelito".'
+        ),
+      };
+      cachePut(question, fallback);
+      return NextResponse.json(fallback, { status: 200 });
     }
-    return NextResponse.json(
-      {
-        kind: 'navigation',
-        narrative: typeof llmJson.narrative === 'string' ? llmJson.narrative : '',
-        actions: validation.actions,
-      } satisfies AskResponse,
-      { status: 200 }
-    );
+    const navResponse: AskResponse = {
+      kind: 'navigation',
+      narrative: typeof llmJson.narrative === 'string' ? llmJson.narrative : '',
+      actions: validation.actions,
+    };
+    cachePut(question, navResponse);
+    return NextResponse.json(navResponse, { status: 200 });
   }
 
   // ── kind: out_of_scope ───────────────────────────────────────────────────
   if (kind === 'out_of_scope') {
-    return NextResponse.json(
-      {
-        kind: 'out_of_scope',
-        narrative: typeof llmJson.narrative === 'string' ? llmJson.narrative : '',
-        scopeHint: trimScopeHint(llmJson.scopeHint),
-      } satisfies AskResponse,
-      { status: 200 }
-    );
+    const oosResponse: AskResponse = {
+      kind: 'out_of_scope',
+      narrative: typeof llmJson.narrative === 'string' ? llmJson.narrative : '',
+      scopeHint: trimScopeHint(llmJson.scopeHint),
+    };
+    cachePut(question, oosResponse);
+    return NextResponse.json(oosResponse, { status: 200 });
   }
 
   // ── kind: data (default + retry on validation failure) ───────────────────
   if (kind !== 'data') {
-    return NextResponse.json(
-      {
-        kind: 'out_of_scope',
-        narrative: 'I could not classify that question.',
-        scopeHint: trimScopeHint(
-          'Try a Panama-specific access question, e.g. "Top 5 districts with the worst walking access for high schoolers".'
-        ),
-      } satisfies AskResponse,
-      { status: 200 }
-    );
+    const unknownResponse: AskResponse = {
+      kind: 'out_of_scope',
+      narrative: 'I could not classify that question.',
+      scopeHint: trimScopeHint(
+        'Try a Panama-specific access question, e.g. "Top 5 districts with the worst walking access for high schoolers".'
+      ),
+    };
+    cachePut(question, unknownResponse);
+    return NextResponse.json(unknownResponse, { status: 200 });
   }
 
   let sql = typeof llmJson.sql === 'string' ? llmJson.sql.trim() : '';
@@ -389,8 +445,7 @@ export async function POST(req: NextRequest) {
       resultShape = coerceResultShape(retryJson.resultShape) ?? resultShape;
       validation = validateSQL(sql);
     } catch (err) {
-      console.error('[ask] LLM retry error:', err);
-      return NextResponse.json({ error: 'LLM unavailable. Try again.' }, { status: 502 });
+      return handleLlmError(err);
     }
   }
 
@@ -415,16 +470,15 @@ export async function POST(req: NextRequest) {
     .map((r) => r.cod_dist)
     .filter((c): c is string => typeof c === 'string');
 
-  return NextResponse.json(
-    {
-      kind: 'data',
-      sql,
-      columns,
-      rows,
-      highlightCodDist,
-      resultShape,
-      narrative,
-    } satisfies AskResponse,
-    { status: 200 }
-  );
+  const dataResponse: AskResponse = {
+    kind: 'data',
+    sql,
+    columns,
+    rows,
+    highlightCodDist,
+    resultShape,
+    narrative,
+  };
+  cachePut(question, dataResponse);
+  return NextResponse.json(dataResponse, { status: 200 });
 }

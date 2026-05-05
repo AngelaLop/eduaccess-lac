@@ -48,38 +48,47 @@ export default function LandingPromptCarousel({ prompts }: Props) {
     return () => window.clearTimeout(timer);
   }, [displayText, isDeleting, promptIndex, safePrompts]);
 
+  const currentPrompt = safePrompts[promptIndex] ?? '';
+
   return (
     <div className="mx-auto w-full">
       <div className="flex items-center gap-3 rounded-full bg-white px-4 py-3 shadow-[0_22px_54px_rgba(16,33,28,0.055)] sm:gap-4 sm:px-5 sm:py-3.5">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f2f7f4] text-emerald-700 sm:h-11 sm:w-11">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            className="h-4.5 w-4.5"
-            aria-hidden="true"
-          >
-            <path d="M21 21l-4.35-4.35" />
-            <circle cx="11" cy="11" r="6.25" />
-          </svg>
-        </div>
-
-        <div className="min-w-0 flex-1 text-left">
-          <div className="flex items-center gap-0.5 overflow-hidden">
-            <p className="truncate text-sm text-neutral-700 sm:text-base">
-              {displayText}
-            </p>
-            <span
-              className="h-5 w-px shrink-0 bg-emerald-600 animate-[blink-caret_1s_step-end_infinite]"
+        <Link
+          href="/platform?tab=ask"
+          className="flex min-w-0 flex-1 items-center gap-3 rounded-full transition-colors hover:bg-neutral-50 sm:gap-4"
+          aria-label="Open the Ask tab"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f2f7f4] text-emerald-700 sm:h-11 sm:w-11">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              className="h-4.5 w-4.5"
               aria-hidden="true"
-            />
+            >
+              <path d="M21 21l-4.35-4.35" />
+              <circle cx="11" cy="11" r="6.25" />
+            </svg>
           </div>
-        </div>
+
+          <div className="min-w-0 flex-1 text-left">
+            <div className="flex items-center gap-0.5 overflow-hidden">
+              <p className="truncate text-sm text-neutral-700 sm:text-base">
+                {displayText}
+              </p>
+              <span
+                className="h-5 w-px shrink-0 bg-emerald-600 animate-[blink-caret_1s_step-end_infinite]"
+                aria-hidden="true"
+              />
+            </div>
+          </div>
+        </Link>
 
         <Link
-          href="/platform"
+          href={`/platform?ask=${encodeURIComponent(currentPrompt)}`}
           className="shrink-0 rounded-full bg-emerald-700 px-[18px] py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800 sm:px-5"
+          aria-label={`Ask: ${currentPrompt}`}
         >
           Ask
         </Link>

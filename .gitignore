@@ -65,3 +65,6 @@ data/scratch/
 # Screenshots of credentials — never commit
 keys.png
 keys*.png
+
+# Local debugging screenshots dropped at the project root
+LLM*.png

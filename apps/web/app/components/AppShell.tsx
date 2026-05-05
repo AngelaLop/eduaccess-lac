@@ -119,6 +119,21 @@ export default function AppShell() {
   const [panelTab, setPanelTab] = useState<PanelTab>('insight');
   const [askBadge, setAskBadge] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const urlConsumedRef = useRef(false);
+
+  // URL-params bootstrap: ?tab=ask opens the Ask tab; ?ask=<prompt> also auto-fires.
+  // Done in useEffect (not useState init) because window is unavailable during SSR.
+  useEffect(() => {
+    if (urlConsumedRef.current) return;
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    const askParam = params.get('ask');
+    if (tab === 'ask' || askParam) {
+      urlConsumedRef.current = true;
+      setPanelTab('ask');
+    }
+  }, []);
 
   useEffect(() => {
     const grouped: Record<TransportMode, IndicatorsByDist> = { walking: {}, motorized: {} };
@@ -268,6 +283,19 @@ export default function AppShell() {
     setPanelTab('insight');
   }
 
+  // Auto-fire ?ask=<prompt> from URL once on mount (landing page → Ask)
+  const askFireRef = useRef(false);
+  useEffect(() => {
+    if (askFireRef.current) return;
+    if (typeof window === 'undefined') return;
+    const askParam = new URLSearchParams(window.location.search).get('ask');
+    if (askParam && askParam.trim()) {
+      askFireRef.current = true;
+      ask(askParam);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="flex h-full flex-col md:flex-row">
       {/* ── Map ─────────────────────────────────────────────────────────────── */}
@@ -284,6 +312,11 @@ export default function AppShell() {
           rankedHighlights={rankedHighlights}
           selectedDist={selectedDist}
           onDistrictClick={selectDistrict}
+          onResetView={() => {
+            setSelectedDist(null);
+            setChatHighlights([]);
+            setRankedHighlights(null);
+          }}
         />
       </div>
 
@@ -373,22 +406,26 @@ export default function AppShell() {
         {/* Tab strip */}
         <div className="shrink-0 border-b border-neutral-200 bg-white">
           <div className="flex">
-            {(['insight', 'ask'] as PanelTab[]).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setPanelTab(tab)}
-                className={`relative flex-1 border-b-2 px-4 py-2 text-xs font-medium uppercase tracking-wider transition-colors ${
-                  panelTab === tab
-                    ? 'border-emerald-700 text-emerald-700'
-                    : 'border-transparent text-neutral-400 hover:text-neutral-600'
-                }`}
-              >
-                {tab === 'insight' ? 'Insight' : 'Ask'}
-                {tab === 'ask' && askBadge && (
-                  <span className="absolute right-3 top-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                )}
-              </button>
-            ))}
+            {(['insight', 'ask'] as PanelTab[]).map((tab) => {
+              const active = panelTab === tab;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setPanelTab(tab)}
+                  className={`relative flex flex-1 items-center justify-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition-colors ${
+                    active
+                      ? 'border-emerald-700 bg-emerald-50/60 text-emerald-800'
+                      : 'border-transparent text-neutral-500 hover:bg-neutral-50 hover:text-neutral-800'
+                  }`}
+                >
+                  {tab === 'insight' ? <InsightIcon /> : <AskIcon />}
+                  <span>{tab === 'insight' ? 'Insight' : 'Ask'}</span>
+                  {tab === 'ask' && askBadge && !active && (
+                    <span className="absolute right-3 top-2.5 inline-block h-2 w-2 rounded-full bg-emerald-500" />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -476,6 +513,45 @@ export default function AppShell() {
         </div>
       </aside>
     </div>
+  );
+}
+
+// ── tab icons ─────────────────────────────────────────────────────────────────
+
+function InsightIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+      aria-hidden="true"
+    >
+      <line x1="4" y1="20" x2="4" y2="13" />
+      <line x1="10" y1="20" x2="10" y2="9" />
+      <line x1="16" y1="20" x2="16" y2="14" />
+      <line x1="22" y1="20" x2="22" y2="6" />
+    </svg>
+  );
+}
+
+function AskIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+      aria-hidden="true"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
   );
 }
 

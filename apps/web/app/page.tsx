@@ -39,20 +39,16 @@ export default function Page() {
 
       <section className="relative z-10 mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-5xl flex-col items-center justify-center px-6 pb-24 pt-8 text-center sm:px-8">
         <p className="text-[11px] font-medium uppercase tracking-[0.34em] text-neutral-400">
-          Ask, Discover, Decide
+          Ask · Discover · Decide
         </p>
 
         <h1 className="mt-6 max-w-3xl text-4xl font-medium tracking-[-0.05em] text-[#10211c] sm:text-5xl lg:text-[3.45rem] lg:leading-[1.04]">
-          Unlock instant location insights for education policy making.
+          How accessible are schools in Panama?
         </h1>
 
         <p className="mt-5 max-w-2xl text-base leading-7 text-neutral-500 sm:text-lg">
-          District-level school accessibility evidence for education ministries,
-          planning teams, and public-sector decision-makers.
-        </p>
-
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-400 sm:text-base">
-          Click a district. Ask a question. See the data behind every recommendation.
+          83 districts mapped by walking and motorized access for 4 student age groups.
+          Ask the AI a question — get the answer plus the data and confidence behind it.
         </p>
 
         <div className="mt-12 w-full max-w-[820px]">

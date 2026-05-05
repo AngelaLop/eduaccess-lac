@@ -43,6 +43,7 @@ interface Props {
   rankedHighlights: RankedHighlight[] | null;
   selectedDist: string | null;
   onDistrictClick: (codDist: string) => void;
+  onResetView: () => void;
 }
 
 // bbox of any GeoJSON Polygon | MultiPolygon, returned as [minX, minY, maxX, maxY]
@@ -71,6 +72,7 @@ export default function PanamaMap({
   rankedHighlights,
   selectedDist,
   onDistrictClick,
+  onResetView,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -95,24 +97,42 @@ export default function PanamaMap({
     const rankByCode = new Map(
       (rankedRef.current ?? []).map((r) => [r.cod_dist, r.rank])
     );
+    // Some districts are split across multiple features in the geojson
+    // (multipolygon coasts / archipelagos). Pick one feature per cod_dist —
+    // the largest by approximate bbox area — so we only render one label.
+    const labelFeatureByCode = new Map<string, number>();
+    if (rankByCode.size > 0) {
+      const areaByIdx: Array<{ idx: number; code: string; area: number }> = [];
+      gj.features.forEach((f, idx) => {
+        const code = f.properties?.cod_dist as string | undefined;
+        if (!code || !rankByCode.has(code)) return;
+        const [minX, minY, maxX, maxY] = geometryBbox(f.geometry);
+        const area = Number.isFinite(minX) ? (maxX - minX) * (maxY - minY) : 0;
+        areaByIdx.push({ idx, code, area });
+      });
+      areaByIdx.sort((a, b) => b.area - a.area);
+      for (const { idx, code } of areaByIdx) {
+        if (!labelFeatureByCode.has(code)) labelFeatureByCode.set(code, idx);
+      }
+    }
 
     return {
       ...gj,
-      features: gj.features.map((feature) => {
+      features: gj.features.map((feature, idx) => {
         const code = feature.properties?.cod_dist as string;
         const current = inds[code]?.[activeGroup];
         const hasTravelData = current ? current.data_completeness_pct > 0 : false;
         const rank = rankByCode.get(code);
+        const isLabelFeature = rank !== undefined && labelFeatureByCode.get(code) === idx;
 
-        return {
-          ...feature,
-          properties: {
-            ...feature.properties,
-            has_travel_data: hasTravelData ? 1 : 0,
-            pct_le30_current: hasTravelData ? current?.pct_le30 ?? null : null,
-            rank_in_result: rank ?? null,
-          },
+        const properties: Record<string, unknown> = {
+          ...feature.properties,
+          has_travel_data: hasTravelData ? 1 : 0,
+          pct_le30_current: hasTravelData ? current?.pct_le30 ?? null : null,
         };
+        if (isLabelFeature) properties.rank_in_result = rank;
+
+        return { ...feature, properties };
       }),
     };
   }
@@ -305,5 +325,34 @@ export default function PanamaMap({
     );
   }, [selectedDist]);
 
-  return <div ref={containerRef} className="h-full w-full" />;
+  const showOverviewButton = !!selectedDist || highlightedDists.length > 0;
+
+  return (
+    <div className="relative h-full w-full">
+      <div ref={containerRef} className="h-full w-full" />
+      {showOverviewButton && (
+        <button
+          onClick={onResetView}
+          className="absolute right-3 top-24 z-10 flex items-center gap-1.5 rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-700 shadow-lg transition-colors hover:bg-neutral-50 hover:text-neutral-900"
+          title="Back to Panama overview"
+          aria-label="Back to Panama overview"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-3.5 w-3.5"
+            aria-hidden="true"
+          >
+            <path d="M3 12L12 3l9 9" />
+            <path d="M5 10v10h14V10" />
+          </svg>
+          Overview
+        </button>
+      )}
+    </div>
+  );
 }
