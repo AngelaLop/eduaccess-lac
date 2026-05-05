@@ -51,6 +51,10 @@ export default function Page() {
           planning teams, and public-sector decision-makers.
         </p>
 
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-400 sm:text-base">
+          Click a district. Ask a question. See the data behind every recommendation.
+        </p>
+
         <div className="mt-12 w-full max-w-[820px]">
           <LandingPromptCarousel prompts={prompts} />
         </div>

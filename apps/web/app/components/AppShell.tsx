@@ -5,7 +5,17 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import IndicatorPanel from './IndicatorPanel';
-import type { AgeGroup, IndicatorRow, IndicatorsByDist, TransportMode } from '@/lib/types';
+import ScopeCard from './ScopeCard';
+import type {
+  AgeGroup,
+  AskAction,
+  AskResponseKind,
+  IndicatorRow,
+  IndicatorsByDist,
+  PanelTab,
+  ResultShape,
+  TransportMode,
+} from '@/lib/types';
 import { AGE_GROUPS, AGE_GROUP_SHORT_LABELS, TRANSPORT_LABELS } from '@/lib/types';
 
 const PanamaMap = dynamic(() => import('./PanamaMap'), { ssr: false });
@@ -14,10 +24,9 @@ const PanamaMap = dynamic(() => import('./PanamaMap'), { ssr: false });
 
 const SEEDED_PROMPTS = [
   'Top 5 districts with the worst walking access for high schoolers',
-  'Which districts have over 1,000 high schoolers more than 30 minutes from a school?',
-  'Show districts where over 20% of school-age population lacks travel-time data',
-  'Compare primary vs high school walking access in the districts of Panama province',
-  'Rank provinces by their average % of population within 15 minutes of a school',
+  'Districts with over 1,000 high schoolers more than 30 min from a school',
+  'Compare primary vs high school walking access in Panama province',
+  'Rank provinces by average % within 15 min of a school',
 ] as const;
 
 const LEGEND_STOPS = [
@@ -28,14 +37,21 @@ const NO_DATA_COLOR = '#d1d5db';
 
 // ── types ─────────────────────────────────────────────────────────────────────
 
+// ChatMessage mirrors the AskResponse contract so Stream B can populate
+// these fields without changing this shape.
 interface ChatMessage {
   role: 'user' | 'assistant';
   question?: string;
+  error?: string;
+  kind?: AskResponseKind;
   sql?: string;
   columns?: string[];
   rows?: Record<string, unknown>[];
+  highlightCodDist?: string[];
+  resultShape?: ResultShape;
   narrative?: string;
-  error?: string;
+  scopeHint?: string;
+  actions?: AskAction[];
 }
 
 interface ScenarioRow {
@@ -90,6 +106,8 @@ export default function AppShell() {
   const [question, setQuestion] = useState('');
   const [isAsking, setIsAsking] = useState(false);
   const [chatHighlights, setChatHighlights] = useState<string[]>([]);
+  const [panelTab, setPanelTab] = useState<PanelTab>('insight');
+  const [askBadge, setAskBadge] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -135,6 +153,19 @@ export default function AppShell() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Clear the Ask-tab notification dot when the user lands on the Ask tab
+  useEffect(() => {
+    if (panelTab === 'ask') setAskBadge(false);
+  }, [panelTab]);
+
+  // Stream A handles focus_panel_tab. Stream B will extend this dispatcher
+  // for select_district / set_transport_mode / set_education_level.
+  function dispatchAction(action: AskAction) {
+    if (action.type === 'focus_panel_tab') {
+      setPanelTab(action.tab);
+    }
+  }
+
   async function ask(q: string) {
     if (!q.trim() || isAsking) return;
     setIsAsking(true);
@@ -156,22 +187,39 @@ export default function AppShell() {
           ...m,
           {
             role: 'assistant',
+            kind: data.kind,
             sql: data.sql,
             columns: data.columns,
             rows: data.rows,
+            highlightCodDist: data.highlightCodDist,
+            resultShape: data.resultShape,
             narrative: data.narrative,
+            scopeHint: data.scopeHint,
+            actions: data.actions,
           },
         ]);
         if (data.highlightCodDist?.length) {
           setChatHighlights(data.highlightCodDist);
           setSelectedDist(null);
         }
+        if (Array.isArray(data.actions)) {
+          for (const action of data.actions as AskAction[]) dispatchAction(action);
+        }
       }
+
+      if (panelTab !== 'ask') setAskBadge(true);
     } catch {
       setMessages((m) => [...m, { role: 'assistant', error: 'Network error. Try again.' }]);
     } finally {
       setIsAsking(false);
     }
+  }
+
+  // Selecting a district from the map or insight list takes the user to the Insight tab
+  function selectDistrict(cod: string) {
+    setSelectedDist(cod);
+    setChatHighlights([]);
+    setPanelTab('insight');
   }
 
   return (
@@ -188,10 +236,7 @@ export default function AppShell() {
           activeAgeGroup={selectedAgeGroup}
           highlightedDists={highlightedDists}
           selectedDist={selectedDist}
-          onDistrictClick={(cod) => {
-            setSelectedDist(cod);
-            setChatHighlights([]);
-          }}
+          onDistrictClick={selectDistrict}
         />
       </div>
 
@@ -278,69 +323,102 @@ export default function AppShell() {
           </div>
         </div>
 
-        {/* Scrollable indicator content */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-          <IndicatorPanel
-            isLoading={isLoading}
-            top5Worst={top5Worst}
-            selectedDist={selectedDist}
-            distIndicators={distIndicators}
-            selectedTransport={selectedTransport}
-            selectedAgeGroup={selectedAgeGroup}
-            onSelectDist={(cod) => {
-              setSelectedDist(cod);
-              setChatHighlights([]);
-            }}
-            onClearSelection={() => setSelectedDist(null)}
-          />
+        {/* Tab strip */}
+        <div className="shrink-0 border-b border-neutral-200 bg-white">
+          <div className="flex">
+            {(['insight', 'ask'] as PanelTab[]).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setPanelTab(tab)}
+                className={`relative flex-1 border-b-2 px-4 py-2 text-xs font-medium uppercase tracking-wider transition-colors ${
+                  panelTab === tab
+                    ? 'border-emerald-700 text-emerald-700'
+                    : 'border-transparent text-neutral-400 hover:text-neutral-600'
+                }`}
+              >
+                {tab === 'insight' ? 'Insight' : 'Ask'}
+                {tab === 'ask' && askBadge && (
+                  <span className="absolute right-3 top-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Chat */}
-        <div className="flex max-h-[45vh] shrink-0 flex-col border-t border-neutral-200 bg-white">
-          {messages.length === 0 && (
-            <div className="flex flex-wrap gap-1.5 px-4 pb-2 pt-3">
-              {SEEDED_PROMPTS.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => ask(p)}
+        {/* Body — swaps based on panelTab */}
+        <div className="flex min-h-0 flex-1 flex-col">
+          {panelTab === 'insight' && (
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+              {!isLoading && !selectedDist && chatHighlights.length === 0 && (
+                <p className="mb-3 text-xs text-neutral-500">
+                  Click any district on the map, or switch to <strong>Ask</strong> to query the data.
+                </p>
+              )}
+              <IndicatorPanel
+                isLoading={isLoading}
+                top5Worst={top5Worst}
+                selectedDist={selectedDist}
+                distIndicators={distIndicators}
+                selectedTransport={selectedTransport}
+                selectedAgeGroup={selectedAgeGroup}
+                onSelectDist={selectDistrict}
+                onClearSelection={() => setSelectedDist(null)}
+              />
+            </div>
+          )}
+
+          {panelTab === 'ask' && (
+            <div className="flex min-h-0 flex-1 flex-col">
+              {messages.length === 0 ? (
+                <div className="min-h-0 flex-1 overflow-y-auto">
+                  <ScopeCard />
+                  <div className="flex flex-col gap-1.5 px-4 pb-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+                      Try one
+                    </p>
+                    {SEEDED_PROMPTS.map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => ask(p)}
+                        disabled={isAsking}
+                        className="rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-left text-xs text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-3">
+                  {messages.map((msg, i) => (
+                    <ChatBubble key={i} msg={msg} onPromptClick={ask} />
+                  ))}
+                  {isAsking && <p className="animate-pulse text-xs text-neutral-400">Thinking...</p>}
+                  <div ref={chatEndRef} />
+                </div>
+              )}
+
+              <form
+                onSubmit={(e) => { e.preventDefault(); ask(question); }}
+                className="flex shrink-0 gap-2 border-t border-neutral-100 px-4 py-3"
+              >
+                <input
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  placeholder="Ask about school access in Panama..."
                   disabled={isAsking}
-                  className="rounded-full border border-neutral-200 px-2.5 py-1 text-left text-xs text-neutral-600 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
+                  className="flex-1 rounded-md border border-neutral-200 px-3 py-1.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 disabled:opacity-50"
+                />
+                <button
+                  type="submit"
+                  disabled={isAsking || !question.trim()}
+                  className="rounded-md bg-emerald-700 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800 disabled:opacity-40"
                 >
-                  {p}
+                  Ask
                 </button>
-              ))}
+              </form>
             </div>
           )}
-
-          {messages.length > 0 && (
-            <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-2">
-              {messages.map((msg, i) => (
-                <ChatBubble key={i} msg={msg} />
-              ))}
-              {isAsking && <p className="animate-pulse text-xs text-neutral-400">Thinking...</p>}
-              <div ref={chatEndRef} />
-            </div>
-          )}
-
-          <form
-            onSubmit={(e) => { e.preventDefault(); ask(question); }}
-            className="flex gap-2 border-t border-neutral-100 px-4 py-3"
-          >
-            <input
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="Ask about school access in Panama..."
-              disabled={isAsking}
-              className="flex-1 rounded-md border border-neutral-200 px-3 py-1.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 disabled:opacity-50"
-            />
-            <button
-              type="submit"
-              disabled={isAsking || !question.trim()}
-              className="rounded-md bg-emerald-700 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800 disabled:opacity-40"
-            >
-              Ask
-            </button>
-          </form>
         </div>
 
         {/* Footer */}
@@ -356,7 +434,12 @@ export default function AppShell() {
 
 // ── chat bubble ───────────────────────────────────────────────────────────────
 
-function ChatBubble({ msg }: { msg: ChatMessage }) {
+interface ChatBubbleProps {
+  msg: ChatMessage;
+  onPromptClick: (prompt: string) => void;
+}
+
+function ChatBubble({ msg, onPromptClick }: ChatBubbleProps) {
   const [showSql, setShowSql] = useState(false);
 
   if (msg.role === 'user') {
@@ -371,6 +454,31 @@ function ChatBubble({ msg }: { msg: ChatMessage }) {
     return (
       <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
         {msg.error}
+      </div>
+    );
+  }
+
+  if (msg.kind === 'out_of_scope') {
+    return (
+      <div className="rounded-md border border-neutral-200 bg-neutral-50 px-3 py-3 text-sm text-neutral-700">
+        {msg.narrative && <p>{msg.narrative}</p>}
+        {msg.scopeHint && (
+          <p className="mt-2 text-xs text-neutral-500">{msg.scopeHint}</p>
+        )}
+        <div className="mt-3 flex flex-col gap-1">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+            Try instead
+          </p>
+          {SUGGESTED_FALLBACK_PROMPTS.map((p) => (
+            <button
+              key={p}
+              onClick={() => onPromptClick(p)}
+              className="rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-left text-xs text-neutral-700 transition-colors hover:border-emerald-300 hover:bg-emerald-50/50"
+            >
+              {p}
+            </button>
+          ))}
+        </div>
       </div>
     );
   }
@@ -431,3 +539,8 @@ function ChatBubble({ msg }: { msg: ChatMessage }) {
     </div>
   );
 }
+
+const SUGGESTED_FALLBACK_PROMPTS = [
+  'Top 5 districts with the worst walking access for high schoolers',
+  'Compare primary vs high school walking access in Panama province',
+] as const;
