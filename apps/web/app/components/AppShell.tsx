@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import IndicatorPanel from './IndicatorPanel';
 import ScopeCard from './ScopeCard';
+import type { RankedHighlight } from './PanamaMap';
 import type {
   AgeGroup,
   AskAction,
@@ -36,6 +37,14 @@ const LEGEND_STOPS = [
 const NO_DATA_COLOR = '#d1d5db';
 
 // ── types ─────────────────────────────────────────────────────────────────────
+
+// Aggregate stats for the Insight landing (no district selected).
+// Computed in AppShell because indicators live there; rendered in IndicatorPanel.
+export interface InsightStats {
+  nationalPct: number;
+  totalUnderserved: number;
+  topUnderserved: Array<{ row: IndicatorRow; underserved: number }>;
+}
 
 // ChatMessage mirrors the AskResponse contract so Stream B can populate
 // these fields without changing this shape.
@@ -106,6 +115,7 @@ export default function AppShell() {
   const [question, setQuestion] = useState('');
   const [isAsking, setIsAsking] = useState(false);
   const [chatHighlights, setChatHighlights] = useState<string[]>([]);
+  const [rankedHighlights, setRankedHighlights] = useState<RankedHighlight[] | null>(null);
   const [panelTab, setPanelTab] = useState<PanelTab>('insight');
   const [askBadge, setAskBadge] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -134,12 +144,22 @@ export default function AppShell() {
 
   const indicators = indicatorsByTransport[selectedTransport] ?? {};
 
-  const top5Worst = useMemo<IndicatorRow[]>(() => {
+  const insightStats = useMemo<InsightStats | null>(() => {
     const rows = Object.values(indicators)
       .map((d) => d[selectedAgeGroup])
       .filter((r): r is IndicatorRow => r !== undefined)
       .filter((r) => r.data_completeness_pct > 0);
-    return rows.sort((a, b) => a.pct_le30 - b.pct_le30).slice(0, 5);
+    if (rows.length === 0) return null;
+    const totalPop = rows.reduce((s, r) => s + r.pop_total, 0);
+    const totalLe30 = rows.reduce((s, r) => s + r.pop_le30, 0);
+    const nationalPct = totalPop > 0 ? Math.round((totalLe30 / totalPop) * 100) : 0;
+    const totalUnderserved = totalPop - totalLe30;
+    const topUnderserved = rows
+      .map((r) => ({ row: r, underserved: r.pop_total - r.pop_le30 }))
+      .filter((x) => x.underserved > 0)
+      .sort((a, b) => b.underserved - a.underserved)
+      .slice(0, 5);
+    return { nationalPct, totalUnderserved, topUnderserved };
   }, [indicators, selectedAgeGroup]);
 
   // Only true chat results dim the map. The default top-5-worst still
@@ -209,8 +229,23 @@ export default function AppShell() {
           },
         ]);
         if (data.highlightCodDist?.length) {
-          setChatHighlights(data.highlightCodDist);
+          // Dedupe while preserving rank order (first occurrence = best rank)
+          const ordered: string[] = [];
+          const seen = new Set<string>();
+          for (const c of data.highlightCodDist as string[]) {
+            if (seen.has(c)) continue;
+            seen.add(c);
+            ordered.push(c);
+          }
+          setChatHighlights(ordered);
           setSelectedDist(null);
+          if (data.resultShape === 'ranking') {
+            setRankedHighlights(ordered.map((cod_dist, i) => ({ cod_dist, rank: i + 1 })));
+          } else {
+            setRankedHighlights(null);
+          }
+        } else {
+          setRankedHighlights(null);
         }
         if (Array.isArray(data.actions)) {
           for (const action of data.actions as AskAction[]) dispatchAction(action);
@@ -229,6 +264,7 @@ export default function AppShell() {
   function selectDistrict(cod: string) {
     setSelectedDist(cod);
     setChatHighlights([]);
+    setRankedHighlights(null);
     setPanelTab('insight');
   }
 
@@ -245,6 +281,7 @@ export default function AppShell() {
           indicators={indicators}
           activeAgeGroup={selectedAgeGroup}
           highlightedDists={highlightedDists}
+          rankedHighlights={rankedHighlights}
           selectedDist={selectedDist}
           onDistrictClick={selectDistrict}
         />
@@ -366,7 +403,7 @@ export default function AppShell() {
               )}
               <IndicatorPanel
                 isLoading={isLoading}
-                top5Worst={top5Worst}
+                insightStats={insightStats}
                 selectedDist={selectedDist}
                 distIndicators={distIndicators}
                 selectedTransport={selectedTransport}

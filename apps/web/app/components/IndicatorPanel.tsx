@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import type { AgeGroup, DistrictIndicators, IndicatorRow, TransportMode } from '@/lib/types';
 import {
   AGE_GROUP_LABELS,
+  AGE_GROUP_NARRATIVE,
   AGE_GROUP_SHORT_LABELS,
   AGE_GROUPS,
   TRANSPORT_LABELS,
 } from '@/lib/types';
+import type { InsightStats } from './AppShell';
 
 // ── sub-components ────────────────────────────────────────────────────────────
 
@@ -155,57 +157,89 @@ function DistrictDetail({
   );
 }
 
-// ── default view ──────────────────────────────────────────────────────────────
+// ── insight landing (no district selected) ────────────────────────────────────
 
-function DefaultView({
-  top5,
+function InsightLanding({
+  stats,
   onSelectDist,
   selectedTransport,
   selectedAgeGroup,
 }: {
-  top5: IndicatorRow[];
+  stats: InsightStats;
   onSelectDist: (cod: string) => void;
   selectedTransport: TransportMode;
   selectedAgeGroup: AgeGroup;
 }) {
-  const rankLabel = `${AGE_GROUP_SHORT_LABELS[selectedAgeGroup]} ${TRANSPORT_LABELS[selectedTransport].toLowerCase()}`;
+  const narrative = AGE_GROUP_NARRATIVE[selectedAgeGroup];
+  const mode = TRANSPORT_LABELS[selectedTransport].toLowerCase();
+  const maxUnderserved = stats.topUnderserved[0]?.underserved ?? 0;
 
   return (
-    <div className="flex flex-col gap-3">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
-        5 worst {rankLabel} districts
-      </p>
-
-      {top5.length > 0 ? (
-        <ol className="space-y-1.5">
-          {top5.map((row, i) => (
-            <li key={row.cod_dist}>
-              <button
-                onClick={() => onSelectDist(row.cod_dist)}
-                className="w-full rounded-md border border-neutral-200 px-3 py-2.5 text-left transition-colors hover:bg-neutral-50"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="min-w-0">
-                    <span className="mr-1.5 text-xs text-neutral-400">{i + 1}.</span>
-                    <span className="font-medium text-neutral-800">{row.nomb_dist}</span>
-                    <span className="ml-1 text-xs text-neutral-400">{row.nomb_prov}</span>
-                  </div>
-                  <span className="ml-2 shrink-0 text-sm font-bold text-red-700">
-                    {row.pct_le30.toFixed(1)}%
-                  </span>
-                </div>
-              </button>
-            </li>
-          ))}
-        </ol>
-      ) : (
-        <p className="rounded-md border border-neutral-200 bg-neutral-50 px-3 py-3 text-sm text-neutral-500">
-          No districts with travel-time data for this view.
+    <div className="flex flex-col gap-4">
+      {/* Headline: % within 30 min */}
+      <div className="rounded-lg bg-emerald-50 p-4 text-center">
+        <p className="text-4xl font-bold text-emerald-800">{stats.nationalPct}%</p>
+        <p className="mt-1 text-sm text-emerald-700">
+          of Panama&apos;s {narrative} live within 30 min by {mode} of a school
         </p>
+      </div>
+
+      {/* Stakes: absolute children underserved */}
+      <div className="rounded-lg border border-neutral-200 bg-white p-4">
+        <p className="text-3xl font-bold text-neutral-900">
+          {stats.totalUnderserved.toLocaleString()}
+        </p>
+        <p className="mt-0.5 text-sm text-neutral-500">
+          {narrative} more than 30 min by {mode} from any school
+        </p>
+      </div>
+
+      {/* Top 5 districts by absolute kids underserved */}
+      {stats.topUnderserved.length > 0 && (
+        <div>
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+            Districts with the most {narrative} underserved
+          </p>
+          <ol className="space-y-1.5">
+            {stats.topUnderserved.map((entry, i) => {
+              const widthPct =
+                maxUnderserved > 0 ? (entry.underserved / maxUnderserved) * 100 : 0;
+              return (
+                <li key={entry.row.cod_dist}>
+                  <button
+                    onClick={() => onSelectDist(entry.row.cod_dist)}
+                    className="block w-full rounded-md border border-neutral-200 px-3 py-2 text-left transition-colors hover:bg-neutral-50"
+                  >
+                    <div className="mb-1 flex items-baseline justify-between gap-2">
+                      <div className="min-w-0 truncate">
+                        <span className="mr-1.5 text-xs text-neutral-400">{i + 1}.</span>
+                        <span className="text-sm font-medium text-neutral-800">
+                          {entry.row.nomb_dist}
+                        </span>
+                        <span className="ml-1 text-xs text-neutral-400">
+                          {entry.row.nomb_prov}
+                        </span>
+                      </div>
+                      <span className="shrink-0 text-sm font-bold text-neutral-900">
+                        {entry.underserved.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+                      <div
+                        className="h-full rounded-full bg-emerald-600"
+                        style={{ width: `${Math.max(widthPct, 2)}%` }}
+                      />
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
       )}
 
       <p className="text-xs text-neutral-400">
-        Click any district on the map to see its full breakdown.
+        Click any bar to focus that district on the map.
       </p>
     </div>
   );
@@ -215,7 +249,7 @@ function DefaultView({
 
 interface Props {
   isLoading: boolean;
-  top5Worst: IndicatorRow[];
+  insightStats: InsightStats | null;
   selectedDist: string | null;
   distIndicators: DistrictIndicators | null;
   selectedTransport: TransportMode;
@@ -226,7 +260,7 @@ interface Props {
 
 export default function IndicatorPanel({
   isLoading,
-  top5Worst,
+  insightStats,
   selectedDist,
   distIndicators,
   selectedTransport,
@@ -253,9 +287,17 @@ export default function IndicatorPanel({
     );
   }
 
+  if (!insightStats) {
+    return (
+      <p className="rounded-md border border-neutral-200 bg-neutral-50 px-3 py-3 text-sm text-neutral-500">
+        No districts with travel-time data for this view.
+      </p>
+    );
+  }
+
   return (
-    <DefaultView
-      top5={top5Worst}
+    <InsightLanding
+      stats={insightStats}
       onSelectDist={onSelectDist}
       selectedTransport={selectedTransport}
       selectedAgeGroup={selectedAgeGroup}

@@ -17,6 +17,14 @@ export const AGE_GROUP_SHORT_LABELS: Record<AgeGroup, string> = {
   highschool: 'High school',
 };
 
+// Narrative form for embedding in sentences ("...of high schoolers", etc.)
+export const AGE_GROUP_NARRATIVE: Record<AgeGroup, string> = {
+  all: 'school-age children',
+  primary: 'primary students',
+  secondary: 'secondary students',
+  highschool: 'high schoolers',
+};
+
 export const TRANSPORT_LABELS: Record<TransportMode, string> = {
   walking: 'Walking',
   motorized: 'Motorized',

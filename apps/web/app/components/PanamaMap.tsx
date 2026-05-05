@@ -29,10 +29,18 @@ const choroplethFill: maplibregl.ExpressionSpecification = [
   ],
 ] as unknown as maplibregl.ExpressionSpecification;
 
+export interface RankedHighlight {
+  cod_dist: string;
+  rank: number;
+}
+
 interface Props {
   indicators: IndicatorsByDist;
   activeAgeGroup: AgeGroup;
   highlightedDists: string[];
+  // Set when chat returned a ranking result; empty/null otherwise.
+  // Drives the numbered labels on the highlighted polygons.
+  rankedHighlights: RankedHighlight[] | null;
   selectedDist: string | null;
   onDistrictClick: (codDist: string) => void;
 }
@@ -60,6 +68,7 @@ export default function PanamaMap({
   indicators,
   activeAgeGroup,
   highlightedDists,
+  rankedHighlights,
   selectedDist,
   onDistrictClick,
 }: Props) {
@@ -72,15 +81,20 @@ export default function PanamaMap({
   const indicatorsRef = useRef<IndicatorsByDist>(indicators);
   const ageGroupRef = useRef<AgeGroup>(activeAgeGroup);
   const highlightedRef = useRef<string[]>(highlightedDists);
+  const rankedRef = useRef<RankedHighlight[] | null>(rankedHighlights);
   const selectedRef = useRef<string | null>(selectedDist);
   indicatorsRef.current = indicators;
   ageGroupRef.current = activeAgeGroup;
   highlightedRef.current = highlightedDists;
+  rankedRef.current = rankedHighlights;
   selectedRef.current = selectedDist;
 
   function mergedGeoJSON(gj: GeoJSON.FeatureCollection): GeoJSON.FeatureCollection {
     const inds = indicatorsRef.current;
     const activeGroup = ageGroupRef.current;
+    const rankByCode = new Map(
+      (rankedRef.current ?? []).map((r) => [r.cod_dist, r.rank])
+    );
 
     return {
       ...gj,
@@ -88,6 +102,7 @@ export default function PanamaMap({
         const code = feature.properties?.cod_dist as string;
         const current = inds[code]?.[activeGroup];
         const hasTravelData = current ? current.data_completeness_pct > 0 : false;
+        const rank = rankByCode.get(code);
 
         return {
           ...feature,
@@ -95,6 +110,7 @@ export default function PanamaMap({
             ...feature.properties,
             has_travel_data: hasTravelData ? 1 : 0,
             pct_le30_current: hasTravelData ? current?.pct_le30 ?? null : null,
+            rank_in_result: rank ?? null,
           },
         };
       }),
@@ -172,6 +188,27 @@ export default function PanamaMap({
         paint: { 'line-color': '#ffffff', 'line-width': 0.6 },
       });
 
+      // Rank labels for ranking results — small numbered badge centered on the polygon
+      map.addLayer({
+        id: 'rank-labels',
+        type: 'symbol',
+        source: 'districts',
+        filter: ['has', 'rank_in_result'],
+        layout: {
+          'text-field': ['to-string', ['get', 'rank_in_result']],
+          'text-size': 13,
+          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+          'text-allow-overlap': true,
+          'text-ignore-placement': true,
+          'symbol-placement': 'point',
+        },
+        paint: {
+          'text-color': '#ffffff',
+          'text-halo-color': '#0a0a0a',
+          'text-halo-width': 2,
+        },
+      });
+
       map.on('click', 'districts-fill', (e) => {
         const code = e.features?.[0]?.properties?.cod_dist as string | undefined;
         if (code) onDistrictClick(code);
@@ -231,7 +268,7 @@ export default function PanamaMap({
       mergedGeoJSON(gj)
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indicators, activeAgeGroup]);
+  }, [indicators, activeAgeGroup, rankedHighlights]);
 
   useEffect(() => {
     const map = mapRef.current;
