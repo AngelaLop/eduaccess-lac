@@ -142,10 +142,10 @@ export default function AppShell() {
     return rows.sort((a, b) => a.pct_le30 - b.pct_le30).slice(0, 5);
   }, [indicators, selectedAgeGroup]);
 
-  const highlightedDists = useMemo(
-    () => (chatHighlights.length > 0 ? chatHighlights : top5Worst.map((r) => r.cod_dist)),
-    [chatHighlights, top5Worst]
-  );
+  // Only true chat results dim the map. The default top-5-worst still
+  // shows in the Insight panel list, but the map stays at full opacity
+  // until the user actually asks something or selects a district.
+  const highlightedDists = chatHighlights;
 
   const distIndicators = selectedDist ? (indicators[selectedDist] ?? null) : null;
 
@@ -158,11 +158,21 @@ export default function AppShell() {
     if (panelTab === 'ask') setAskBadge(false);
   }, [panelTab]);
 
-  // Stream A handles focus_panel_tab. Stream B will extend this dispatcher
-  // for select_district / set_transport_mode / set_education_level.
   function dispatchAction(action: AskAction) {
-    if (action.type === 'focus_panel_tab') {
-      setPanelTab(action.tab);
+    switch (action.type) {
+      case 'select_district':
+        setSelectedDist(action.cod_dist);
+        setChatHighlights([]);
+        break;
+      case 'set_transport_mode':
+        setSelectedTransport(action.mode);
+        break;
+      case 'set_education_level':
+        setSelectedAgeGroup(action.level);
+        break;
+      case 'focus_panel_tab':
+        setPanelTab(action.tab);
+        break;
     }
   }
 

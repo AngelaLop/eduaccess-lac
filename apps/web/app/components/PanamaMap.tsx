@@ -15,6 +15,8 @@ const COLOR_STEPS: [number, string][] = [
 
 const NO_DATA_COLOR = '#d1d5db';
 
+const PANAMA_VIEW = { center: [-80.0, 8.5] as [number, number], zoom: 6.5 };
+
 const choroplethFill: maplibregl.ExpressionSpecification = [
   'case',
   ['==', ['get', 'has_travel_data'], 0],
@@ -35,6 +37,25 @@ interface Props {
   onDistrictClick: (codDist: string) => void;
 }
 
+// bbox of any GeoJSON Polygon | MultiPolygon, returned as [minX, minY, maxX, maxY]
+function geometryBbox(geometry: GeoJSON.Geometry): [number, number, number, number] {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  function walk(coords: unknown) {
+    if (Array.isArray(coords) && typeof coords[0] === 'number') {
+      const x = coords[0] as number;
+      const y = coords[1] as number;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    } else if (Array.isArray(coords)) {
+      for (const c of coords) walk(c);
+    }
+  }
+  if ('coordinates' in geometry) walk(geometry.coordinates);
+  return [minX, minY, maxX, maxY];
+}
+
 export default function PanamaMap({
   indicators,
   activeAgeGroup,
@@ -46,6 +67,7 @@ export default function PanamaMap({
   const mapRef = useRef<maplibregl.Map | null>(null);
   const geojsonRef = useRef<GeoJSON.FeatureCollection | null>(null);
   const readyRef = useRef(false);
+  const popupRef = useRef<maplibregl.Popup | null>(null);
 
   const indicatorsRef = useRef<IndicatorsByDist>(indicators);
   const ageGroupRef = useRef<AgeGroup>(activeAgeGroup);
@@ -79,17 +101,55 @@ export default function PanamaMap({
     };
   }
 
+  // ── apply selection-aware fill opacity ────────────────────────────────────
+  // - selection: 0.95 selected, 0.18 others
+  // - chat highlights (no selection): 0.95 highlighted, 0.30 others
+  // - neither: 0.82 default
+  function applyFillOpacity(
+    map: maplibregl.Map,
+    sel: string | null,
+    highlights: string[]
+  ) {
+    if (sel) {
+      map.setPaintProperty('districts-fill', 'fill-opacity', [
+        'case',
+        ['==', ['get', 'cod_dist'], sel],
+        0.95,
+        0.18,
+      ] as unknown as maplibregl.ExpressionSpecification);
+      return;
+    }
+    if (highlights.length > 0) {
+      map.setPaintProperty('districts-fill', 'fill-opacity', [
+        'case',
+        ['in', ['get', 'cod_dist'], ['literal', highlights]],
+        0.95,
+        0.30,
+      ] as unknown as maplibregl.ExpressionSpecification);
+      return;
+    }
+    map.setPaintProperty('districts-fill', 'fill-opacity', 0.82);
+  }
+
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-      center: [-80.0, 8.5],
-      zoom: 6.5,
+      center: PANAMA_VIEW.center,
+      zoom: PANAMA_VIEW.zoom,
     });
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      offset: 10,
+      className: 'eduaccess-popup',
+    });
+    popupRef.current = popup;
 
     map.on('load', async () => {
       const res = await fetch('/panama_districts.simplified.geojson');
@@ -112,22 +172,6 @@ export default function PanamaMap({
         paint: { 'line-color': '#ffffff', 'line-width': 0.6 },
       });
 
-      map.addLayer({
-        id: 'districts-highlight',
-        type: 'line',
-        source: 'districts',
-        filter: ['in', ['get', 'cod_dist'], ['literal', []]],
-        paint: { 'line-color': '#d97706', 'line-width': 3 },
-      });
-
-      map.addLayer({
-        id: 'districts-selected',
-        type: 'fill',
-        source: 'districts',
-        filter: ['==', ['get', 'cod_dist'], ''],
-        paint: { 'fill-color': '#d97706', 'fill-opacity': 0.25 },
-      });
-
       map.on('click', 'districts-fill', (e) => {
         const code = e.features?.[0]?.properties?.cod_dist as string | undefined;
         if (code) onDistrictClick(code);
@@ -135,24 +179,44 @@ export default function PanamaMap({
       map.on('mouseenter', 'districts-fill', () => {
         map.getCanvas().style.cursor = 'pointer';
       });
+      map.on('mousemove', 'districts-fill', (e) => {
+        const f = e.features?.[0];
+        if (!f) return;
+        const code = f.properties?.cod_dist as string;
+        const name = f.properties?.nomb_dist as string | undefined;
+        const prov = f.properties?.nomb_prov as string | undefined;
+        const ind = indicatorsRef.current[code]?.[ageGroupRef.current];
+        const valueLine =
+          !ind || ind.data_completeness_pct === 0
+            ? '<span style="color:#a3a3a3;">No travel-time data</span>'
+            : `<strong>${ind.pct_le30}%</strong> within 30 min walk`;
+        popup
+          .setLngLat(e.lngLat)
+          .setHTML(
+            `<div style="font: 12px ui-sans-serif, system-ui; line-height: 1.35;">
+               <div style="font-weight: 600; color: #171717;">${name ?? code}</div>
+               <div style="color: #737373; font-size: 11px;">${prov ?? ''}</div>
+               <div style="margin-top: 2px; color: #404040;">${valueLine}</div>
+             </div>`
+          )
+          .addTo(map);
+      });
       map.on('mouseleave', 'districts-fill', () => {
         map.getCanvas().style.cursor = '';
+        popup.remove();
       });
 
       readyRef.current = true;
 
-      map.setFilter('districts-highlight', [
-        'in',
-        ['get', 'cod_dist'],
-        ['literal', highlightedRef.current],
-      ]);
-      map.setFilter('districts-selected', ['==', ['get', 'cod_dist'], selectedRef.current ?? '']);
+      applyFillOpacity(map, selectedRef.current, highlightedRef.current);
     });
 
     mapRef.current = map;
     return () => {
+      popup.remove();
       map.remove();
       mapRef.current = null;
+      popupRef.current = null;
       readyRef.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -172,19 +236,36 @@ export default function PanamaMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !readyRef.current) return;
-
-    map.setFilter('districts-highlight', [
-      'in',
-      ['get', 'cod_dist'],
-      ['literal', highlightedDists],
-    ]);
+    applyFillOpacity(map, selectedDist, highlightedDists);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [highlightedDists]);
 
+  // Selection: dim non-selected and zoom to fit
   useEffect(() => {
     const map = mapRef.current;
+    const gj = geojsonRef.current;
     if (!map || !readyRef.current) return;
 
-    map.setFilter('districts-selected', ['==', ['get', 'cod_dist'], selectedDist ?? '']);
+    applyFillOpacity(map, selectedDist, highlightedRef.current);
+    popupRef.current?.remove();
+
+    if (!selectedDist) {
+      map.flyTo({ center: PANAMA_VIEW.center, zoom: PANAMA_VIEW.zoom, duration: 700 });
+      return;
+    }
+
+    if (!gj) return;
+    const feature = gj.features.find((f) => f.properties?.cod_dist === selectedDist);
+    if (!feature) return;
+    const [minX, minY, maxX, maxY] = geometryBbox(feature.geometry);
+    if (!Number.isFinite(minX)) return;
+    map.fitBounds(
+      [
+        [minX, minY],
+        [maxX, maxY],
+      ],
+      { padding: 80, duration: 700, maxZoom: 11 }
+    );
   }, [selectedDist]);
 
   return <div ref={containerRef} className="h-full w-full" />;

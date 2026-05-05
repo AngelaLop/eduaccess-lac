@@ -83,6 +83,14 @@ HARD RULES — any violation makes the SQL invalid:
 4. Include cod_dist in SELECT for district-level results. Province-level aggregates may omit it.
 5. No semicolons. No pg_* functions. No information_schema.
 
+RANKING RULE:
+When the user ranks by an access metric (pct_le15, pct_le30, pct_le60), ALWAYS
+add "AND data_completeness_pct > 0" to the WHERE clause. Districts with zero
+completeness show pct_le30 = 0 because the data is missing, not because access
+is genuinely zero — including them buries the real worst-served districts
+under data gaps. Exception: if the user is explicitly asking about
+completeness or missing data, do NOT add this filter.
+
 resultShape values:
   "ranking"    → top-N / bottom-N / ORDER BY ... LIMIT
   "filter"     → WHERE filter, returns matching rows without rank semantics
@@ -92,7 +100,7 @@ resultShape values:
 Examples:
 
 Q: Top 5 districts with the worst walking access for high schoolers
-A: {"kind":"data","sql":"SELECT cod_dist, nomb_dist, nomb_prov, pct_le30 FROM v_panama_indicators WHERE age_group = 'highschool' ORDER BY pct_le30 ASC LIMIT 5","narrative":"The 5 districts with the lowest share of high schoolers within 30 minutes walk of a school.","resultShape":"ranking"}
+A: {"kind":"data","sql":"SELECT cod_dist, nomb_dist, nomb_prov, pct_le30 FROM v_panama_indicators WHERE age_group = 'highschool' AND data_completeness_pct > 0 ORDER BY pct_le30 ASC LIMIT 5","narrative":"The 5 districts with the lowest share of high schoolers within 30 minutes walk of a school (excluding districts with no travel-time data).","resultShape":"ranking"}
 
 Q: Districts with over 1,000 high schoolers more than 30 min from a school
 A: {"kind":"data","sql":"SELECT cod_dist, nomb_dist, nomb_prov, pop_total - pop_le30 AS unreachable FROM v_panama_indicators WHERE age_group = 'highschool' AND (pop_total - pop_le30) > 1000 ORDER BY unreachable DESC LIMIT 20","narrative":"Districts with more than 1,000 high schoolers beyond a 30-minute walk from a school.","resultShape":"filter"}
@@ -101,7 +109,7 @@ Q: Compare primary vs high school walking access in Panama province
 A: {"kind":"data","sql":"SELECT cod_dist, nomb_dist, age_group, pct_le30 FROM v_panama_indicators WHERE nomb_prov = 'Panama' AND age_group IN ('primary','highschool') ORDER BY cod_dist, age_group LIMIT 50","narrative":"Walking access for primary and high school students across the districts of Panama province.","resultShape":"comparison"}
 
 Q: Rank provinces by average % within 15 min of a school
-A: {"kind":"data","sql":"SELECT nomb_prov, ROUND(AVG(pct_le15),1) AS avg_pct_le15, COUNT(DISTINCT cod_dist) AS n_districts FROM v_panama_indicators WHERE age_group = 'all' GROUP BY nomb_prov ORDER BY avg_pct_le15 DESC LIMIT 20","narrative":"Province ranking by average share of school-age population within 15 minutes walk of a school.","resultShape":"ranking"}
+A: {"kind":"data","sql":"SELECT nomb_prov, ROUND(AVG(pct_le15),1) AS avg_pct_le15, COUNT(DISTINCT cod_dist) AS n_districts FROM v_panama_indicators WHERE age_group = 'all' AND data_completeness_pct > 0 GROUP BY nomb_prov ORDER BY avg_pct_le15 DESC LIMIT 20","narrative":"Province ranking by average share of school-age population within 15 minutes walk of a school.","resultShape":"ranking"}
 
 ============================================================
 KIND: "navigation"
