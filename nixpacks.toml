@@ -1,9 +1,10 @@
 # Nixpacks build config for the worker (apps/worker).
-# Setting buildCommand on railway.json alone wasn't enough — Nixpacks didn't
-# install Node, so corepack was missing. This file makes the setup explicit.
-
-[phases.setup]
-nixPkgs = ["nodejs_22"]
+#
+# Strategy: don't override the setup phase — let Nixpacks auto-detect Node
+# from package.json. We only override install/build/start to:
+#   1. Add pnpm (Nixpacks defaults to npm; our lockfile is pnpm)
+#   2. Skip the build step entirely (worker uses tsx runtime, no compile)
+#   3. Filter the start command to the worker package only
 
 [phases.install]
 cmds = [
@@ -11,7 +12,6 @@ cmds = [
   "pnpm install --frozen-lockfile --prod=false"
 ]
 
-# No build phase — the worker uses tsx as its runtime, no compile step needed.
 [phases.build]
 cmds = []
 
