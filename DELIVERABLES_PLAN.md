@@ -89,96 +89,92 @@
 
 ---
 
-## v2 � Week 7 � "It's a system, not an app" (pipeline as worker)
+## v2 — Week 7 — SHIPPED 2026-05-05
 
-**Theme:** Apply Week 4. The Phase B pipeline becomes a **Railway worker** that processes countries on demand, writes to Supabase, and streams progress via Realtime. Add **Honduras** (geocoding done) so we have two countries.
+**What landed:**
+- Three parallel streams (A: tabbed Insight/Ask + scope card + out_of_scope render; B: `/api/ask` rewritten as a 3-kind router with district name resolution + action validation; C: map hover popups + ranked-highlight numbered labels + Insight landing visualization) merged in order.
+- **Worker as a real second service** — `apps/worker` on Railway. Robustness Auditor agent (4 deterministic dimensions + LLM-written narrative per cell) and Priority Scorer (children × access gap × confidence). Cron `0 3 * * *` UTC.
+- Frontend RobustnessCard now reads from `robustness_reports`; Insight landing's PriorityPanel reads from `priority_scores` with a per-row plain-English "why" line.
+- Cohort feedback fully addressed (7/7 items).
+
+**Lessons that informed v3+:**
+- Multi-iteration Railway/Nixpacks fight — fixed by adding root `package.json` with `engines.node` + `packageManager`. Codex caught this. Future deploys will be smoother.
+- 70B daily quota (100K TPD) is too tight for a full audit (~465K tokens). 8B has enough headroom. v3 worker should default to 8B and reserve 70B for selective re-runs.
+- Charts in chat bubbles felt wrong — visualization belongs on the standing Insight panel.
+
+**Pending after submission:** First full 664-cell audit completes on the next cron tick after Groq quota resets.
+
+---
+
+## v3 — Week 8 — "Second country with rural/urban + socioeconomic dimensions"
+
+**Theme:** Multi-country reach with new analytical dimensions. Reuse the v2 worker as a country-onboarding pipeline.
+
+**Audience for the demo shifts:** the LAC minister story works better with a comparison view than with one-country-deep.
+
+**Data we already have (no Phase B re-run needed):**
+- School-level data for all 21 LAC countries: counts, public/private split, coordinates, adm1/adm2 boundaries.
+- WorldPop for population per district (free, raster).
+
+**Indicators we can compute cheaply per district from this data:**
+- Schools per 1000 school-age population
+- Public/private mix
+- % districts with zero schools
+- Straight-line distance to nearest school (district centroid → nearest school)
+- Spatial concentration / clustering score
+- **Rural/urban classification** per district (using WorldPop density + admin area, or external classification)
+- **Socioeconomic status proxy** per district (RWI from Meta — Relative Wealth Index — is openly available; or a national poverty layer if the country publishes one)
 
 **What's IN scope**
-- New service `apps/pipeline-worker` (Node.js shim that invokes the Python pipeline via subprocess, or a pure-Python worker on Railway � pick one based on Railway language support; Python on Railway works fine).
-- Worker reads a `pipeline_jobs` table in Supabase: `{country, step, status, progress_pct, started_at, finished_at, log_tail}`. Frontend has a hidden `/admin/pipeline` page (no auth for v2, hidden URL) that subscribes via Realtime and shows live progress for steps 07�10 per country.
-- Service role key on Railway, anon key with RLS on Vercel. Make this distinction explicit in `CLAUDE.md`.
-- Honduras added end-to-end. Country switcher in the UI.
-- Indicator schema upgraded from `indicators_panama` to `indicators_adm2` (the multi-country shape from your README).
-- **First explicit agent in the analysis:** a *Geocoding QA agent* runs as part of the worker. For each country, it samples N geocoded schools, summarizes ArcGIS score distribution, flags discrepancies, and writes a `geocoding_qa_report` row that the frontend surfaces in the robustness card. Use Claude Haiku via API.
-- Upsert pattern (Week 4) used for `indicators_adm2` � same row keys (`adm2_pcode`, `education_level`) across re-runs.
+- Pick **one second country** with the cleanest data + clearest urban/rural divide (likely Honduras or Costa Rica). Don't try for 3 countries — focus on doing one well.
+- Worker grows a country-onboarding pipeline: `pipeline_jobs` table with status, frontend `/admin` page subscribes via Realtime to watch the run live (this is the demo moment for the worker pattern).
+- New schema: `indicators_adm2` (multi-country shape, columns include `country_iso`, `urban_rural`, `ses_band`).
+- **Country switcher** in the UI top-bar. Default still Panama; a click loads the second country.
+- The Robustness Auditor adapts: its 4 dimensions extend to handle the new "we have schools but no travel-time" reality. Be explicit in the narrative: *"This score is based on school density and straight-line distance, not travel time."* Honesty about scope is itself a robustness move.
+- Comparison view: pick two districts (across countries OK) and see their indicators side-by-side.
 
 **What's OUT**
-- More countries beyond PAN + HND.
-- Public auth.
-- Recommendation agent (lands in v3).
+- Phase B pipeline for the second country (heavy GIS, lives in IDB repo, would consume v3 entirely).
+- More than one new country.
+- Auth (queued for v4 if the project ever goes beyond a class demo).
+- Policy Recommender agent (was originally v3 — push to v4 if v3 is full).
 
-**Architecture**
+**Architecture additions**
 ```
-[ESPN-style external sources]      [Browser]
-   WorldPop, MAP, OSM, IDB              ?
-        ?                               ?
-        ?                       [Vercel: web + API]
-[Railway worker]  ???????????   [Supabase: tables + Realtime + RLS]
-   - 07 population zonal               ?
-   - 08 friction surfaces              ?
-   - 09 FMM travel time                ?
-   - 10 compute indicators             ?
-   - geocoding_qa_agent ???????????????? (writes qa_reports)
+[Railway worker — apps/worker]
+  Job queue (pipeline_jobs table)
+  Per-country jobs:
+    - ingest_schools     (read CSV/Parquet → schools table with country_iso)
+    - compute_indicators (zonal stats, density, distance, urban_rural, ses)
+    - audit_robustness   (existing Auditor, adapted dimensions per country)
+  Concurrency 1 per-country, multiple countries can run in parallel
+  Realtime: frontend /admin watches pipeline_jobs status updates live
 ```
 
-**Submission v2**: GitHub + Vercel + Railway log screenshot + a 90s video showing a country going from "queued" ? "computing 07/08/09/10" ? "done" ? frontend updates live, then asking the bot a Honduras question.
+**Submission v3:** GitHub + Vercel + a video showing **a country onboarding live** in the admin UI (queued → ingesting → computing → done) and the new country immediately visible in the country switcher.
 
-**Time budget: 7.5h** � heavy on the worker (you've never deployed Python to Railway before; budget 3h for that alone).
+**Time budget: 7.5h** — heaviest on schema migration to multi-country shape and the data ingest itself; Railway path now well-understood.
 
 ---
 
-## v3 � Week 8 � "Agents for each part of the analysis" (Shubham's feedback, paid in full)
+## v4 — Week 9 — Project fair: polish + scale + the Recommender agent
 
-**Theme:** Make the *analysis* agentic and the *recommendations* explainable. This is also where the project starts to look like MapAI but with a defensible policy angle.
-
-**Three agents added** (each is a Vercel API route + a typed prompt + a small toolset, not chat-bots; they return structured JSON):
-
-1. **Robustness Auditor**
-   - Input: `adm2_pcode`, `education_level`.
-   - Tools: SQL queries over indicators_adm2, school_base, geocoding_qa_reports, population provenance.
-   - Output: `{score: 0�100, dimensions: {data_completeness, geocoder_confidence, sample_size, friction_source_agreement, poverty_data_recency}, narrative: string, caveats: []}`.
-   - Surfaced in the panel � replaces the simple v1/v2 robustness card.
-
-2. **Policy Recommendation Agent**
-   - Input: a municipality.
-   - Tools: SQL, the Robustness Auditor, a small library of intervention archetypes (build a primary school, build a secondary school, transport subsidy, hybrid), each with a one-paragraph rationale template.
-   - Output: ranked recommendations with: expected impact (rough, e.g., "would bring ~3,800 children within 30 min walk"), evidence trail (which indicators support it), confidence level (from the Auditor), and counter-arguments ("but motorized access is already 92% � road, not school, may be the bottleneck").
-   - **No recommendation ships without a robustness score attached.** This is the answer to Shubham.
-
-3. **Friction Sensitivity Agent**
-   - Input: country.
-   - Compares MAP vs OSM friction surfaces. Flags municipalities where the two sources disagree by >X%.
-   - Output: a `friction_disagreement` overlay layer on the map + an annotation in affected municipality panels.
-
-**Other v3 work**
-- Add Colombia (in-progress geocoding) and one more country (pick based on which finishes 05 first; Argentina or Mexico are good candidates given their geocoder scores).
-- Spanish UI (Next.js i18n, just one extra locale � Portuguese in v4 if time).
-- "Compare two municipalities" view.
-- Test suite: pytest for pipeline asserts already in your IDB repo + Playwright MCP for the frontend (smoke test the chat happy path and a click-and-panel-opens path).
-
-**Submission v3**: same as before + a written one-pager (`AGENTS.md`-style) describing the three agents, their tools, and how they interact. Graders should see the analysis pipeline is now agentic.
-
----
-
-## v4 � Week 9 � "Project fair" (polish, story, scale)
-
-**Theme:** Make it presentable to a minister. Apply Week 5's UI/UX principles seriously. Use Figma MCP.
+**Theme:** Make it presentable to a minister, and ship the missing v3 agent.
 
 **What's IN**
-- **Figma MCP design pass** (Week 5 slides 12�14). Generate a polished design system in Figma ? ask Claude/Codex to rebuild the frontend against it. Hierarchy, space, one accent, alignment grid, consistent button system, every state drawn (default/hover/loading/empty/error/success), inline errors, mobile-first 375px breakpoint.
-- **Export reports.** PDF or Excel summary for a selected municipality, with the robustness profile and recommendations embedded � the literal artifact a minister attaches to a funding proposal.
-- **Portuguese locale.**
-- **More countries** if pipeline allows: aim for 5�7 total. If pipeline lags, ship 4 well-done countries rather than 7 broken ones.
-- **Live demo readiness.** Pre-loaded talking track. The 60-second demo from v1 now has a 3-minute extended cut for the project fair.
-- **First-run experience** (Week 5 principle 27): a 4-step guided tour the first time someone lands.
-- **Error states & empty states** (principles 11, 20, 21).
-- **Accessibility** (principle 25): WCAG AA contrast, semantic HTML, alt text on all icons, color never the only signal for `exclusion_severity`.
+- **Policy Recommendation Agent** (originally v3). Per-district: ranks intervention archetypes (build primary, build secondary, transport subsidy, hybrid) with expected impact estimate, evidence trail, confidence from the Robustness Auditor, and counter-arguments. **No recommendation ships without robustness attached.** This is Shubham's feedback finished.
+- **Figma MCP design pass.** Apply Week 5 UI/UX principles seriously: hierarchy, space, one accent, alignment grid, consistent button system, every state drawn (default/hover/loading/empty/error/success), mobile-first.
+- **Export reports.** PDF for a selected district with the robustness profile + recommendation. Worker generates async, returns a Supabase Storage URL.
+- **Add 1-2 more countries** if v3's onboarding pipeline is solid. Aim for **3-4 countries total**, well-done, not 7 half-done.
+- **Spanish locale** (Next.js i18n).
+- **First-run experience** + accessibility pass (WCAG AA contrast, semantic HTML).
+- **Project-fair demo readiness:** 3-minute extended cut of the v1 demo, talking track pre-loaded.
 
-**What's OUT**
-- Auth (still not needed; this is public data).
-- "Add a hypothetical school" simulation (was a stretch goal; punt unless v3 is on time).
+**What's OUT (still)**
+- Auth — public data, doesn't need it.
+- Phase B pipeline for new countries — proxies are good enough and honest about it.
 
-**Submission v4**: Project fair demo + final repo + final video walkthrough + one-page summary describing the system, the architecture, the agents, and what robustness means in this app. Have answers ready for: "How do you know your recommendations are right?" � point to the Robustness Auditor.
+**Submission v4:** Project fair demo + final video + one-page summary. Be ready for the question *"How do you know your recommendations are right?"* — the Robustness Auditor + per-recommendation confidence is the answer.
 
 ---
 
