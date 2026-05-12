@@ -34,18 +34,6 @@ export interface RankedHighlight {
   rank: number;
 }
 
-export interface SimulationCommand {
-  type: 'play' | 'pause' | 'replay' | 'idle';
-  nonce: number;
-}
-
-export interface SimulationStatusUpdate {
-  simMin: number;
-  arrivedPct: number;
-  isPlaying: boolean;
-  isFinished: boolean;
-}
-
 interface Props {
   indicators: IndicatorsByDist;
   activeAgeGroup: AgeGroup;
@@ -57,89 +45,25 @@ interface Props {
   selectedDist: string | null;
   onDistrictClick: (codDist: string) => void;
   onResetView: () => void;
-  // Inequality-in-motion simulation overlay
+  // Inequality simulation: when active, the choropleth rebinds to
+  // "% of children reached at simulationSimMin" instead of static pct_le30.
   simulationActive: boolean;
-  simulationCommand: SimulationCommand;
-  onSimulationStatus: (s: SimulationStatusUpdate) => void;
+  simulationSimMin: number;     // 0..60
 }
 
-// ── simulation helpers ──────────────────────────────────────────────────────
+// ── simulation helper ───────────────────────────────────────────────────────
 
-const SIM_DURATION_SEC = 10;
-const SIM_MINUTES = 60;
-const DOTS_PER_DISTRICT = 10;
-
-interface SimDot {
-  id: string;
-  lng: number;
-  lat: number;
-  vlng: number;
-  vlat: number;
-  arrivalMin: number;     // Infinity = never arrives in 60 min
-  status: 0 | 1 | 2;      // 0 walking · 1 arrived · 2 never (post-60)
-  bMinLng: number;
-  bMaxLng: number;
-  bMinLat: number;
-  bMaxLat: number;
-}
-
-function generateDotsForDistrict(
-  codDist: string,
-  geometry: GeoJSON.Geometry,
-  pct_le15: number,
-  pct_le30: number,
-  pct_le60: number,
-  count: number
-): SimDot[] {
-  const [minLng, minLat, maxLng, maxLat] = geometryBbox(geometry);
-  if (!Number.isFinite(minLng)) return [];
-
-  const cLng = (minLng + maxLng) / 2;
-  const cLat = (minLat + maxLat) / 2;
-  const spanLng = maxLng - minLng;
-  const spanLat = maxLat - minLat;
-
-  const fLe15 = Math.max(0, pct_le15) / 100;
-  const f15_30 = Math.max(0, pct_le30 - pct_le15) / 100;
-  const f30_60 = Math.max(0, pct_le60 - pct_le30) / 100;
-
-  const dots: SimDot[] = [];
-  for (let i = 0; i < count; i++) {
-    const lng = cLng + (Math.random() - 0.5) * spanLng * 0.4;
-    const lat = cLat + (Math.random() - 0.5) * spanLat * 0.4;
-
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 0.025 + Math.random() * 0.02;
-    const vlng = Math.cos(angle) * speed * spanLng;
-    const vlat = Math.sin(angle) * speed * spanLat;
-
-    const r = Math.random();
-    let arrivalMin: number;
-    if (r < fLe15) arrivalMin = Math.random() * 15;
-    else if (r < fLe15 + f15_30) arrivalMin = 15 + Math.random() * 15;
-    else if (r < fLe15 + f15_30 + f30_60) arrivalMin = 30 + Math.random() * 30;
-    else arrivalMin = Infinity;
-
-    dots.push({
-      id: `${codDist}_${i}`,
-      lng, lat, vlng, vlat, arrivalMin,
-      status: 0,
-      bMinLng: minLng, bMaxLng: maxLng,
-      bMinLat: minLat, bMaxLat: maxLat,
-    });
-  }
-  return dots;
-}
-
-function dotsToFeatures(dots: SimDot[]): GeoJSON.FeatureCollection {
-  return {
-    type: 'FeatureCollection',
-    features: dots.map((d) => ({
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: [d.lng, d.lat] },
-      properties: { status: d.status, id: d.id },
-    })),
-  };
+/**
+ * Compute % of children who have reached a school by simulated minute t,
+ * given the district's pct_le15/30/60. Linear interp through the data
+ * points (0,0), (15, pct_le15), (30, pct_le30), (60, pct_le60).
+ */
+function pctArrivedAt(t: number, pct_le15: number, pct_le30: number, pct_le60: number): number {
+  if (t <= 0) return 0;
+  if (t <= 15) return (t / 15) * pct_le15;
+  if (t <= 30) return pct_le15 + ((t - 15) / 15) * (pct_le30 - pct_le15);
+  if (t <= 60) return pct_le30 + ((t - 30) / 30) * (pct_le60 - pct_le30);
+  return pct_le60;
 }
 
 // bbox of any GeoJSON Polygon | MultiPolygon, returned as [minX, minY, maxX, maxY]
@@ -171,8 +95,7 @@ export default function PanamaMap({
   onDistrictClick,
   onResetView,
   simulationActive,
-  simulationCommand,
-  onSimulationStatus,
+  simulationSimMin,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -193,15 +116,8 @@ export default function PanamaMap({
   rankedRef.current = rankedHighlights;
   selectedRef.current = selectedDist;
 
-  // Simulation state (kept in refs so animation ticks don't trigger React rerenders)
-  const simDotsRef = useRef<SimDot[]>([]);
-  const simAnimRef = useRef<number | null>(null);
-  const simPlayStartRef = useRef<number | null>(null);
-  const simElapsedAtPauseRef = useRef<number>(0);
-  const simIsPlayingRef = useRef(false);
-  const simIsFinishedRef = useRef(false);
-  const simulationStatusRef = useRef(onSimulationStatus);
-  simulationStatusRef.current = onSimulationStatus;
+  // Avoid unused-var warnings in simulation-mode codepaths
+  void activeTransport;
 
   function mergedGeoJSON(gj: GeoJSON.FeatureCollection): GeoJSON.FeatureCollection {
     const inds = indicatorsRef.current;
@@ -241,6 +157,10 @@ export default function PanamaMap({
           ...feature.properties,
           has_travel_data: hasTravelData ? 1 : 0,
           pct_le30_current: hasTravelData ? current?.pct_le30 ?? null : null,
+          // Properties used by the simulation fill expression
+          pct_le15_sim: hasTravelData ? current?.pct_le15 ?? 0 : 0,
+          pct_le30_sim: hasTravelData ? current?.pct_le30 ?? 0 : 0,
+          pct_le60_sim: hasTravelData ? current?.pct_le60 ?? 0 : 0,
         };
         if (isLabelFeature) properties.rank_in_result = rank;
 
@@ -437,227 +357,70 @@ export default function PanamaMap({
     );
   }, [selectedDist]);
 
-  // ── simulation: build dots from current indicators ──────────────────────
-  function buildSimDots(): SimDot[] {
-    const gj = geojsonRef.current;
-    if (!gj) return [];
-    const inds = indicatorsRef.current;
-    const age = ageGroupRef.current;
-    const out: SimDot[] = [];
-    for (const feat of gj.features) {
-      const code = feat.properties?.cod_dist as string | undefined;
-      if (!code) continue;
-      const row = inds[code]?.[age];
-      if (!row || row.data_completeness_pct === 0) continue;
-      out.push(
-        ...generateDotsForDistrict(
-          code,
-          feat.geometry,
-          row.pct_le15,
-          row.pct_le30,
-          row.pct_le60,
-          DOTS_PER_DISTRICT
-        )
-      );
-    }
-    return out;
-  }
-
-  function emitSimStatus(simMin: number) {
-    const total = simDotsRef.current.length;
-    const arrived = simDotsRef.current.filter((d) => d.status === 1).length;
-    simulationStatusRef.current({
+  // ── simulation: rebind choropleth fill to current sim time ──────────────
+  //
+  // The expression interpolates a "% arrived at simMin" value per feature
+  // from its pct_le15/30/60 properties, then maps that to the same color
+  // ramp as the static choropleth. At simMin=30 the colors equal the
+  // current Insight-tab choropleth — the simulation just shows the same
+  // story unfolding through time.
+  function simulationFillExpression(simMin: number): maplibregl.ExpressionSpecification {
+    const arrivedExpr: maplibregl.ExpressionSpecification = [
+      'interpolate',
+      ['linear'],
       simMin,
-      arrivedPct: total === 0 ? 0 : Math.round((arrived / total) * 100),
-      isPlaying: simIsPlayingRef.current,
-      isFinished: simIsFinishedRef.current,
-    });
+      0, 0,
+      15, ['get', 'pct_le15_sim'],
+      30, ['get', 'pct_le30_sim'],
+      60, ['get', 'pct_le60_sim'],
+    ] as unknown as maplibregl.ExpressionSpecification;
+
+    return [
+      'case',
+      ['==', ['get', 'has_travel_data'], 0],
+      NO_DATA_COLOR,
+      [
+        'step',
+        arrivedExpr,
+        COLOR_STEPS[0][1],
+        ...COLOR_STEPS.slice(1).flatMap(([threshold, color]) => [threshold, color]),
+      ],
+    ] as unknown as maplibregl.ExpressionSpecification;
   }
 
-  function simTick() {
-    const map = mapRef.current;
-    if (!map || simPlayStartRef.current === null) return;
-
-    const realMs =
-      performance.now() - simPlayStartRef.current + simElapsedAtPauseRef.current;
-    const simMin = Math.min(
-      SIM_MINUTES,
-      (realMs / (SIM_DURATION_SEC * 1000)) * SIM_MINUTES
-    );
-
-    const dtRealSec = 0.016;
-    const simMinPerSec = SIM_MINUTES / SIM_DURATION_SEC;
-    const dt = dtRealSec * simMinPerSec;
-
-    for (const d of simDotsRef.current) {
-      if (d.status === 0 && simMin >= d.arrivalMin) d.status = 1;
-      if (d.status !== 1) {
-        d.lng += d.vlng * dt;
-        d.lat += d.vlat * dt;
-        if (d.lng < d.bMinLng) { d.lng = d.bMinLng; d.vlng = -d.vlng; }
-        if (d.lng > d.bMaxLng) { d.lng = d.bMaxLng; d.vlng = -d.vlng; }
-        if (d.lat < d.bMinLat) { d.lat = d.bMinLat; d.vlat = -d.vlat; }
-        if (d.lat > d.bMaxLat) { d.lat = d.bMaxLat; d.vlat = -d.vlat; }
-      }
-    }
-
-    const source = map.getSource('dots-sim') as maplibregl.GeoJSONSource | undefined;
-    source?.setData(dotsToFeatures(simDotsRef.current));
-
-    if (simMin >= SIM_MINUTES) {
-      // Final: any still-walking dots that never arrive turn red
-      for (const d of simDotsRef.current) {
-        if (d.status === 0 && d.arrivalMin === Infinity) d.status = 2;
-      }
-      source?.setData(dotsToFeatures(simDotsRef.current));
-      simIsPlayingRef.current = false;
-      simIsFinishedRef.current = true;
-      simPlayStartRef.current = null;
-      simElapsedAtPauseRef.current = 0;
-      emitSimStatus(SIM_MINUTES);
-      return;
-    }
-
-    emitSimStatus(simMin);
-    simAnimRef.current = requestAnimationFrame(simTick);
-  }
-
-  function setChoroplethDimmed(dim: boolean) {
-    const map = mapRef.current;
-    if (!map || !readyRef.current) return;
-    map.setPaintProperty('districts-fill', 'fill-opacity', dim ? 0.12 : 0.82);
-  }
-
-  // Toggle simulation overlay on/off when simulationActive changes
+  // Apply / unapply the simulation fill expression when simulationActive
+  // toggles.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !readyRef.current) return;
 
     if (simulationActive) {
-      // Build dots, add source + layer (if not already), dim choropleth
-      const dots = buildSimDots();
-      simDotsRef.current = dots;
-      simIsFinishedRef.current = false;
-      simIsPlayingRef.current = false;
-      simPlayStartRef.current = null;
-      simElapsedAtPauseRef.current = 0;
-
-      if (!map.getSource('dots-sim')) {
-        map.addSource('dots-sim', {
-          type: 'geojson',
-          data: dotsToFeatures(dots),
-        });
-        map.addLayer({
-          id: 'dots-sim-layer',
-          type: 'circle',
-          source: 'dots-sim',
-          paint: {
-            'circle-radius': 3,
-            'circle-color': [
-              'match',
-              ['get', 'status'],
-              1, '#16a34a', // arrived (emerald)
-              2, '#dc2626', // never
-              '#eab308',    // walking (amber)
-            ] as unknown as maplibregl.ExpressionSpecification,
-            'circle-stroke-width': 0.6,
-            'circle-stroke-color': '#ffffff',
-            'circle-opacity': 0.95,
-          },
-        });
-      } else {
-        (map.getSource('dots-sim') as maplibregl.GeoJSONSource).setData(dotsToFeatures(dots));
-      }
-      setChoroplethDimmed(true);
-      emitSimStatus(0);
+      map.setPaintProperty(
+        'districts-fill',
+        'fill-color',
+        simulationFillExpression(simulationSimMin)
+      );
+      map.setPaintProperty('districts-fill', 'fill-opacity', 0.88);
     } else {
-      // Cancel anim, remove layer + source, restore choropleth
-      if (simAnimRef.current) {
-        cancelAnimationFrame(simAnimRef.current);
-        simAnimRef.current = null;
-      }
-      if (map.getLayer('dots-sim-layer')) map.removeLayer('dots-sim-layer');
-      if (map.getSource('dots-sim')) map.removeSource('dots-sim');
-      simDotsRef.current = [];
-      simIsPlayingRef.current = false;
-      simIsFinishedRef.current = false;
-      simPlayStartRef.current = null;
-      simElapsedAtPauseRef.current = 0;
-      setChoroplethDimmed(false);
+      map.setPaintProperty('districts-fill', 'fill-color', choroplethFill);
+      applyFillOpacity(map, selectedRef.current, highlightedRef.current);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [simulationActive]);
 
-  // When age/transport changes during an active simulation, regenerate dots
+  // While simulation is active, update the fill expression on every simMin
+  // change (driven by the parent's animation loop).
   useEffect(() => {
     if (!simulationActive) return;
     const map = mapRef.current;
     if (!map || !readyRef.current) return;
-    if (simAnimRef.current) {
-      cancelAnimationFrame(simAnimRef.current);
-      simAnimRef.current = null;
-    }
-    const dots = buildSimDots();
-    simDotsRef.current = dots;
-    simIsPlayingRef.current = false;
-    simIsFinishedRef.current = false;
-    simPlayStartRef.current = null;
-    simElapsedAtPauseRef.current = 0;
-    const source = map.getSource('dots-sim') as maplibregl.GeoJSONSource | undefined;
-    source?.setData(dotsToFeatures(dots));
-    emitSimStatus(0);
+    map.setPaintProperty(
+      'districts-fill',
+      'fill-color',
+      simulationFillExpression(simulationSimMin)
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeAgeGroup, activeTransport]);
-
-  // React to play/pause/replay commands from the side panel
-  useEffect(() => {
-    if (!simulationActive) return;
-    if (simulationCommand.type === 'idle') return;
-    const map = mapRef.current;
-    if (!map) return;
-
-    if (simulationCommand.type === 'play') {
-      if (simIsPlayingRef.current) return;
-      if (simIsFinishedRef.current) {
-        // Reset before play
-        const dots = buildSimDots();
-        simDotsRef.current = dots;
-        simIsFinishedRef.current = false;
-        simElapsedAtPauseRef.current = 0;
-        (map.getSource('dots-sim') as maplibregl.GeoJSONSource | undefined)?.setData(
-          dotsToFeatures(dots)
-        );
-      }
-      simIsPlayingRef.current = true;
-      simPlayStartRef.current = performance.now();
-      emitSimStatus(simElapsedAtPauseRef.current / (SIM_DURATION_SEC * 1000) * SIM_MINUTES);
-      simAnimRef.current = requestAnimationFrame(simTick);
-    } else if (simulationCommand.type === 'pause') {
-      if (!simIsPlayingRef.current) return;
-      if (simPlayStartRef.current !== null) {
-        simElapsedAtPauseRef.current += performance.now() - simPlayStartRef.current;
-        simPlayStartRef.current = null;
-      }
-      if (simAnimRef.current) cancelAnimationFrame(simAnimRef.current);
-      simAnimRef.current = null;
-      simIsPlayingRef.current = false;
-      emitSimStatus(simElapsedAtPauseRef.current / (SIM_DURATION_SEC * 1000) * SIM_MINUTES);
-    } else if (simulationCommand.type === 'replay') {
-      if (simAnimRef.current) cancelAnimationFrame(simAnimRef.current);
-      const dots = buildSimDots();
-      simDotsRef.current = dots;
-      simIsFinishedRef.current = false;
-      simElapsedAtPauseRef.current = 0;
-      simIsPlayingRef.current = true;
-      simPlayStartRef.current = performance.now();
-      (map.getSource('dots-sim') as maplibregl.GeoJSONSource | undefined)?.setData(
-        dotsToFeatures(dots)
-      );
-      emitSimStatus(0);
-      simAnimRef.current = requestAnimationFrame(simTick);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [simulationCommand]);
+  }, [simulationSimMin, simulationActive]);
 
   const showOverviewButton = !!selectedDist || highlightedDists.length > 0;
 

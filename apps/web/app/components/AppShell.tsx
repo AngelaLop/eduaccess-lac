@@ -20,8 +20,10 @@ import type {
 import { AGE_GROUPS, AGE_GROUP_SHORT_LABELS, TRANSPORT_LABELS } from '@/lib/types';
 
 const PanamaMap = dynamic(() => import('./PanamaMap'), { ssr: false });
-import SimulationPanel, { type SimulationStatus } from './SimulationPanel';
-import type { SimulationCommand } from './PanamaMap';
+import SimulationPanel from './SimulationPanel';
+
+const SIM_DURATION_MS = 10_000;
+const SIM_MINUTES = 60;
 
 // ── constants ─────────────────────────────────────────────────────────────────
 
@@ -122,13 +124,12 @@ export default function AppShell() {
   const [rankedHighlights, setRankedHighlights] = useState<RankedHighlight[] | null>(null);
   const [panelTab, setPanelTab] = useState<PanelTab>('insight');
   const [askBadge, setAskBadge] = useState(false);
-  const [simStatus, setSimStatus] = useState<SimulationStatus>({
-    simMin: 0,
-    arrivedPct: 0,
-    isPlaying: false,
-    isFinished: false,
-  });
-  const [simCommand, setSimCommand] = useState<SimulationCommand>({ type: 'idle', nonce: 0 });
+  const [simMin, setSimMin] = useState(0);
+  const [simIsPlaying, setSimIsPlaying] = useState(false);
+  const [simIsFinished, setSimIsFinished] = useState(false);
+  const simAnimRef = useRef<number | null>(null);
+  const simPlayStartRef = useRef<number | null>(null);
+  const simElapsedAtPauseRef = useRef<number>(0);
   const simulationActive = panelTab === 'simulation';
   const chatEndRef = useRef<HTMLDivElement>(null);
   const urlConsumedRef = useRef(false);
@@ -301,6 +302,69 @@ export default function AppShell() {
     setPanelTab('insight');
   }
 
+  // ── simulation animation loop ───────────────────────────────────────────
+  function simulationTick() {
+    if (simPlayStartRef.current === null) return;
+    const realMs =
+      performance.now() - simPlayStartRef.current + simElapsedAtPauseRef.current;
+    const t = Math.min(SIM_MINUTES, (realMs / SIM_DURATION_MS) * SIM_MINUTES);
+    setSimMin(t);
+    if (t >= SIM_MINUTES) {
+      setSimIsPlaying(false);
+      setSimIsFinished(true);
+      simPlayStartRef.current = null;
+      simElapsedAtPauseRef.current = 0;
+      simAnimRef.current = null;
+      return;
+    }
+    simAnimRef.current = requestAnimationFrame(simulationTick);
+  }
+
+  function playSimulation() {
+    if (simIsFinished) {
+      // Reset before play
+      simElapsedAtPauseRef.current = 0;
+      setSimIsFinished(false);
+      setSimMin(0);
+    }
+    simPlayStartRef.current = performance.now();
+    setSimIsPlaying(true);
+    simAnimRef.current = requestAnimationFrame(simulationTick);
+  }
+
+  function pauseSimulation() {
+    if (simPlayStartRef.current !== null) {
+      simElapsedAtPauseRef.current += performance.now() - simPlayStartRef.current;
+      simPlayStartRef.current = null;
+    }
+    if (simAnimRef.current) cancelAnimationFrame(simAnimRef.current);
+    simAnimRef.current = null;
+    setSimIsPlaying(false);
+  }
+
+  function replaySimulation() {
+    if (simAnimRef.current) cancelAnimationFrame(simAnimRef.current);
+    simElapsedAtPauseRef.current = 0;
+    simPlayStartRef.current = performance.now();
+    setSimMin(0);
+    setSimIsFinished(false);
+    setSimIsPlaying(true);
+    simAnimRef.current = requestAnimationFrame(simulationTick);
+  }
+
+  // When leaving the simulation tab, stop the animation and reset state so
+  // the next visit starts clean.
+  useEffect(() => {
+    if (panelTab === 'simulation') return;
+    if (simAnimRef.current) cancelAnimationFrame(simAnimRef.current);
+    simAnimRef.current = null;
+    simPlayStartRef.current = null;
+    simElapsedAtPauseRef.current = 0;
+    setSimIsPlaying(false);
+    setSimIsFinished(false);
+    setSimMin(0);
+  }, [panelTab]);
+
   // Auto-fire ?ask=<prompt> from URL once on mount (landing page → Ask)
   const askFireRef = useRef(false);
   useEffect(() => {
@@ -337,8 +401,7 @@ export default function AppShell() {
             setRankedHighlights(null);
           }}
           simulationActive={simulationActive}
-          simulationCommand={simCommand}
-          onSimulationStatus={setSimStatus}
+          simulationSimMin={simMin}
         />
       </div>
 
@@ -481,18 +544,15 @@ export default function AppShell() {
           {panelTab === 'simulation' && (
             <div className="flex-1 overflow-y-auto px-5 py-4">
               <SimulationPanel
-                status={simStatus}
+                indicators={indicators}
                 ageGroup={selectedAgeGroup}
                 transport={selectedTransport}
-                onPlay={() =>
-                  setSimCommand((c) => ({ type: 'play', nonce: c.nonce + 1 }))
-                }
-                onPause={() =>
-                  setSimCommand((c) => ({ type: 'pause', nonce: c.nonce + 1 }))
-                }
-                onReplay={() =>
-                  setSimCommand((c) => ({ type: 'replay', nonce: c.nonce + 1 }))
-                }
+                simMin={simMin}
+                isPlaying={simIsPlaying}
+                isFinished={simIsFinished}
+                onPlay={playSimulation}
+                onPause={pauseSimulation}
+                onReplay={replaySimulation}
               />
             </div>
           )}
