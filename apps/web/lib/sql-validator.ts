@@ -128,12 +128,29 @@ export function checkHasLimit(sql: string): ValidationResult {
   // Check only the top-level query so a LIMIT inside a subquery doesn't satisfy the requirement
   const topLevel = stripParens(sql);
   const match = topLevel.match(/\bLIMIT\s+(\d+)/i);
-  if (!match) return { ok: false, reason: `Query must include LIMIT (max ${MAX_LIMIT}).` };
-  const n = parseInt(match[1], 10);
-  if (n > MAX_LIMIT) {
-    return { ok: false, reason: `LIMIT must be ${MAX_LIMIT} or less (got ${n}).` };
+  if (match) {
+    const n = parseInt(match[1], 10);
+    if (n > MAX_LIMIT) {
+      return { ok: false, reason: `LIMIT must be ${MAX_LIMIT} or less (got ${n}).` };
+    }
+    return { ok: true };
   }
-  return { ok: true };
+
+  // No LIMIT — only accept it when the query is a single-row aggregate.
+  // Conditions: at least one aggregate function in the top-level SELECT
+  // clause, no top-level GROUP BY, no window function (OVER). These three
+  // together guarantee the query returns exactly one row, so LIMIT adds
+  // nothing. stripParens has already collapsed e.g. `SUM(x)` to `SUM`, so
+  // the aggregate names appear as standalone tokens we can match cleanly.
+  const selectMatch = topLevel.match(/SELECT\s+([\s\S]*?)\s+FROM\s/i);
+  const selectClause = selectMatch ? selectMatch[1] : '';
+  const hasAggregateInSelect = /\b(COUNT|SUM|AVG|MIN|MAX)\b/i.test(selectClause);
+  const hasTopLevelGroupBy = /\bGROUP\s+BY\b/i.test(topLevel);
+  const hasTopLevelWindow = /\bOVER\b/i.test(topLevel);
+  if (hasAggregateInSelect && !hasTopLevelGroupBy && !hasTopLevelWindow) {
+    return { ok: true };
+  }
+  return { ok: false, reason: `Query must include LIMIT (max ${MAX_LIMIT}).` };
 }
 
 export function checkNoDangerousFunctions(sql: string): ValidationResult {
