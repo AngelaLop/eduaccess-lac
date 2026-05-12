@@ -1,11 +1,27 @@
 import Link from 'next/link';
-import LandingPromptCarousel from './components/LandingPromptCarousel';
 
-const prompts = [
-  'Which districts have the weakest high-school walking access?',
-  'Where does missing travel-time data exceed 20%?',
-  'Compare primary and high-school access in Panama province.',
-  'Show districts with more than 1,000 students beyond 30 minutes.',
+interface Verb {
+  label: string;
+  teaser: string;
+  href: string;
+}
+
+const verbs: Verb[] = [
+  {
+    label: 'Insight',
+    teaser: "Where Panama's schools fall short, district by district.",
+    href: '/platform',
+  },
+  {
+    label: 'Ask',
+    teaser: 'Query 83 districts in plain English.',
+    href: '/platform?tab=ask',
+  },
+  {
+    label: 'Simulate',
+    teaser: 'Watch 60 minutes of school travel compress into 20 seconds.',
+    href: '/platform?tab=simulation',
+  },
 ];
 
 export default function Page() {
@@ -47,15 +63,37 @@ export default function Page() {
         </h1>
 
         <p className="mt-5 max-w-2xl text-base leading-7 text-neutral-500 sm:text-lg">
-          83 districts mapped by walking and motorized access for 4 student age groups.
-          Ask the AI a question — get the answer plus the data and confidence behind it.
+          83 districts mapped by walking and motorized access for 4 student age
+          groups. Three ways in.
         </p>
 
-        <div className="mt-12 w-full max-w-[820px]">
-          <LandingPromptCarousel prompts={prompts} />
+        <div className="mt-12 w-full max-w-[640px]">
+          <ul className="divide-y divide-neutral-200/70 overflow-hidden rounded-2xl bg-white/70 backdrop-blur-sm shadow-[0_22px_54px_rgba(16,33,28,0.045)]">
+            {verbs.map((v) => (
+              <li key={v.label}>
+                <Link
+                  href={v.href}
+                  className="group flex items-center gap-4 px-5 py-5 text-left transition-colors hover:bg-emerald-50/40 sm:px-6"
+                >
+                  <span className="w-24 shrink-0 text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-700">
+                    {v.label}
+                  </span>
+                  <span className="flex-1 text-sm text-neutral-600 sm:text-base">
+                    {v.teaser}
+                  </span>
+                  <span
+                    className="ml-2 shrink-0 text-base text-neutral-300 transition-colors group-hover:text-emerald-700"
+                    aria-hidden
+                  >
+                    →
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <p className="mt-6 text-sm font-normal text-neutral-400">
+        <p className="mt-8 text-sm font-normal text-neutral-400">
           Panama pilot built on IDB accessibility data.
         </p>
       </section>

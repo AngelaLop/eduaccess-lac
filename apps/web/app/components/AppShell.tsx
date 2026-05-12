@@ -134,7 +134,8 @@ export default function AppShell() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const urlConsumedRef = useRef(false);
 
-  // URL-params bootstrap: ?tab=ask opens the Ask tab; ?ask=<prompt> also auto-fires.
+  // URL-params bootstrap: ?tab=<insight|ask|simulation> opens that tab;
+  // ?ask=<prompt> opens Ask AND auto-fires the question.
   // Done in useEffect (not useState init) because window is unavailable during SSR.
   useEffect(() => {
     if (urlConsumedRef.current) return;
@@ -142,9 +143,12 @@ export default function AppShell() {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
     const askParam = params.get('ask');
-    if (tab === 'ask' || askParam) {
+    if (askParam) {
       urlConsumedRef.current = true;
       setPanelTab('ask');
+    } else if (tab === 'ask' || tab === 'insight' || tab === 'simulation') {
+      urlConsumedRef.current = true;
+      setPanelTab(tab);
     }
   }, []);
 
