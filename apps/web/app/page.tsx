@@ -55,33 +55,20 @@ export default function Page() {
           <LandingPromptCarousel prompts={prompts} />
         </div>
 
-        <div className="mt-6 w-full max-w-[640px]">
-          <Link
-            href="/platform?tab=simulation"
-            className="group flex items-center gap-4 rounded-2xl border border-emerald-100 bg-white/70 px-5 py-4 text-left shadow-[0_10px_30px_rgba(16,33,28,0.04)] backdrop-blur-sm transition-colors hover:border-emerald-200 hover:bg-emerald-50/50 sm:px-6"
-            aria-label="Open the Simulate tab"
+        <Link
+          href="/platform?tab=simulation"
+          className="group mt-8 inline-flex items-center gap-2 text-sm font-normal text-neutral-500 transition-colors hover:text-emerald-700"
+        >
+          <span
+            className="text-emerald-600 transition-colors group-hover:text-emerald-700"
+            aria-hidden
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-base text-white shadow-[0_6px_16px_rgba(16,185,129,0.28)] transition-colors group-hover:bg-emerald-700">
-              ▶
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-700">
-                Watch
-              </span>
-              <span className="mt-0.5 block text-sm text-neutral-700 sm:text-base">
-                60 minutes of school travel compress into 20 seconds.
-              </span>
-            </span>
-            <span
-              className="ml-2 shrink-0 text-base text-neutral-300 transition-colors group-hover:text-emerald-700"
-              aria-hidden
-            >
-              →
-            </span>
-          </Link>
-        </div>
+            ▶
+          </span>
+          <span>Watch 60 minutes in 20 seconds</span>
+        </Link>
 
-        <p className="mt-8 text-sm font-normal text-neutral-400">
+        <p className="mt-3 text-sm font-normal text-neutral-400">
           Panama pilot built on IDB accessibility data.
         </p>
       </section>
