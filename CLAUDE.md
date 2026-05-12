@@ -68,12 +68,15 @@ If a classmate has to read instructions to use it, v1 has failed.
 
 ## Files of note
 
-- `PROJECT_PROPOSAL.md` — original proposal
-- `Feedback_1.md` — TA feedback (Shubham): "think about how you'll use agents for each part of the analysis and how to explain the robustness of recommendations." This is the spine of v3.
-- `DELIVERABLES_PLAN.md` — v1→v4 arc (v3 rationale is the "Robustness explanation strategy" section)
-- `SECURITY_AUDIT.md` — v3 security audit findings + corrections
-- `V1_CHECKLIST.md` — what to actually do for v1
-- `AGENTS.md` — same context for Codex / other agents
+- `README.md` — short repo overview, stays at root
+- `AGENTS.md` — same context for Codex / other agents, stays at root
+- `docs/PROJECT_PROPOSAL.md` — original proposal
+- `docs/Feedback_1.md` — TA feedback (Shubham): "think about how you'll use agents for each part of the analysis and how to explain the robustness of recommendations." Spine of v3.
+- `docs/DELIVERABLES_PLAN.md` — v1→v4 arc (v3 rationale is the "Robustness explanation strategy" section)
+- `docs/SECURITY_AUDIT.md` — v3 security audit findings + corrections
+- `docs/security_review.md` — the audit prompt the v3 audit ran against
+- `docs/V1_CHECKLIST.md`, `docs/V2_CHECKLIST.md` — per-version execution checklists
+- `docs/v1-summary.md`, `docs/v2-summary.md`, `docs/v3-summary.md` — model-generated post-version summaries
 
 ---
 
