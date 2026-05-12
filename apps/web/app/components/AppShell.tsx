@@ -20,7 +20,8 @@ import type {
 import { AGE_GROUPS, AGE_GROUP_SHORT_LABELS, TRANSPORT_LABELS } from '@/lib/types';
 
 const PanamaMap = dynamic(() => import('./PanamaMap'), { ssr: false });
-const InequalitySimulation = dynamic(() => import('./InequalitySimulation'), { ssr: false });
+import SimulationPanel, { type SimulationStatus } from './SimulationPanel';
+import type { SimulationCommand } from './PanamaMap';
 
 // ── constants ─────────────────────────────────────────────────────────────────
 
@@ -121,7 +122,14 @@ export default function AppShell() {
   const [rankedHighlights, setRankedHighlights] = useState<RankedHighlight[] | null>(null);
   const [panelTab, setPanelTab] = useState<PanelTab>('insight');
   const [askBadge, setAskBadge] = useState(false);
-  const [isSimOpen, setIsSimOpen] = useState(false);
+  const [simStatus, setSimStatus] = useState<SimulationStatus>({
+    simMin: 0,
+    arrivedPct: 0,
+    isPlaying: false,
+    isFinished: false,
+  });
+  const [simCommand, setSimCommand] = useState<SimulationCommand>({ type: 'idle', nonce: 0 });
+  const simulationActive = panelTab === 'simulation';
   const chatEndRef = useRef<HTMLDivElement>(null);
   const urlConsumedRef = useRef(false);
 
@@ -318,6 +326,7 @@ export default function AppShell() {
         <PanamaMap
           indicators={indicators}
           activeAgeGroup={selectedAgeGroup}
+          activeTransport={selectedTransport}
           highlightedDists={highlightedDists}
           rankedHighlights={rankedHighlights}
           selectedDist={selectedDist}
@@ -327,6 +336,9 @@ export default function AppShell() {
             setChatHighlights([]);
             setRankedHighlights(null);
           }}
+          simulationActive={simulationActive}
+          simulationCommand={simCommand}
+          onSimulationStatus={setSimStatus}
         />
       </div>
 
@@ -416,8 +428,12 @@ export default function AppShell() {
         {/* Tab strip */}
         <div className="shrink-0 border-b border-neutral-200 bg-white">
           <div className="flex">
-            {(['insight', 'ask'] as PanelTab[]).map((tab) => {
+            {(['insight', 'ask', 'simulation'] as PanelTab[]).map((tab) => {
               const active = panelTab === tab;
+              const label =
+                tab === 'insight' ? 'Insight' : tab === 'ask' ? 'Ask' : 'Simulate';
+              const Icon =
+                tab === 'insight' ? InsightIcon : tab === 'ask' ? AskIcon : SimulateIcon;
               return (
                 <button
                   key={tab}
@@ -428,8 +444,8 @@ export default function AppShell() {
                       : 'border-transparent text-neutral-500 hover:bg-neutral-50 hover:text-neutral-800'
                   }`}
                 >
-                  {tab === 'insight' ? <InsightIcon /> : <AskIcon />}
-                  <span>{tab === 'insight' ? 'Insight' : 'Ask'}</span>
+                  <Icon />
+                  <span>{label}</span>
                   {tab === 'ask' && askBadge && !active && (
                     <span className="absolute right-3 top-2.5 inline-block h-2 w-2 rounded-full bg-emerald-500" />
                   )}
@@ -457,7 +473,26 @@ export default function AppShell() {
                 selectedAgeGroup={selectedAgeGroup}
                 onSelectDist={selectDistrict}
                 onClearSelection={() => setSelectedDist(null)}
-                onOpenSim={() => setIsSimOpen(true)}
+                onOpenSim={() => setPanelTab('simulation')}
+              />
+            </div>
+          )}
+
+          {panelTab === 'simulation' && (
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+              <SimulationPanel
+                status={simStatus}
+                ageGroup={selectedAgeGroup}
+                transport={selectedTransport}
+                onPlay={() =>
+                  setSimCommand((c) => ({ type: 'play', nonce: c.nonce + 1 }))
+                }
+                onPause={() =>
+                  setSimCommand((c) => ({ type: 'pause', nonce: c.nonce + 1 }))
+                }
+                onReplay={() =>
+                  setSimCommand((c) => ({ type: 'replay', nonce: c.nonce + 1 }))
+                }
               />
             </div>
           )}
@@ -523,15 +558,6 @@ export default function AppShell() {
           </p>
         </div>
       </aside>
-
-      {isSimOpen && (
-        <InequalitySimulation
-          indicators={indicators}
-          ageGroup={selectedAgeGroup}
-          transport={selectedTransport}
-          onClose={() => setIsSimOpen(false)}
-        />
-      )}
     </div>
   );
 }
@@ -571,6 +597,24 @@ function AskIcon() {
       aria-hidden="true"
     >
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+function SimulateIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <polyline points="12 7 12 12 15 14" />
     </svg>
   );
 }

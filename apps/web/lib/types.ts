@@ -55,7 +55,7 @@ export type IndicatorsByDist = Record<string, DistrictIndicators>;
 //   - Stream A consumes `kind`, `narrative`, `scopeHint`, and `actions`
 //   - Stream C consumes `resultShape` and the order of `highlightCodDist`
 
-export type PanelTab = 'insight' | 'ask';
+export type PanelTab = 'insight' | 'ask' | 'simulation';
 
 export type AskAction =
   | { type: 'select_district'; cod_dist: string }
