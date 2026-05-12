@@ -22,7 +22,7 @@ import { AGE_GROUPS, AGE_GROUP_SHORT_LABELS, TRANSPORT_LABELS } from '@/lib/type
 const PanamaMap = dynamic(() => import('./PanamaMap'), { ssr: false });
 import SimulationPanel from './SimulationPanel';
 
-const SIM_DURATION_MS = 10_000;
+const SIM_DURATION_MS = 20_000;
 const SIM_MINUTES = 60;
 
 // ── constants ─────────────────────────────────────────────────────────────────

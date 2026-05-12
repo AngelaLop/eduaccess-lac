@@ -50,7 +50,6 @@ function pctArrivedAt(t: number, r: IndicatorRow): number {
 interface Representative {
   row: IndicatorRow;
   label: string;          // descriptive header ("Hardest", "Typical", "Easiest")
-  description: string;    // 1-line context for this district at finish
 }
 
 function pickRepresentatives(
@@ -65,29 +64,17 @@ function pickRepresentatives(
   if (rows.length < 3) return [];
   rows.sort((a, b) => a.pct_le30 - b.pct_le30);
 
-  // Worst — first non-zero pct_le30 so the demo never opens with a fully
-  // empty track. If everything is zero, just take the first.
+  // Worst — pick a non-zero, sub-30% district so the demo opens with a
+  // track that actually has visible motion. Fall back to the first row.
   const worst =
     rows.find((r) => r.pct_le30 > 0 && r.pct_le30 < 30) ?? rows[0];
   const best = rows[rows.length - 1];
   const median = rows[Math.floor(rows.length / 2)];
 
   return [
-    {
-      row: worst,
-      label: 'Hardest',
-      description: `${worst.pct_le30.toFixed(0)}% reach a school within 30 min`,
-    },
-    {
-      row: median,
-      label: 'Typical',
-      description: `${median.pct_le30.toFixed(0)}% reach a school within 30 min`,
-    },
-    {
-      row: best,
-      label: 'Easiest',
-      description: `${best.pct_le30.toFixed(0)}% reach a school within 30 min`,
-    },
+    { row: worst, label: 'Hardest' },
+    { row: median, label: 'Typical' },
+    { row: best, label: 'Easiest' },
   ];
 }
 
@@ -101,19 +88,25 @@ function KidTrack({
   isFinished: boolean;
 }) {
   const pct = pctArrivedAt(simMin, rep.row);
-  // Kid sits at "pct% of the way." School icon is at the end.
-  // If the kid never reaches 100% AND we're at the end → mark them stuck.
-  const reached = pct >= 99 && rep.row.pct_le60 >= 99;
-  const stuck = isFinished && rep.row.pct_le60 < 99;
+  // "Reached" when the cumulative arrival hits 99+% — the kid is at the
+  // school. "Stuck" only when the clock has finished AND the district's
+  // ceiling (pct_le60) never reaches the school.
+  const reached = pct >= 99;
+  const stuck = isFinished && rep.row.pct_le60 < 99 && !reached;
   const kidColor = reached
     ? 'bg-emerald-600'
     : stuck
     ? 'bg-red-500'
     : 'bg-amber-500';
+  const fillColor = reached
+    ? 'bg-emerald-500'
+    : stuck
+    ? 'bg-red-300'
+    : 'bg-amber-300';
 
   return (
     <div>
-      <div className="mb-1 flex items-baseline justify-between gap-2">
+      <div className="mb-1.5 flex items-baseline justify-between gap-2">
         <div className="min-w-0 truncate">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
             {rep.label}
@@ -123,41 +116,34 @@ function KidTrack({
           </span>
           <span className="ml-1 text-[10px] text-neutral-400">{rep.row.nomb_prov}</span>
         </div>
-        <span className="shrink-0 font-mono text-xs tabular-nums text-neutral-600">
+        <span className="shrink-0 font-mono text-xs tabular-nums text-neutral-700">
           {Math.round(pct)}%
         </span>
       </div>
 
       <div className="relative flex items-center">
         {/* Track line */}
-        <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-100">
-          {/* Filled portion */}
+        <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-neutral-100">
+          {/* Filled portion — no CSS transition; the React state updates per frame */}
           <div
-            className={`absolute inset-y-0 left-0 ${
-              reached
-                ? 'bg-emerald-600'
-                : stuck
-                ? 'bg-red-300'
-                : 'bg-amber-300'
-            } transition-[width] duration-100 ease-linear`}
+            className={`absolute top-0 bottom-0 left-0 ${fillColor}`}
             style={{ width: `${pct}%` }}
           />
           {/* Kid marker */}
           <div
-            className={`absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-sm ${kidColor} transition-[left] duration-100 ease-linear`}
+            className={`absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow ${kidColor}`}
             style={{ left: `${pct}%` }}
             aria-hidden
           />
         </div>
         {/* School icon */}
-        <span className="ml-2 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-sm bg-neutral-700 text-[10px] font-bold text-white">
+        <span
+          className="ml-2 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-sm bg-neutral-700 text-[10px] font-bold text-white"
+          aria-hidden
+        >
           🏫
         </span>
       </div>
-
-      <p className="mt-1 text-[10px] leading-snug text-neutral-500">
-        {rep.description}
-      </p>
     </div>
   );
 }
@@ -227,8 +213,14 @@ export default function SimulationPanel({
       {/* Kid tracks */}
       {representatives.length === 3 && (
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
             Three children, three districts
+          </p>
+          <p className="mb-2 text-[11px] leading-snug text-neutral-500">
+            The number on each track is the share of {narrative} in that
+            district who have reached a school by the current simulated
+            minute. Each track is a different district sampled from the
+            hardest, the typical, and the easiest.
           </p>
           <div className="flex flex-col gap-3 rounded-md border border-neutral-200 bg-white p-3">
             {representatives.map((rep) => (
@@ -298,7 +290,7 @@ export default function SimulationPanel({
       </div>
 
       <p className="text-[11px] leading-snug text-neutral-500">
-        10 seconds of wall-clock = 60 simulated minutes. At the end, any
+        20 seconds of wall-clock = 60 simulated minutes. At the end, any
         district still showing amber or red on the map (or any kid not yet at
         the school icon) is one the system failed.
       </p>
