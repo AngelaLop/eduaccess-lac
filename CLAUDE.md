@@ -10,27 +10,22 @@ This is **EduAccess LAC**, a Next.js + Supabase + (eventually) Railway-worker sy
 
 ---
 
-## Current version: **v1 (Week 6) � Panama only, no Railway**
+## Current version: **v3 (Week 7) — security + deterministic robustness explainer**
 
-For v1 we are NOT building the pipeline in the cloud. The Phase B indicators for Panama are already computed in `c:\Users\lopez\github\IDB\accessibility_platform` (the IDB repo, separate, not part of this project). We export Panama indicators as a CSV, seed Supabase, and build the app on top.
+v1 (Week 6) and v2 (Week 7, post-mortem on the per-cell LLM loop) are shipped. v3 keeps Panama-only scope but rebuilds the robustness layer:
 
-**v1 scope (do not exceed):**
-- Next.js 14 app at `apps/web`, deployed to Vercel
-- MapLibre choropleth of Panama ADM2 (~80 polygons), colored by `pct_within_30min_walk` for upper secondary
-- Click a polygon ? indicator side panel with hero metric + secondary metrics + robustness card
-- `/api/ask` text-to-SQL endpoint using **Groq + Llama 3.3 70B** via the OpenAI-compatible API at `https://api.groq.com/openai/v1`. (Gemini was blocked by uchicago Google account policy; Anthropic now requires a payment method. Groq is genuinely free and faster than both.) Model: `llama-3.3-70b-versatile`. Env var: `GROQ_API_KEY`.
-- 5 seeded prompts as buttons above the chat input
-- Public, no auth
+- **Deterministic explainer** (`apps/worker/src/explainer.ts`) writes one short sentence + 1-3 specific caveats for every cell from the 4 numeric scores. Zero tokens, zero retries, identical text for identical inputs.
+- **One LLM call per refresh per country** is the only LLM step left in the worker — a ~120-word country audit brief written by `apps/worker/src/country-brief.ts` and surfaced at the top of the Insight landing.
+- **Versioning columns** on `robustness_reports`: `narrative_source`, `facts_version`, `prompt_version`, `model`, `input_hash`. Future LLM-polished narratives invalidate against these.
+- **Security pass** completed: per-IP rate limiter on `/api/ask`, GitHub Actions CI (typecheck + gitleaks), agent deny list (below). See `SECURITY_AUDIT.md` for the full audit + corrections.
 
-**v1 cuts (do NOT build these now):**
-- Railway worker � comes in v2
-- More countries beyond Panama � comes in v2/v3
-- Robustness Auditor agent � v1 has a static robustness card only
-- Policy Recommender agent � v3
-- i18n, exports, comparative views � v4
-- Figma polish � v4
-
-The execution checklist is in `V1_CHECKLIST.md`. Follow it. If you find yourself doing something not on it, stop and ask.
+**v3 cuts (do NOT build these now):**
+- Lazy `/api/audit-cell` LLM polish — v4
+- Worker prewarm for top-N priority cells — v4
+- Second country (rural/urban + SES) — v4 if v3 lands clean
+- Policy Recommender agent — v4
+- Husky pre-commit hook — defer (CI is the actual gate)
+- Sentry / structured monitoring — v4
 
 ---
 
@@ -73,8 +68,23 @@ If a classmate has to read instructions to use it, v1 has failed.
 
 ## Files of note
 
-- `PROJECT_PROPOSAL.md` � original proposal
-- `Feedback_1.md` � TA feedback (Shubham): "think about how you'll use agents for each part of the analysis and how to explain the robustness of recommendations." This is the spine of v3.
-- `DELIVERABLES_PLAN.md` � v1�v4 arc
-- `V1_CHECKLIST.md` � what to actually do for v1
-- `AGENTS.md` � same context for Codex / other agents
+- `PROJECT_PROPOSAL.md` — original proposal
+- `Feedback_1.md` — TA feedback (Shubham): "think about how you'll use agents for each part of the analysis and how to explain the robustness of recommendations." This is the spine of v3.
+- `DELIVERABLES_PLAN.md` — v1→v4 arc (v3 rationale is the "Robustness explanation strategy" section)
+- `SECURITY_AUDIT.md` — v3 security audit findings + corrections
+- `V1_CHECKLIST.md` — what to actually do for v1
+- `AGENTS.md` — same context for Codex / other agents
+
+---
+
+## Security: agent deny list
+
+Claude Code and any other agents working on this project MUST NOT:
+
+1. **Read or modify `.env`, `.env.local`, `.env.*.local`.** These hold live API keys. Use `.env.example` files for placeholders instead.
+2. **Commit any `*.png` at the repo root.** `keys*.png` is gitignored as a safety net for credential screenshots; do not bypass it.
+3. **Modify `package.json` or `pnpm-lock.yaml`** without explicit user approval. Lockfile changes must go through `pnpm add` / `pnpm remove`.
+4. **Modify `vercel.json`, `railway.json`, `nixpacks.toml`, or `.github/workflows/`** without confirming the change with the user first — these affect production deploys.
+5. **Run destructive git operations** (`git push --force`, `git reset --hard`, `git checkout -- .`, branch deletion) without explicit user approval.
+6. **Log full user questions verbatim** from `/api/ask` to any persistent artifact. Logging digests + length is fine.
+7. **Skip pre-commit hooks** (`--no-verify`) or commit signing flags unless the user explicitly asks for it.

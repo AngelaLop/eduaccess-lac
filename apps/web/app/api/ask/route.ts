@@ -19,8 +19,14 @@ import OpenAI from 'openai';
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { validateSQL } from '@/lib/sql-validator';
+import { createRateLimiter, ipFromHeaders } from '@/lib/rate-limit';
 import districtRoster from '@/lib/district-roster.json';
 import type { AgeGroup, AskAction, AskResponse, ResultShape, TransportMode } from '@/lib/types';
+
+// 30 requests / 15 min per IP. Generous for normal exploration; closes
+// the door on a script looping the endpoint and draining the Groq quota
+// for everyone else.
+const askRateLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 30 });
 
 // ── district roster ───────────────────────────────────────────────────────────
 
@@ -321,6 +327,22 @@ const RequestSchema = z.object({ question: z.string().min(1).max(500) });
 // ── route ─────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  // Per-IP rate limit BEFORE parsing the body — a flooder shouldn't get
+  // free JSON parsing on every hit.
+  const ip = ipFromHeaders(req.headers);
+  const gate = askRateLimiter(ip);
+  if (!gate.allowed) {
+    return NextResponse.json(
+      {
+        error: `Too many requests. Try again in ${gate.retryAfterSec}s.`,
+      },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(gate.retryAfterSec) },
+      }
+    );
+  }
+
   const body = await req.json().catch(() => null);
   const parsed = RequestSchema.safeParse(body);
   if (!parsed.success) {
