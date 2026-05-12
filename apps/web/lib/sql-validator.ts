@@ -24,10 +24,18 @@ const ALLOWED_FUNCTIONS = new Set([
   'LAG', 'LEAD', 'FIRST_VALUE', 'LAST_VALUE',
 ]);
 
-// SQL syntax tokens that appear before ( but are NOT function calls
+// SQL syntax tokens that appear before ( but are NOT function calls.
+// Includes operators (IN, NOT, EXISTS, ...) and clause keywords (WHERE,
+// HAVING, AND, ...) since the LLM frequently writes `WHERE (a AND b)` etc.
 const NON_FUNCTION_KEYWORDS = new Set([
   'IN', 'NOT', 'EXISTS', 'ANY', 'ALL', 'SOME', 'OVER',
   'FILTER', 'GROUP', 'BETWEEN', 'DISTINCT', 'INTERVAL',
+  'WHERE', 'HAVING', 'ON', 'AND', 'OR',
+  'CASE', 'WHEN', 'THEN', 'ELSE',
+  'SELECT', 'FROM', 'WITH', 'AS', 'BY',
+  'UNION', 'INTERSECT', 'EXCEPT',
+  'LIKE', 'ILIKE', 'IS', 'VALUES',
+  'LIMIT', 'OFFSET', 'USING', 'LATERAL',
 ]);
 
 /** Strip single-line and block comments, skipping over string literals. */
