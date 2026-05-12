@@ -8,6 +8,7 @@ if (!apiKey) {
 export const groq = new OpenAI({
   apiKey,
   baseURL: 'https://api.groq.com/openai/v1',
+  maxRetries: 8,
 });
 
 export const MODEL = process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile';

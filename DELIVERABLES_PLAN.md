@@ -99,10 +99,10 @@
 
 **Lessons that informed v3+:**
 - Multi-iteration Railway/Nixpacks fight — fixed by adding root `package.json` with `engines.node` + `packageManager`. Codex caught this. Future deploys will be smoother.
-- 70B daily quota (100K TPD) is too tight for a full audit (~465K tokens). 8B has enough headroom. v3 worker should default to 8B and reserve 70B for selective re-runs.
+- **Free Groq is structurally wrong for a per-cell bulk audit.** 70B's 100K TPD ceiling can't cover a full 664-cell run; 8B has the daily headroom but its 6K TPM cap means concurrency=1 + retry-after pacing → ~2-hour wall time per run. Confirmed by hands-on debug 2026-05-06 (multi-attempt run on local laptop). The fix is *architectural*, not a model swap — see v3 below.
 - Charts in chat bubbles felt wrong — visualization belongs on the standing Insight panel.
 
-**Pending after submission:** First full 664-cell audit completes on the next cron tick after Groq quota resets.
+**Pending after submission:** First full 664-cell audit. As of 2026-05-06: a deferred Railway service got reconfigured at some point (now points at `apps/web`, crashing) — the worker is no longer running on a cron there. Audit currently being completed by a one-shot local run on 8B before the architectural pivot lands in v3.
 
 ---
 
@@ -144,16 +144,57 @@
 [Railway worker — apps/worker]
   Job queue (pipeline_jobs table)
   Per-country jobs:
-    - ingest_schools     (read CSV/Parquet → schools table with country_iso)
-    - compute_indicators (zonal stats, density, distance, urban_rural, ses)
-    - audit_robustness   (existing Auditor, adapted dimensions per country)
+    - ingest_schools         (read CSV/Parquet → schools table with country_iso)
+    - compute_indicators     (zonal stats, density, distance, urban_rural, ses)
+    - score_robustness       (PURE-SQL numeric scores per cell)
+    - explain_robustness     (DETERMINISTIC text per cell from numeric scores — no LLM)
+    - audit_brief            (ONE LLM call per country: a paragraph audit brief)
+    - prewarm_top_n          (LLM polishes narratives for ≤30 priority/outlier cells)
   Concurrency 1 per-country, multiple countries can run in parallel
   Realtime: frontend /admin watches pipeline_jobs status updates live
+  Trigger: on data-version change OR rubric-version change. NOT a daily cron by default.
 ```
 
-**Submission v3:** GitHub + Vercel + a video showing **a country onboarding live** in the admin UI (queued → ingesting → computing → done) and the new country immediately visible in the country switcher.
+**Robustness explanation strategy (the v2-lessons + Codex-review pivot)**
 
-**Time budget: 7.5h** — heaviest on schema migration to multi-country shape and the data ingest itself; Railway path now well-understood.
+Hands-on debugging in week 7 confirmed that LLM-narrating every cell is structurally wrong on free tier (TPM bucket throttles 8B; TPD ceiling kills 70B). A second-pass review with Codex sharpened the deeper insight: *narrate every cell nightly* was never the right requirement. The TA's feedback was about explaining the **robustness of recommendations**, not generating per-row AI blurbs. v3 reframes the explanation layer in three tiers:
+
+| Tier | Producer | When | Coverage | Cost |
+|---|---|---|---|---|
+| Numeric scores | Pure SQL in worker | Every refresh | All cells | Free |
+| **Deterministic explanation text** | Rule-based template in worker | Every refresh | All cells | Free |
+| LLM narrative polish | On-demand via `/api/audit-cell` | User click | Whatever a human opens | ~1K tokens/click |
+| LLM prewarm narratives | Worker, after numeric scores land | Post-refresh | ≤30 cells per country (top priorities + biggest source disagreements + demo-path cells) | ~30K tokens/country |
+| **LLM country audit brief** | Worker, once per refresh | Post-refresh | One paragraph per country | ~2K tokens/country |
+
+**The deterministic explanation is the authoritative display.** LLM polish is *additive*, not the only explanation. A minister reading "Confidence is moderate; the weakest signal is friction-source agreement (MAP vs OSM differ by 18 points)" gets a more honest, scientifically-defensible answer than a paraphrased AI sentence. The country audit brief is the high-leverage agentic artifact — one paragraph that summarizes "where this country's data is strong, where it is weak, what to trust and what not to" — much better demo material than 664 single-cell narratives.
+
+**Versioning + stale-text invalidation**
+
+`robustness_reports` gains five columns:
+- `facts_version` — bumped when scoring weights or thresholds change
+- `prompt_version` — bumped when the LLM system prompt changes
+- `model` — the model that produced any cached LLM narrative
+- `input_hash` — content hash of the underlying numeric inputs for the cell
+- `generated_at`
+
+When any of those drift from current, the cached LLM narrative is invalidated and falls back to the deterministic text until something re-prompts it. This prevents prose-drifts-from-numbers, the worst failure mode of cached AI text.
+
+**Cross-country score semantics**
+
+A 72/100 robustness score in Panama (travel-time-based) does not mean the same as 72/100 in Country B (proxy-distance + SES-based). v3's display rule:
+- **Within a single country:** show the numeric score with methodology disclosed in a tooltip.
+- **In any cross-country comparison view:** show band labels (Low / Moderate / High) only, with a "scores not directly comparable across methodologies" footnote.
+
+This is itself a robustness move — honesty about scope.
+
+**Provider strategy: deferred, on purpose**
+
+Worker is LLM-free except for the brief + prewarm calls (≤32 LLM calls per country per refresh, on a non-daily trigger). On-demand polish is bounded by user attention. Total LLM volume sits comfortably inside Groq free even at v3's cell count. The earlier Cloudflare Workers AI / Ollama / Groq Dev provider stack is **deferred** until there's evidence of actual need. Fix architecture first, vendor second.
+
+**Submission v3:** GitHub + Vercel + a video showing **a country onboarding live** in the admin UI (queued → ingesting → scoring → explaining → audit-brief → prewarm → done) and the new country immediately visible with a country audit brief on the landing page. Bonus: click a never-before-touched district, watch the LLM polish a narrative and cache it back with the right `prompt_version` stamp.
+
+**Time budget: 7.5h** — heaviest on schema migration to multi-country shape and the deterministic-explainer + country-brief code (the latter is a single LLM call template, not a refactor). Railway path well-understood. Worker is *simpler* than v2 (no per-cell LLM loop), so net development effort is lower than the v2 worker, despite covering more capability.
 
 ---
 

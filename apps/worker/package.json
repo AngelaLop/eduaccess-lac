@@ -7,7 +7,8 @@
     "start": "tsx src/index.ts",
     "audit": "tsx src/index.ts",
     "audit:dry": "tsx src/index.ts --dry-run",
-    "audit:limit": "tsx src/index.ts --limit"
+    "audit:limit": "tsx src/index.ts --limit",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.1",
