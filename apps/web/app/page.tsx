@@ -65,7 +65,7 @@ export default function Page() {
           >
             ▶
           </span>
-          <span>Watch 60 minutes in 20 seconds</span>
+          <span>Watch how many kids walk to school in 60 minutes — in 20 seconds</span>
         </Link>
 
         <p className="mt-3 text-sm font-normal text-neutral-400">
