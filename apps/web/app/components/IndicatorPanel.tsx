@@ -12,6 +12,7 @@ import {
 import type { InsightStats } from './AppShell';
 import RobustnessCard from './RobustnessCard';
 import PriorityPanel from './PriorityPanel';
+import CountryAuditBrief from './CountryAuditBrief';
 import { supabase } from '@/lib/supabase';
 import type { PriorityRow } from '@/lib/types';
 
@@ -178,6 +179,8 @@ function InsightLanding({
 
   return (
     <div className="flex flex-col gap-4">
+      <CountryAuditBrief countryIso="PAN" />
+
       {/* Headline: % within 30 min */}
       <div className="rounded-lg bg-emerald-50 p-4 text-center">
         <p className="text-4xl font-bold text-emerald-800">{stats.nationalPct}%</p>

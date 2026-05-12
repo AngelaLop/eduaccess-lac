@@ -120,8 +120,9 @@ export default function RobustnessCard({ cod_dist, age_group, transport_mode }: 
       <section className="rounded-md border border-neutral-200 bg-neutral-50 p-3 text-xs">
         <p className="font-semibold text-neutral-700">How much can we trust this?</p>
         <p className="mt-1 text-neutral-500">
-          Robustness profile not yet computed for this district. The Auditor worker
-          runs nightly; check back after the next run.
+          Robustness profile not yet computed for this cell. The Auditor
+          worker runs on data or rubric changes; it has not yet seen this
+          scenario.
         </p>
         <p className="mt-2 text-neutral-400">
           Population: WorldPop 2023 · Friction: MAP (Weiss et al. 2020) · Travel-time: FMM 1km grid
@@ -178,9 +179,10 @@ export default function RobustnessCard({ cod_dist, age_group, transport_mode }: 
       )}
 
       <p className="mt-3 border-t border-neutral-200 pt-2 text-[10px] text-neutral-400">
-        Audited by the Robustness Auditor agent
-        {computedDate ? ` on ${computedDate}` : ''} · 4 dimensions, LLM-composed
-        narrative
+        Computed by the Robustness Auditor
+        {computedDate ? ` on ${computedDate}` : ''} · 4 numeric dimensions ·
+        text generated from the scores by a rule-based explainer (no LLM
+        on this cell)
       </p>
     </section>
   );
