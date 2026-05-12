@@ -184,30 +184,76 @@ export default function SimulationPanel({
     };
   }, [indicators, ageGroup, simMin]);
 
+  const statusLabel = isFinished ? 'finished' : isPlaying ? 'running' : 'paused';
+
   return (
     <div className="flex flex-col gap-4">
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
           Inequality in motion
         </p>
-        <p className="mt-1 text-sm leading-snug text-neutral-600">
-          Watch where {narrative} reach a school as the clock runs. The map
-          fills with the same colors you see on the Insight tab — but
-          unfolding through 60 simulated minutes of {mode}.
+        <p className="mt-1 text-[11px] leading-snug text-neutral-500">
+          Watch the map heat up over 60 simulated minutes of {mode}.
         </p>
       </div>
 
-      {/* Digital clock */}
-      <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-center">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
-          Simulated time
-        </p>
-        <p className="mt-1 font-mono text-4xl font-bold tabular-nums text-neutral-900">
-          {clock}
-        </p>
-        <p className="mt-0.5 text-[11px] text-neutral-500">
-          of 60:00 ({isFinished ? 'finished' : isPlaying ? 'running' : 'paused'})
-        </p>
+      {/* Compact HUD: clock + transport controls in a single row so they
+          stay visible together without scrolling. */}
+      <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+              Simulated time
+            </p>
+            <p className="mt-0.5 font-mono text-2xl font-bold leading-none tabular-nums text-neutral-900 sm:text-3xl">
+              {clock}
+              <span className="ml-1.5 align-baseline text-sm font-normal text-neutral-400">
+                / 60:00
+              </span>
+            </p>
+            <p className="mt-0.5 text-[10px] text-neutral-500">{statusLabel}</p>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-1.5">
+            {!isPlaying && !isFinished && (
+              <button
+                onClick={onPlay}
+                className="rounded-md bg-emerald-700 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-emerald-800"
+                aria-label="Play simulation"
+              >
+                ▶ Play
+              </button>
+            )}
+            {isPlaying && (
+              <button
+                onClick={onPause}
+                className="rounded-md bg-neutral-200 px-3 py-2 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-300"
+                aria-label="Pause simulation"
+              >
+                ❚❚ Pause
+              </button>
+            )}
+            {isFinished && (
+              <button
+                onClick={onReplay}
+                className="rounded-md bg-emerald-700 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-emerald-800"
+                aria-label="Replay simulation"
+              >
+                ↻ Replay
+              </button>
+            )}
+            {!isFinished && simMin > 0 && (
+              <button
+                onClick={onReplay}
+                className="rounded-md border border-neutral-200 bg-white px-2 py-2 text-xs text-neutral-600 transition-colors hover:bg-neutral-50"
+                title="Reset and play from the start"
+                aria-label="Reset and play from the start"
+              >
+                ↻
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Kid tracks */}
@@ -250,43 +296,6 @@ export default function SimulationPanel({
           </p>
           <p className="text-[10px] text-amber-700/70">{narrative}</p>
         </div>
-      </div>
-
-      {/* Controls */}
-      <div className="flex items-center gap-2">
-        {!isPlaying && !isFinished && (
-          <button
-            onClick={onPlay}
-            className="flex-1 rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
-          >
-            ▶ Play
-          </button>
-        )}
-        {isPlaying && (
-          <button
-            onClick={onPause}
-            className="flex-1 rounded-md bg-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-300"
-          >
-            ❚❚ Pause
-          </button>
-        )}
-        {isFinished && (
-          <button
-            onClick={onReplay}
-            className="flex-1 rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
-          >
-            ↻ Replay
-          </button>
-        )}
-        {!isFinished && simMin > 0 && (
-          <button
-            onClick={onReplay}
-            className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 transition-colors hover:bg-neutral-50"
-            title="Reset and play from the start"
-          >
-            ↻
-          </button>
-        )}
       </div>
 
       <p className="text-[11px] leading-snug text-neutral-500">
