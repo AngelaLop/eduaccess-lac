@@ -20,6 +20,7 @@ import type {
 import { AGE_GROUPS, AGE_GROUP_SHORT_LABELS, TRANSPORT_LABELS } from '@/lib/types';
 
 const PanamaMap = dynamic(() => import('./PanamaMap'), { ssr: false });
+const InequalitySimulation = dynamic(() => import('./InequalitySimulation'), { ssr: false });
 
 // ── constants ─────────────────────────────────────────────────────────────────
 
@@ -120,6 +121,7 @@ export default function AppShell() {
   const [rankedHighlights, setRankedHighlights] = useState<RankedHighlight[] | null>(null);
   const [panelTab, setPanelTab] = useState<PanelTab>('insight');
   const [askBadge, setAskBadge] = useState(false);
+  const [isSimOpen, setIsSimOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const urlConsumedRef = useRef(false);
 
@@ -455,6 +457,7 @@ export default function AppShell() {
                 selectedAgeGroup={selectedAgeGroup}
                 onSelectDist={selectDistrict}
                 onClearSelection={() => setSelectedDist(null)}
+                onOpenSim={() => setIsSimOpen(true)}
               />
             </div>
           )}
@@ -520,6 +523,15 @@ export default function AppShell() {
           </p>
         </div>
       </aside>
+
+      {isSimOpen && (
+        <InequalitySimulation
+          indicators={indicators}
+          ageGroup={selectedAgeGroup}
+          transport={selectedTransport}
+          onClose={() => setIsSimOpen(false)}
+        />
+      )}
     </div>
   );
 }

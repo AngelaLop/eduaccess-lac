@@ -143,11 +143,13 @@ function InsightLanding({
   onSelectDist,
   selectedTransport,
   selectedAgeGroup,
+  onOpenSim,
 }: {
   stats: InsightStats;
   onSelectDist: (cod: string) => void;
   selectedTransport: TransportMode;
   selectedAgeGroup: AgeGroup;
+  onOpenSim: () => void;
 }) {
   const narrative = AGE_GROUP_NARRATIVE[selectedAgeGroup];
   const mode = TRANSPORT_LABELS[selectedTransport].toLowerCase();
@@ -180,6 +182,22 @@ function InsightLanding({
   return (
     <div className="flex flex-col gap-4">
       <CountryAuditBrief countryIso="PAN" />
+
+      <button
+        onClick={onOpenSim}
+        className="group flex items-center justify-between rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-left transition-colors hover:border-emerald-300 hover:bg-emerald-50/40"
+      >
+        <div>
+          <p className="text-sm font-semibold text-neutral-800 group-hover:text-emerald-800">
+            See inequality in motion
+          </p>
+          <p className="mt-0.5 text-[11px] leading-snug text-neutral-500">
+            10-second animation: each dot is a child walking to a school. Where the
+            yellow keeps moving is where access fails.
+          </p>
+        </div>
+        <span className="ml-3 shrink-0 text-emerald-700 group-hover:text-emerald-800">▶</span>
+      </button>
 
       {/* Headline: % within 30 min */}
       <div className="rounded-lg bg-emerald-50 p-4 text-center">
@@ -270,6 +288,7 @@ interface Props {
   selectedAgeGroup: AgeGroup;
   onSelectDist: (cod: string) => void;
   onClearSelection: () => void;
+  onOpenSim: () => void;
 }
 
 export default function IndicatorPanel({
@@ -281,6 +300,7 @@ export default function IndicatorPanel({
   selectedAgeGroup,
   onSelectDist,
   onClearSelection,
+  onOpenSim,
 }: Props) {
   if (selectedDist && distIndicators) {
     return (
@@ -315,6 +335,7 @@ export default function IndicatorPanel({
       onSelectDist={onSelectDist}
       selectedTransport={selectedTransport}
       selectedAgeGroup={selectedAgeGroup}
+      onOpenSim={onOpenSim}
     />
   );
 }
