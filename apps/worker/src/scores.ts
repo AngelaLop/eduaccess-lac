@@ -1,110 +1,99 @@
 /**
- * Deterministic scorers — the 4 numeric dimensions of robustness.
+ * Deterministic scorers — the 3 numeric dimensions of robustness (v4).
  * Each returns 0-100. Higher = more trustworthy.
  *
- * The LLM never touches these. It only writes the narrative on top.
+ * v4 change: the unified multi-country dataset has no census/worldpop or
+ * MAP/OSM-friction variants, so the v3 `friction_agreement` and
+ * `pop_agreement` dimensions are retired. Methodology cross-check is now
+ * FMM vs OSRM (`method_agreement`).
+ *
+ * Note on `data_completeness`: the unified aggregate has no explicit
+ * `pop_nodata`, so completeness is a data-validity check (FMM value present
+ * and population positive). It saturates near 100 for normal cells — the
+ * discriminating signal is sample_size + method_agreement. This is the
+ * 2-effective-dimension fallback the plan anticipated; the explainer is
+ * honest about it.
+ *
+ * The LLM never touches these. It only writes the country brief on top.
  */
 
-export type AgeGroup = 'all' | 'primary' | 'secondary' | 'highschool';
+export type EducationLevel = 'primaria' | 'secbaja' | 'secalta';
 export type TransportMode = 'walking' | 'motorized';
 
-// One row in panama_district_indicators, narrowed to the columns the worker uses
-export interface ScenarioRow {
-  cod_dist: string;
-  nomb_dist: string;
-  nomb_prov: string;
-  age_group: AgeGroup;
-  pop_source: 'worldpop' | 'census';
-  friction_source: 'map' | 'osm';
-  friction: TransportMode;
-  pop_total: number;
-  pop_nodata: number;
-  pct_le30: number;
-}
-
-/** Bundle of 4 scenarios for a single (district x age_group x transport_mode) cell. */
-export interface CellBundle {
-  cod_dist: string;
-  nomb_dist: string;
-  nomb_prov: string;
-  age_group: AgeGroup;
-  transport_mode: TransportMode;
-  // canonical scenario: worldpop pop + MAP friction
-  canonical: ScenarioRow;
-  // for friction_agreement: worldpop pop + OSM friction
-  worldpop_osm: ScenarioRow | null;
-  // for pop_agreement: census pop + MAP friction
-  census_map: ScenarioRow | null;
+/** One row of v_indicators_adm2 — one robustness cell. */
+export interface IndicatorCell {
+  country_iso: string;
+  admin2_pcode: string;
+  admin2_name: string | null;
+  admin1_name: string | null;
+  education_level: EducationLevel;
+  mode: TransportMode;
+  pct_le15: number | null;
+  pct_le30: number | null;
+  pct_le60: number | null;
+  pop_total: number | null;
+  pct_le30_osrm: number | null; // OSRM canonical-slice le30, null if OSRM not run
 }
 
 export interface CellScores {
   data_completeness: number;
   sample_size: number;
-  friction_agreement: number;
-  pop_agreement: number;
-  composite: number;          // weighted average; LLM may override
+  method_agreement: number;
+  composite: number;
   weakest: keyof Omit<CellScores, 'composite' | 'weakest'>;
 }
 
 const clamp = (x: number, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, x));
+const round1 = (x: number) => Math.round(x * 10) / 10;
 
-/** Data completeness: % of population with usable travel-time data. */
-export function scoreDataCompleteness(c: CellBundle): number {
-  const { pop_total, pop_nodata } = c.canonical;
-  if (pop_total <= 0) return 0;
-  const pct = ((pop_total - pop_nodata) / pop_total) * 100;
-  return clamp(Math.round(pct * 10) / 10);
+/** Data completeness: is the FMM accessibility value present and population positive? */
+export function scoreDataCompleteness(c: IndicatorCell): number {
+  const pop = c.pop_total ?? 0;
+  if (pop <= 0) return 0;
+  if (c.pct_le30 == null) return 0;
+  // pct_le15/le60 missing while le30 is present = a partial pivot.
+  if (c.pct_le15 == null || c.pct_le60 == null) return 60;
+  return 100;
 }
 
 /** Sample size: log-scaled population. <100 people = noisy; 10K+ = solid. */
-export function scoreSampleSize(c: CellBundle): number {
-  const n = c.canonical.pop_total;
+export function scoreSampleSize(c: IndicatorCell): number {
+  const n = c.pop_total ?? 0;
   if (n <= 0) return 0;
-  // log10(10) = 25, log10(100) = 50, log10(1000) = 75, log10(10000) = 100
-  return clamp(Math.round(Math.log10(n + 1) * 25 * 10) / 10);
+  // log10(10) -> 25, log10(100) -> 50, log10(1000) -> 75, log10(10000) -> 100
+  return round1(clamp(Math.log10(n + 1) * 25));
 }
 
-/** Friction agreement: how much MAP and OSM friction surfaces agree on pct_le30. */
-export function scoreFrictionAgreement(c: CellBundle): number {
-  if (!c.worldpop_osm) return 50; // single source — neutral confidence
-  const delta = Math.abs(c.canonical.pct_le30 - c.worldpop_osm.pct_le30);
-  return clamp(Math.round((100 - delta) * 10) / 10);
-}
-
-/** Population-source agreement: WorldPop vs Census on pct_le30. */
-export function scorePopAgreement(c: CellBundle): number {
-  if (!c.census_map) return 50; // single source
-  const delta = Math.abs(c.canonical.pct_le30 - c.census_map.pct_le30);
-  return clamp(Math.round((100 - delta) * 10) / 10);
+/** Method agreement: how close FMM and OSRM are on pct_le30. */
+export function scoreMethodAgreement(c: IndicatorCell): number {
+  if (c.pct_le30_osrm == null || c.pct_le30 == null) return 50; // single method — neutral
+  const delta = Math.abs(c.pct_le30 - c.pct_le30_osrm);
+  return round1(clamp(100 - delta));
 }
 
 /**
- * Composite score: weighted average of the 4 dimensions.
- * Weights reflect how much each dimension affects whether you can trust the
- * pct_le30 number for this cell.
+ * Composite score: weighted average of the 3 dimensions.
+ * method_agreement carries the most weight — two independent routing
+ * engines disagreeing is the strongest signal that a number is uncertain.
  */
 const WEIGHTS = {
-  data_completeness: 0.30,    // if half the people have no data, the % is suspect
-  sample_size: 0.20,          // tiny populations swing wildly
-  friction_agreement: 0.30,   // if MAP and OSM disagree, travel-time model is uncertain
-  pop_agreement: 0.20,        // pop source disagreement = where are the people, really?
+  data_completeness: 0.35,
+  sample_size: 0.25,
+  method_agreement: 0.40,
 } as const;
 
-export function computeScores(c: CellBundle): CellScores {
+export function computeScores(c: IndicatorCell): CellScores {
   const data_completeness = scoreDataCompleteness(c);
   const sample_size = scoreSampleSize(c);
-  const friction_agreement = scoreFrictionAgreement(c);
-  const pop_agreement = scorePopAgreement(c);
+  const method_agreement = scoreMethodAgreement(c);
 
   const composite = clamp(
     data_completeness * WEIGHTS.data_completeness +
       sample_size * WEIGHTS.sample_size +
-      friction_agreement * WEIGHTS.friction_agreement +
-      pop_agreement * WEIGHTS.pop_agreement
+      method_agreement * WEIGHTS.method_agreement
   );
 
-  // Identify the weakest dimension — the LLM uses this to focus the narrative
-  const dims = { data_completeness, sample_size, friction_agreement, pop_agreement };
+  const dims = { data_completeness, sample_size, method_agreement };
   let weakest: CellScores['weakest'] = 'data_completeness';
   let weakestVal = Infinity;
   for (const [k, v] of Object.entries(dims) as [CellScores['weakest'], number][]) {
@@ -117,9 +106,8 @@ export function computeScores(c: CellBundle): CellScores {
   return {
     data_completeness,
     sample_size,
-    friction_agreement,
-    pop_agreement,
-    composite: Math.round(composite * 10) / 10,
+    method_agreement,
+    composite: round1(composite),
     weakest,
   };
 }

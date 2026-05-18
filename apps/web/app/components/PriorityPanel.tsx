@@ -3,22 +3,21 @@
 import type { PriorityRow } from '@/lib/types';
 
 interface DistrictMeta {
-  nomb_dist: string;
-  nomb_prov: string;
+  admin2_name: string;
+  admin1_name: string;
 }
 
 interface Props {
   rows: PriorityRow[];                              // already sorted by rank
-  meta: Record<string, DistrictMeta>;               // cod_dist → name + province
-  narrative: string;                                // e.g., "high schoolers"
+  meta: Record<string, DistrictMeta>;               // admin2_pcode → name + province
+  narrative: string;                                // e.g., "upper-secondary students"
   mode: string;                                     // e.g., "walking"
-  onSelectDist: (cod: string) => void;
+  onSelectDist: (code: string) => void;
 }
 
 /**
  * Plain-English "why" line per row, derived from the inputs that produced the
- * priority score. Picks the dominant driver (largest underserved, severe
- * access gap, low confidence pulling it down) and frames the row accordingly.
+ * priority score.
  */
 function interpret(row: PriorityRow, peers: PriorityRow[], narrative: string): string {
   const maxUnderserved = Math.max(...peers.map((p) => p.children_underserved), 1);
@@ -67,22 +66,22 @@ export default function PriorityPanel({
       </p>
       <ol className="space-y-1.5">
         {rows.map((entry, i) => {
-          const m = meta[entry.cod_dist];
+          const m = meta[entry.admin2_pcode];
           const why = interpret(entry, rows, narrative);
           return (
-            <li key={entry.cod_dist}>
+            <li key={entry.admin2_pcode}>
               <button
-                onClick={() => onSelectDist(entry.cod_dist)}
+                onClick={() => onSelectDist(entry.admin2_pcode)}
                 className="block w-full rounded-md border border-neutral-200 px-3 py-2 text-left transition-colors hover:bg-neutral-50"
               >
                 <div className="mb-1 flex items-baseline justify-between gap-2">
                   <div className="min-w-0 truncate">
                     <span className="mr-1.5 text-xs text-neutral-400">{i + 1}.</span>
                     <span className="text-sm font-medium text-neutral-800">
-                      {m?.nomb_dist ?? entry.cod_dist}
+                      {m?.admin2_name ?? entry.admin2_pcode}
                     </span>
-                    {m?.nomb_prov && (
-                      <span className="ml-1 text-xs text-neutral-400">{m.nomb_prov}</span>
+                    {m?.admin1_name && (
+                      <span className="ml-1 text-xs text-neutral-400">{m.admin1_name}</span>
                     )}
                   </div>
                   <span className="shrink-0 text-sm font-bold text-emerald-700">

@@ -1,36 +1,63 @@
 # EduAccess LAC — Robustness Auditor Worker
 
-Long-running worker that scores every Panama district × age_group × transport_mode
-cell on four robustness dimensions and writes the results to Supabase.
+Worker that scores every district × education_level × transport_mode cell of
+each country on three robustness dimensions and writes the results to Supabase.
+v4: multi-country (Panama + Colombia, more as their data lands).
 
 ## What it produces
 
-Three tables (created by `data/seed/panama/v2_worker_schema.sql`):
+Tables created by `data/seed/v2_worker_schema.sql`, `v3_robustness_schema.sql`,
+and `v4_multicountry_schema.sql`:
 
-- **`audit_runs`** — one row per worker run. Tracks lifecycle (`running` →
-  `done` / `failed`) and cell counts.
-- **`robustness_reports`** — one row per (district × age_group × transport_mode).
-  Four numeric scores + LLM-written narrative + caveats. Frontend reads from this
-  table when a district is selected.
-- **`priority_scores`** — derived ranking of "where to invest next" per cell,
-  combining children underserved × access gap × robustness. Frontend reads this
-  for the Insight tab top-priority list.
+- **`audit_runs`** — one row per worker run per country. Lifecycle
+  (`running` → `done` / `failed`) + cell counts.
+- **`robustness_reports`** — one row per (country × district × education_level
+  × transport_mode). Three numeric scores + a deterministic narrative +
+  caveats + versioning columns. The frontend RobustnessCard reads this.
+- **`priority_scores`** — derived "where to invest next" ranking per cell.
+- **`country_audit_briefs`** — one LLM-written paragraph per country per run.
+
+## How it works
+
+The worker reads cells from the curated view `v_indicators_adm2`. Each cell is
+scored by **pure deterministic functions** (`scores.ts`) and explained by a
+**rule-based template** (`explainer.ts`) — no per-cell LLM call. The only LLM
+call is one country audit brief per country per run (`country-brief.ts`).
+
+```
+v_indicators_adm2 ──► scores.ts ──► explainer.ts ──► robustness_reports
+                          │                      ──► priority.ts ──► priority_scores
+                          └──────────────────────► country-brief.ts ─► country_audit_briefs
+                                                       (1 LLM call/country)
+```
+
+### The three robustness dimensions
+
+| Dimension | What it measures |
+|---|---|
+| `data_completeness` | the FMM accessibility value is present and population is positive |
+| `sample_size` | `log10(pop_total + 1) * 25`, capped 0-100 |
+| `method_agreement` | `100 - abs(pct_le30(FMM) - pct_le30(OSRM))` — two independent routing engines |
+
+Composite is a weighted average (`scores.ts: WEIGHTS` — completeness 0.35,
+sample 0.25, method 0.40). `data_completeness` saturates near 100 for normal
+cells in the unified dataset; the discriminating signal is sample size + method
+agreement (see the comment in `scores.ts`).
 
 ## Local dev
 
 ```bash
-# from repo root
 cd apps/worker
 cp .env.example .env       # then fill in keys
 pnpm install
 
-# smoke test: 5 cells, no LLM, no writes
-AUDIT_CELL_LIMIT=5 AUDIT_DRY_RUN=true pnpm start
+# smoke test: 20 cells/country, no LLM, no writes
+AUDIT_CELL_LIMIT=20 AUDIT_DRY_RUN=true pnpm start
 
-# smoke test: 5 cells with LLM + writes
-AUDIT_CELL_LIMIT=5 pnpm start
+# one country only
+AUDIT_COUNTRY=COL pnpm start
 
-# full run (~664 cells, ~10-15 minutes)
+# full run (all countries in the data)
 pnpm start
 ```
 
@@ -39,94 +66,23 @@ Env vars (see `.env.example`):
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `GROQ_API_KEY`
 - `GROQ_MODEL` (optional, defaults to `llama-3.3-70b-versatile`)
-- `AUDIT_CONCURRENCY` (optional, default `4`)
-- `AUDIT_CELL_LIMIT` (optional, smoke testing)
+- `AUDIT_COUNTRY` (optional, limit the run to one `country_iso`)
+- `AUDIT_CELL_LIMIT` (optional, smoke testing — N cells per country)
 - `AUDIT_DRY_RUN` (optional, skip LLM + writes)
+- `AUDIT_SKIP_BRIEF` (optional, skip the country brief)
 - `AUDIT_TRIGGER_SOURCE` (optional, `'cron'` | `'manual'`)
 
 ## Railway deploy
 
-This package is a Node service that runs once per invocation and exits. Deploy
-it as a Railway **cron job** (or "service with cron") so Railway runs it on a
-schedule.
-
-1. **New service from this monorepo**
-   - Connect your GitHub repo to Railway
-   - Set "Root Directory" to `apps/worker`
-   - Build: Nixpacks auto-detects Node; no Dockerfile needed
-   - Start command: `pnpm start`
-
-2. **Set env vars** in the Railway service "Variables" tab (the same ones
-   listed above; do NOT include the prefix `NEXT_PUBLIC_`)
-
-3. **Configure cron** — Railway → service → Settings → Cron Schedule:
-   ```
-   0 3 * * *
-   ```
-   That runs daily at 03:00 UTC. Adjust as needed.
-
-4. **First run** — trigger manually from the Railway dashboard ("Deploy" or
-   "Run Now"), then watch the logs for `[audit] done in Ns` and the
-   `audit_run id=<uuid>` line.
-
-## How it works
-
-```
-                                 ┌─────────────────┐
-                                 │  Supabase DB    │
-                                 │                 │
-                                 │ panama_district_│  read
-                                 │   indicators    │ ◄────┐
-                                 │                 │      │
-                                 │ audit_runs      │ ◄────┤
-                                 │ robustness_     │      │
-                                 │   reports       │ ◄────┤  upsert
-                                 │ priority_scores │      │
-                                 └─────────────────┘      │
-                                                          │
-                                 ┌─────────────────┐      │
-                                 │  Worker (this)  │ ─────┘
-                                 │                 │
-                                 │ scores.ts       │  pure SQL → 4 dims
-                                 │ auditor-agent.ts│  Groq → narrative
-                                 │ priority.ts     │  pure SQL → priority
-                                 │ audit.ts        │  orchestration
-                                 └─────────────────┘
-```
-
-The four robustness dimensions:
-
-| Dimension | What it measures | Source |
-|---|---|---|
-| `data_completeness` | `(pop_total - pop_nodata) / pop_total` | direct from indicators |
-| `sample_size` | `log10(pop_total + 1) * 25`, capped 0-100 | direct |
-| `friction_agreement` | `100 - abs(pct_le30(MAP) - pct_le30(OSM))` | join across friction sources |
-| `pop_agreement` | `100 - abs(pct_le30(WorldPop) - pct_le30(Census))` | join across pop sources |
-
-Composite is a weighted average (`scores.ts: WEIGHTS`); the LLM may shift it
-±10 based on context but typically returns the composite as-is.
-
-## Concurrency + rate limiting
-
-- Default concurrency: **4 in-flight LLM calls** at once. Stays well under
-  Groq's free-tier requests-per-minute and avoids 429s.
-- A full 664-cell audit at concurrency 4 takes ~10-12 minutes and consumes
-  ~80K Groq tokens (well under the daily 100K free-tier cap, but tight —
-  consider running on `llama-3.1-8b-instant` for higher TPD).
-
-## Cost shape
-
-Free tier today:
-- Supabase: free for the data sizes we're using
-- Groq: free, with 100K TPD on the 70B model. One full audit ≈ 80K tokens.
-- Railway: $5/month free credit; this worker's cron pattern uses pennies of
-  it.
+A Node service that runs once per invocation and exits — deploy as a Railway
+cron job. Root Directory `apps/worker`, Nixpacks build, start `pnpm start`.
+Set the env vars above (no `NEXT_PUBLIC_` prefix). Trigger story is data- or
+rubric-version change, not a daily cron.
 
 ## What this worker does NOT do
 
-- It does not run the IDB Phase B pipeline (zonal stats, friction, FMM).
-  Those pre-computed indicators live in the IDB repo and were imported into
-  Supabase as `panama_district_indicators` during v1.
-- It does not enforce auth or rate limit user requests — it only writes
-  computed reports for the frontend to read. The frontend's anon key has
-  RLS read-only access to these tables.
+- It does not run the IDB Phase B pipeline (zonal stats, friction, FMM/OSRM
+  routing). Those pre-computed indicators live in the IDB repo and are loaded
+  into Supabase as `accessibility_indicators` by `data/seed/load_accessibility.py`.
+- It does not enforce auth or rate-limit user requests — it only writes
+  computed reports for the frontend to read via the anon key (RLS read-only).

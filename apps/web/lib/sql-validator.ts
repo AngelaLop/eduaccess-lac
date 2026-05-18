@@ -8,7 +8,7 @@ export type ValidationResult =
   | { ok: true }
   | { ok: false; reason: string };
 
-const ALLOWED_VIEW = 'v_panama_indicators';
+const ALLOWED_VIEW = 'v_indicators_adm2';
 const MAX_LIMIT = 50;
 
 const ALLOWED_FUNCTIONS = new Set([
@@ -189,6 +189,25 @@ export function checkNoDangerousFunctions(sql: string): ValidationResult {
   return { ok: true };
 }
 
+/**
+ * Multi-country guard: the query MUST pin country_iso to the active country.
+ * Without this the LLM could read another country's rows, or mix countries
+ * in one result. The check is exact-match on a literal `country_iso = 'XXX'`.
+ */
+export function checkCountryFilter(sql: string, country: string): ValidationResult {
+  const match = sql.match(/\bcountry_iso\s*=\s*'([A-Za-z]{3})'/i);
+  if (!match) {
+    return { ok: false, reason: `Query must filter country_iso = '${country}'.` };
+  }
+  if (match[1].toUpperCase() !== country.toUpperCase()) {
+    return {
+      ok: false,
+      reason: `Query filters country_iso = '${match[1]}' but the active country is '${country}'.`,
+    };
+  }
+  return { ok: true };
+}
+
 /** Allowlist-based check: every function call must be in the approved set. */
 export function checkFunctionAllowlist(sql: string): ValidationResult {
   for (const [, name] of sql.matchAll(/\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g)) {
@@ -202,12 +221,13 @@ export function checkFunctionAllowlist(sql: string): ValidationResult {
 }
 
 /** Run all checks in order. Returns the first failure or ok. */
-export function validateSQL(rawSql: string): ValidationResult {
+export function validateSQL(rawSql: string, country: string): ValidationResult {
   const sql = stripComments(rawSql);
   const checks = [
     checkNoSemicolon(sql),
     checkStartsWithSelect(sql),
     checkAllowedView(sql),
+    checkCountryFilter(sql, country),
     checkHasLimit(sql),
     checkNoDangerousFunctions(sql),
     checkFunctionAllowlist(sql),

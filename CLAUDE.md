@@ -10,22 +10,29 @@ This is **EduAccess LAC**, a Next.js + Supabase + (eventually) Railway-worker sy
 
 ---
 
-## Current version: **v3 (Week 7) — security + deterministic robustness explainer**
+## Current version: **v4 (Week 9) — Colombia + the Policy Recommender agent**
 
-v1 (Week 6) and v2 (Week 7, post-mortem on the per-cell LLM loop) are shipped. v3 keeps Panama-only scope but rebuilds the robustness layer:
+v1 (Week 6), v2 (Week 7), and v3 (Week 8) are shipped. v3 delivered the deterministic robustness explainer, a security pass, and the inequality-in-motion simulation — all Panama-only. v4 goes multi-country and ships the agent that finishes the TA's feedback:
 
-- **Deterministic explainer** (`apps/worker/src/explainer.ts`) writes one short sentence + 1-3 specific caveats for every cell from the 4 numeric scores. Zero tokens, zero retries, identical text for identical inputs.
-- **One LLM call per refresh per country** is the only LLM step left in the worker — a ~120-word country audit brief written by `apps/worker/src/country-brief.ts` and surfaced at the top of the Insight landing.
-- **Versioning columns** on `robustness_reports`: `narrative_source`, `facts_version`, `prompt_version`, `model`, `input_hash`. Future LLM-polished narratives invalidate against these.
-- **Security pass** completed: per-IP rate limiter on `/api/ask`, GitHub Actions CI (typecheck + gitleaks), agent deny list (below). See `SECURITY_AUDIT.md` for the full audit + corrections.
+- **Policy Recommendation Agent.** Per-district intervention ranking (build primary / build secondary / transport subsidy / hybrid). Two tiers: a **deterministic** ranking (impact estimate + archetype scores + robustness band — pure numeric logic, no LLM) and a **narrative** tier — one cached, versioned LLM call reusing the Groq Llama 3.3 70b already in the worker. No new model, no cost, never bulk per-district. No recommendation ships without a robustness band attached.
+- **Colombia online.** Country #2 is Colombia. New multi-country schema `indicators_adm2` (`country_iso`, `urban_rural`, `ses_band`), a worker country-onboarding pipeline (`pipeline_jobs` + `/admin` Realtime view), a country switcher, and a cross-country comparison view (band labels only — scores are not comparable across methodologies). Schema is built to absorb CRI/ECU/PER as their data finishes.
+- **Two-tier Ask.** `llama-3.1-8b-instant` for classify + a prompt-injection/relevance guard; `llama-3.3-70b` for SQL synthesis only. This is a cost/quota move — Ask's security stays the SQL validator + rate limiter + constrained view.
+- **Design + accessibility.** Figma MCP design pass and a first-run + WCAG AA accessibility pass.
 
-**v3 cuts (do NOT build these now):**
-- Lazy `/api/audit-cell` LLM polish — v4
-- Worker prewarm for top-N priority cells — v4
-- Second country (rural/urban + SES) — v4 if v3 lands clean
-- Policy Recommender agent — v4
+**v4 build order (dependency-driven):**
+1. Verify the v3 robustness schema migration is live in Supabase — hard blocker.
+2. Migrate to the multi-country `indicators_adm2` schema.
+3. Onboard Colombia through the worker pipeline.
+4. Build the Recommender against the multi-country shape.
+5. Two-tier Ask, then the design + accessibility pass.
+
+**v4 cuts (do NOT build these now):**
+- Export PDF reports — stretch goal, cut first if time runs short
+- Spanish locale (i18n) — stretch goal
+- Auth — out of scope (public data)
+- Phase B GIS pipeline for new countries — out (proxy indicators instead)
 - Husky pre-commit hook — defer (CI is the actual gate)
-- Sentry / structured monitoring — v4
+- Sentry / structured monitoring — defer
 
 ---
 

@@ -3,24 +3,17 @@
  *
  * Reads the just-written robustness_reports for a country, aggregates a
  * compact statistical summary, hands it to the LLM, and asks for ONE
- * paragraph (~120 words) summarizing:
- *   - where the country's data is strong
- *   - where it is weak
- *   - what a minister should trust and what they should not
- *
- * Why one paragraph, not per-cell prose: a minister reading 664 single-
- * cell sentences gets noise. A paragraph that names the one or two
- * structural weaknesses gives them what they need in 30 seconds. This is
- * the agentic artifact the TA's feedback was actually asking for.
+ * paragraph (~120 words) summarizing where the country's data is strong,
+ * where it is weak, and what a minister should trust.
  *
  * Token budget: ~2K in / 200 out per country per refresh. Comfortably
- * inside Groq free tier even at v3+ country counts.
+ * inside Groq free tier.
  */
 
 import { sb } from './supabase.js';
 import { groq, MODEL } from './llm.js';
 
-export const PROMPT_VERSION = 1;
+export const PROMPT_VERSION = 2; // v4: 3-dimension robustness model
 
 const SYSTEM_PROMPT = `
 You are the Country Audit Brief writer for the EduAccess LAC platform.
@@ -39,7 +32,9 @@ Always cover three things in this order:
 1. The headline trust level for the country (high / moderate / mixed / low),
    anchored to median overall score across all cells.
 2. The single biggest structural weakness, identified by the dimension
-   most often "weakest" across cells, with one concrete number.
+   most often "weakest" across cells, with one concrete number. The
+   dimensions are: data completeness, sample size, and method agreement
+   (how closely the FMM and OSRM routing methods agree).
 3. What a director should and should not conclude from these indicators.
 
 Output PLAIN TEXT only. No JSON. No markdown. One paragraph.
@@ -51,13 +46,12 @@ interface BriefInputStats {
   median_overall: number;
   p25_overall: number;
   p75_overall: number;
-  pct_high_trust: number;       // share of cells with overall >= 70
-  pct_low_trust: number;        // share of cells with overall < 40
+  pct_high_trust: number;
+  pct_low_trust: number;
   weakest_dimension_counts: Record<string, number>;
   avg_data_completeness: number;
-  avg_friction_agreement: number;
-  avg_pop_agreement: number;
   avg_sample_size: number;
+  avg_method_agreement: number;
 }
 
 function percentile(sorted: number[], p: number): number {
@@ -67,18 +61,13 @@ function percentile(sorted: number[], p: number): number {
 }
 
 async function loadStats(countryIso: string, auditRunId: string): Promise<BriefInputStats> {
-  // Note: v1-v3 only has Panama and the indicators table doesn't carry
-  // country_iso yet, so we ignore countryIso here and pull every cell
-  // from the just-finished run. When v3.5 adds a second country, we
-  // filter by joining to a country column.
-  void countryIso;
-
   const { data, error } = await sb
     .from('robustness_reports')
     .select(
-      'score_overall, score_data_completeness, score_sample_size, score_friction_agreement, score_pop_agreement, weakest_dimension'
+      'score_overall, score_data_completeness, score_sample_size, score_method_agreement, weakest_dimension'
     )
-    .eq('audit_run_id', auditRunId);
+    .eq('audit_run_id', auditRunId)
+    .eq('country_iso', countryIso);
   if (error) throw error;
   if (!data || data.length === 0) {
     throw new Error('country brief: no robustness_reports found for this run');
@@ -86,51 +75,41 @@ async function loadStats(countryIso: string, auditRunId: string): Promise<BriefI
 
   const overalls = data.map((r) => Number(r.score_overall)).sort((a, b) => a - b);
   const cell_count = overalls.length;
-  const median_overall = percentile(overalls, 50);
-  const p25_overall = percentile(overalls, 25);
-  const p75_overall = percentile(overalls, 75);
   const pct_high_trust = (overalls.filter((s) => s >= 70).length / cell_count) * 100;
   const pct_low_trust = (overalls.filter((s) => s < 40).length / cell_count) * 100;
 
   const weakestCounts: Record<string, number> = {};
   let sumCompleteness = 0;
-  let sumFriction = 0;
-  let sumPop = 0;
   let sumSample = 0;
+  let sumMethod = 0;
   for (const r of data) {
     const w = String(r.weakest_dimension);
     weakestCounts[w] = (weakestCounts[w] ?? 0) + 1;
     sumCompleteness += Number(r.score_data_completeness);
-    sumFriction += Number(r.score_friction_agreement);
-    sumPop += Number(r.score_pop_agreement);
     sumSample += Number(r.score_sample_size);
+    sumMethod += Number(r.score_method_agreement);
   }
 
+  const r1 = (x: number) => Math.round(x * 10) / 10;
   return {
-    country_iso: 'PAN',
+    country_iso: countryIso,
     cell_count,
-    median_overall: Math.round(median_overall * 10) / 10,
-    p25_overall: Math.round(p25_overall * 10) / 10,
-    p75_overall: Math.round(p75_overall * 10) / 10,
-    pct_high_trust: Math.round(pct_high_trust * 10) / 10,
-    pct_low_trust: Math.round(pct_low_trust * 10) / 10,
+    median_overall: r1(percentile(overalls, 50)),
+    p25_overall: r1(percentile(overalls, 25)),
+    p75_overall: r1(percentile(overalls, 75)),
+    pct_high_trust: r1(pct_high_trust),
+    pct_low_trust: r1(pct_low_trust),
     weakest_dimension_counts: weakestCounts,
-    avg_data_completeness: Math.round((sumCompleteness / cell_count) * 10) / 10,
-    avg_friction_agreement: Math.round((sumFriction / cell_count) * 10) / 10,
-    avg_pop_agreement: Math.round((sumPop / cell_count) * 10) / 10,
-    avg_sample_size: Math.round((sumSample / cell_count) * 10) / 10,
+    avg_data_completeness: r1(sumCompleteness / cell_count),
+    avg_sample_size: r1(sumSample / cell_count),
+    avg_method_agreement: r1(sumMethod / cell_count),
   };
 }
 
 function formatUserPrompt(stats: BriefInputStats): string {
-  const weakestEntries = Object.entries(stats.weakest_dimension_counts).sort(
-    (a, b) => b[1] - a[1]
-  );
-  const weakestSummary = weakestEntries
-    .map(
-      ([dim, n]) =>
-        `${dim}: ${n} cells (${((n / stats.cell_count) * 100).toFixed(0)}%)`
-    )
+  const weakestSummary = Object.entries(stats.weakest_dimension_counts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([dim, n]) => `${dim}: ${n} cells (${((n / stats.cell_count) * 100).toFixed(0)}%)`)
     .join('; ');
 
   return [
@@ -139,7 +118,7 @@ function formatUserPrompt(stats: BriefInputStats): string {
     `Overall trust score — median ${stats.median_overall}, p25 ${stats.p25_overall}, p75 ${stats.p75_overall}`,
     `High-trust cells (overall ≥ 70): ${stats.pct_high_trust}%`,
     `Low-trust cells (overall < 40): ${stats.pct_low_trust}%`,
-    `Dimension averages — completeness: ${stats.avg_data_completeness}, sample: ${stats.avg_sample_size}, friction-agreement: ${stats.avg_friction_agreement}, pop-agreement: ${stats.avg_pop_agreement}`,
+    `Dimension averages — completeness: ${stats.avg_data_completeness}, sample: ${stats.avg_sample_size}, method-agreement: ${stats.avg_method_agreement}`,
     `Weakest-dimension distribution — ${weakestSummary}`,
   ].join('\n');
 }

@@ -89,7 +89,7 @@ export default function CountryAuditBrief({ countryIso }: Props) {
       {showProvenance && (
         <p className="mt-1 text-[10px] leading-snug text-neutral-400">
           Written by {brief.model} on {generatedLabel ?? 'unknown date'} from
-          aggregated numeric robustness scores across all district × age-group ×
+          aggregated numeric robustness scores across all district × education-level ×
           transport-mode cells. Facts v{brief.facts_version} · prompt v
           {brief.prompt_version}.
         </p>

@@ -1,15 +1,17 @@
 /**
- * POST /api/ask  { question: string }
+ * POST /api/ask  { question: string, country?: 'PAN' | 'COL' }
  * → AskResponse — one of three kinds: data | navigation | out_of_scope
  *
- * v2: Stream B
- * The LLM is no longer a SQL pipe. It's a router that classifies the question
- * into one of three response kinds and returns the matching shape from the
- * AskResponse contract in lib/types.ts.
+ * The LLM is a router that classifies the question into one of three
+ * response kinds and returns the matching shape from the AskResponse
+ * contract in lib/types.ts.
  *
- *   data        → SQL query on v_panama_indicators (existing v1 path)
+ *   data        → SQL query on v_indicators_adm2 (pinned to the active country)
  *   navigation  → UI actions only, no DB call
  *   out_of_scope→ guidance hint, no DB call
+ *
+ * v4: multi-country. Every request carries the active country; the system
+ * prompt, the district roster, and the SQL validator are all scoped to it.
  *
  * Codex second-pass review target.
  */
@@ -21,60 +23,90 @@ import { z } from 'zod';
 import { validateSQL } from '@/lib/sql-validator';
 import { createRateLimiter, ipFromHeaders } from '@/lib/rate-limit';
 import districtRoster from '@/lib/district-roster.json';
-import type { AgeGroup, AskAction, AskResponse, ResultShape, TransportMode } from '@/lib/types';
+import { COUNTRIES, type CountryIso, type AskAction, type AskResponse, type EducationLevel, type ResultShape, type TransportMode } from '@/lib/types';
 
-// 30 requests / 15 min per IP. Generous for normal exploration; closes
-// the door on a script looping the endpoint and draining the Groq quota
-// for everyone else.
+// 30 requests / 15 min per IP — closes the door on a script looping the
+// endpoint and draining the Groq quota for everyone else.
 const askRateLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 30 });
 
 // ── district roster ───────────────────────────────────────────────────────────
 
 interface DistrictRow {
-  cod_dist: string;
-  nomb_dist: string;
-  nomb_prov: string;
+  admin2_pcode: string;
+  admin2_name: string;
+  admin1_name: string;
 }
 
-const DISTRICTS = districtRoster as DistrictRow[];
-const DISTRICT_BY_CODE = new Map(DISTRICTS.map((d) => [d.cod_dist, d]));
+const ROSTER = districtRoster as Record<string, DistrictRow[]>;
 
-// Compact form: "0810=San Miguelito,Panama" — saves ~15 chars per row vs.
-// "(province)" formatting. The full roster is ~83 lines either way.
-const DISTRICT_LIST_FOR_PROMPT = DISTRICTS.map(
-  (d) => `${d.cod_dist}=${d.nomb_dist},${d.nomb_prov}`
-).join('\n');
+function districtsFor(country: CountryIso): DistrictRow[] {
+  return ROSTER[country] ?? [];
+}
 
-// In-memory cache of question → response. Survives until the dev server
-// restarts (or until the serverless instance is recycled in production).
-// Keyed on the lowercased+trimmed question to catch obvious duplicates.
+// Accent-/punctuation-insensitive key for district-name resolution.
+function normalizeName(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9 ]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Resolve an LLM-supplied district reference (a name, or already a code) to a
+ * real admin2_pcode for the country. Returns null when there is no match.
+ *
+ * The full roster is NOT sent to the LLM — embedding ~1,100 Colombian
+ * districts blew past Groq's per-minute token limit. The LLM returns the
+ * district name the user gave; resolution happens here.
+ */
+function resolveDistrict(country: CountryIso, ref: string): string | null {
+  const roster = districtsFor(country);
+  if (roster.some((d) => d.admin2_pcode === ref)) return ref;
+  const key = normalizeName(ref);
+  const hit = roster.find((d) => normalizeName(d.admin2_name) === key);
+  return hit ? hit.admin2_pcode : null;
+}
+
+// ── response cache ──────────────────────────────────────────────────────────────
+// In-memory question→response cache; keyed on country + lowercased question.
+
 const responseCache = new Map<string, AskResponse>();
 const CACHE_MAX = 200;
-function cacheKey(q: string) {
-  return q.trim().toLowerCase();
+function cacheKey(country: CountryIso, q: string) {
+  return `${country}::${q.trim().toLowerCase()}`;
 }
-function cachePut(q: string, r: AskResponse) {
+function cachePut(country: CountryIso, q: string, r: AskResponse) {
   if (responseCache.size >= CACHE_MAX) {
     const firstKey = responseCache.keys().next().value;
     if (firstKey !== undefined) responseCache.delete(firstKey);
   }
-  responseCache.set(cacheKey(q), r);
+  responseCache.set(cacheKey(country, q), r);
 }
 
 // ── system prompt ─────────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `
-You are the EduAccess LAC interface agent for Panama school-accessibility data.
+function buildSystemPrompt(country: CountryIso): string {
+  const countryName = COUNTRIES[country].name;
+  return `
+You are the EduAccess LAC interface agent. This session is scoped to ${countryName} (country_iso='${country}').
 
 For every user question, classify it into ONE of three kinds and return JSON:
 
-  "data"         → answerable by a SQL query on v_panama_indicators
-  "navigation"   → asks to interact with the UI (focus a district, switch
-                   transport mode, or switch education level), no SQL needed
-  "out_of_scope" → outside Panama, outside school-access topic, or asks for
-                   columns we do not have
+  "data"         → answerable by a SQL query on v_indicators_adm2
+  "navigation"   → asks to interact with the UI (switch country, focus a
+                   district, switch transport mode or education level)
+  "out_of_scope" → outside school-access topic, or asks for columns we lack
 
 Always respond as JSON. Never as freeform text. Never mix kinds.
+
+COUNTRY SCOPE: this session is scoped to ${countryName}. The platform also
+covers Panama, Colombia, Costa Rica, Ecuador and Peru. If the user's question
+is about a DIFFERENT one of those five, return a "navigation" response whose
+ONLY action is set_country for that country — the app switches and re-runs the
+question there. Countries outside those five are out_of_scope.
 
 ============================================================
 KIND: "data"
@@ -82,58 +114,51 @@ KIND: "data"
 
 Shape: { "kind":"data", "sql":"...", "narrative":"...", "resultShape":"..." }
 
-VIEW: v_panama_indicators — one row per district × age_group.
-Canonical scenario: WorldPop population + MAP friction + walking transport.
+VIEW: v_indicators_adm2 — one row per district × education_level × mode.
+Travel-time accessibility from the FMM routing method (canonical).
 
 COLUMNS:
-  cod_dist               TEXT    District code (4-char zero-padded), MUST appear in SELECT for district-level results
-  nomb_dist              TEXT    District name
-  nomb_prov              TEXT    Province name
-  age_group              TEXT    'all' | 'primary' | 'secondary' | 'highschool'
-  pop_total              INT     Population in this age group
-  pop_le15               INT     Population within 15 min walk of nearest school
-  pop_le30               INT     Population within 30 min walk
-  pop_le60               INT     Population within 60 min walk
-  pop_nodata             INT     Population with no travel-time data
-  pct_le15               NUMERIC % within 15 min (0-100)
-  pct_le30               NUMERIC % within 30 min (0-100)
-  pct_le60               NUMERIC % within 60 min (0-100)
-  data_completeness_pct  NUMERIC % of population with usable travel-time data
+  country_iso      TEXT    Country ('${country}'). MUST be filtered — see HARD RULES.
+  admin2_pcode     TEXT    District code. MUST appear in SELECT for district-level results.
+  admin2_name      TEXT    District name
+  admin1_name      TEXT    Province / department name
+  education_level  TEXT    'primaria' (ages 5-9) | 'secbaja' (10-14) | 'secalta' (15-19)
+  mode             TEXT    'walking' | 'motorized'
+  pop_total        INT     School-age population in this level
+  pct_le15         NUMERIC % within 15 min of a school (0-100)
+  pct_le30         NUMERIC % within 30 min (0-100)
+  pct_le60         NUMERIC % within 60 min (0-100)
+  pct_le30_osrm    NUMERIC % within 30 min by the OSRM routing method (may be null)
 
 HARD RULES — any violation makes the SQL invalid:
 1. SELECT only. No INSERT/UPDATE/DELETE/DROP/CREATE/ALTER/TRUNCATE.
-2. Only reference v_panama_indicators. No other tables or views.
-3. Include LIMIT N where N ≤ 50.
-4. Include cod_dist in SELECT for district-level results. Province-level aggregates may omit it.
-5. No semicolons. No pg_* functions. No information_schema.
+2. Only reference v_indicators_adm2. No other tables or views.
+3. ALWAYS include "country_iso = '${country}'" in the WHERE clause.
+4. Include LIMIT N where N ≤ 50.
+5. Include admin2_pcode in SELECT for district-level results. Province-level aggregates may omit it.
+6. No semicolons. No pg_* functions. No information_schema.
 
 RANKING RULE:
-When the user ranks by an access metric (pct_le15, pct_le30, pct_le60), ALWAYS
-add "AND data_completeness_pct > 0" to the WHERE clause. Districts with zero
-completeness show pct_le30 = 0 because the data is missing, not because access
-is genuinely zero — including them buries the real worst-served districts
-under data gaps. Exception: if the user is explicitly asking about
-completeness or missing data, do NOT add this filter.
+When the user ranks by an access metric (pct_le15, pct_le30, pct_le60), add
+"AND pop_total > 0" to the WHERE clause so districts with no school-age
+population don't pollute the ranking with a meaningless 0%.
 
 resultShape values:
   "ranking"    → top-N / bottom-N / ORDER BY ... LIMIT
   "filter"     → WHERE filter, returns matching rows without rank semantics
-  "comparison" → side-by-side comparison (two age groups, two provinces, etc.)
+  "comparison" → side-by-side comparison (two levels, two provinces, FMM vs OSRM)
   "aggregate"  → single-row or grouped summary stats
 
 Examples:
 
-Q: Top 5 districts with the worst walking access for high schoolers
-A: {"kind":"data","sql":"SELECT cod_dist, nomb_dist, nomb_prov, pct_le30 FROM v_panama_indicators WHERE age_group = 'highschool' AND data_completeness_pct > 0 ORDER BY pct_le30 ASC LIMIT 5","narrative":"The 5 districts with the lowest share of high schoolers within 30 minutes walk of a school (excluding districts with no travel-time data).","resultShape":"ranking"}
+Q: Top 5 districts with the worst walking access for upper-secondary students
+A: {"kind":"data","sql":"SELECT admin2_pcode, admin2_name, admin1_name, pct_le30 FROM v_indicators_adm2 WHERE country_iso = '${country}' AND education_level = 'secalta' AND mode = 'walking' AND pop_total > 0 ORDER BY pct_le30 ASC LIMIT 5","narrative":"The 5 districts with the lowest share of upper-secondary students within a 30-minute walk of a school.","resultShape":"ranking"}
 
-Q: Districts with over 1,000 high schoolers more than 30 min from a school
-A: {"kind":"data","sql":"SELECT cod_dist, nomb_dist, nomb_prov, pop_total - pop_le30 AS unreachable FROM v_panama_indicators WHERE age_group = 'highschool' AND (pop_total - pop_le30) > 1000 ORDER BY unreachable DESC LIMIT 20","narrative":"Districts with more than 1,000 high schoolers beyond a 30-minute walk from a school.","resultShape":"filter"}
-
-Q: Compare primary vs high school walking access in Panama province
-A: {"kind":"data","sql":"SELECT cod_dist, nomb_dist, age_group, pct_le30 FROM v_panama_indicators WHERE nomb_prov = 'Panama' AND age_group IN ('primary','highschool') ORDER BY cod_dist, age_group LIMIT 50","narrative":"Walking access for primary and high school students across the districts of Panama province.","resultShape":"comparison"}
+Q: Districts where FMM and OSRM disagree most on 30-minute walking access
+A: {"kind":"data","sql":"SELECT admin2_pcode, admin2_name, pct_le30, pct_le30_osrm, ABS(pct_le30 - pct_le30_osrm) AS gap FROM v_indicators_adm2 WHERE country_iso = '${country}' AND education_level = 'primaria' AND mode = 'walking' AND pct_le30_osrm IS NOT NULL ORDER BY gap DESC LIMIT 20","narrative":"Districts where the two routing methods disagree most on primary-school walking access.","resultShape":"comparison"}
 
 Q: Rank provinces by average % within 15 min of a school
-A: {"kind":"data","sql":"SELECT nomb_prov, ROUND(AVG(pct_le15),1) AS avg_pct_le15, COUNT(DISTINCT cod_dist) AS n_districts FROM v_panama_indicators WHERE age_group = 'all' AND data_completeness_pct > 0 GROUP BY nomb_prov ORDER BY avg_pct_le15 DESC LIMIT 20","narrative":"Province ranking by average share of school-age population within 15 minutes walk of a school.","resultShape":"ranking"}
+A: {"kind":"data","sql":"SELECT admin1_name, ROUND(AVG(pct_le15),1) AS avg_pct_le15, COUNT(DISTINCT admin2_pcode) AS n_districts FROM v_indicators_adm2 WHERE country_iso = '${country}' AND education_level = 'primaria' AND mode = 'walking' AND pop_total > 0 GROUP BY admin1_name ORDER BY avg_pct_le15 DESC LIMIT 20","narrative":"Province ranking by average share of primary students within a 15-minute walk of a school.","resultShape":"ranking"}
 
 ============================================================
 KIND: "navigation"
@@ -144,29 +169,33 @@ Shape: { "kind":"navigation", "narrative":"...", "actions":[ ... ] }
 Use this kind when the user wants to interact with the UI without computing
 anything new. The frontend executes each action in order.
 
-Action shapes (must match exactly — never invent fields, never invent codes):
-  { "type":"select_district", "cod_dist":"<4-char code from roster below>" }
+Action shapes (must match exactly — never invent fields):
+  { "type":"set_country", "country":"PAN"|"COL" }
+  { "type":"select_district", "district":"<district name the user gave>" }
   { "type":"set_transport_mode", "mode":"walking"|"motorized" }
-  { "type":"set_education_level", "level":"all"|"primary"|"secondary"|"highschool" }
+  { "type":"set_education_level", "level":"primaria"|"secbaja"|"secalta" }
   { "type":"focus_panel_tab", "tab":"insight"|"ask" }
 
-DISTRICT ROSTER (use these exact codes; if the user names a district not in
-this list, return out_of_scope instead):
-${DISTRICT_LIST_FOR_PROMPT}
+For select_district, return the district name exactly as the user said it — the
+server resolves it to a code. If the user names a place that is not a district
+of ${countryName}, return out_of_scope instead.
 
 When focusing a district, also append a focus_panel_tab→insight action so the
 panel shows the district detail.
 
 Examples:
 
-Q: Show me San Miguelito
-A: {"kind":"navigation","narrative":"Focusing on San Miguelito.","actions":[{"type":"select_district","cod_dist":"0810"},{"type":"focus_panel_tab","tab":"insight"}]}
+Q: Show me the capital district
+A: {"kind":"navigation","narrative":"Focusing on that district.","actions":[{"type":"select_district","district":"<the district the user named>"},{"type":"focus_panel_tab","tab":"insight"}]}
+
+Q: (session is Panama) Worst districts in Colombia
+A: {"kind":"navigation","narrative":"Switching to Colombia.","actions":[{"type":"set_country","country":"COL"}]}
 
 Q: Switch to motorized
 A: {"kind":"navigation","narrative":"Switched to motorized access.","actions":[{"type":"set_transport_mode","mode":"motorized"}]}
 
 Q: Show me primary school data
-A: {"kind":"navigation","narrative":"Switched to primary level.","actions":[{"type":"set_education_level","level":"primary"}]}
+A: {"kind":"navigation","narrative":"Switched to the primary level.","actions":[{"type":"set_education_level","level":"primaria"}]}
 
 ============================================================
 KIND: "out_of_scope"
@@ -175,7 +204,8 @@ KIND: "out_of_scope"
 Shape: { "kind":"out_of_scope", "narrative":"...", "scopeHint":"..." }
 
 Use this kind when the question is outside our coverage:
-- Countries other than Panama (Honduras, Colombia, Costa Rica, etc.)
+- Countries outside the five we cover (Panama, Colombia, Costa Rica, Ecuador,
+  Peru). For one of those five, use a set_country navigation action instead.
 - Indicators we don't have (enrollment, test scores, teacher counts, school
   quality, hospitals, infrastructure other than schools, transit routes)
 - Time series / trends / "how has X changed" — we hold a single snapshot
@@ -188,19 +218,17 @@ can try instead. Be concrete.
 
 Examples:
 
-Q: What about Honduras?
-A: {"kind":"out_of_scope","narrative":"This release covers Panama only — other Latin American countries land in a future version.","scopeHint":"Try a Panama question, e.g. \\"Top 5 districts with the worst walking access for high schoolers\\"."}
+Q: What about Mexico?
+A: {"kind":"out_of_scope","narrative":"The platform covers Panama, Colombia, Costa Rica, Ecuador and Peru — Mexico is not included.","scopeHint":"Try a ${countryName} question, e.g. \\"Top 5 districts with the worst walking access for upper-secondary students\\"."}
 
 Q: What's 2 + 2?
-A: {"kind":"out_of_scope","narrative":"I'm scoped to Panama school accessibility data, not general questions.","scopeHint":"Try \\"Rank provinces by average % within 15 min of a school\\"."}
-
-Q: How are reading scores in Panama?
-A: {"kind":"out_of_scope","narrative":"I have geographic access to schools, not learning outcomes — no reading scores in our data.","scopeHint":"Try \\"Top 5 districts with worst walking access\\" or compare two age groups."}
+A: {"kind":"out_of_scope","narrative":"I'm scoped to ${countryName} school accessibility data, not general questions.","scopeHint":"Try \\"Rank provinces by average % within 15 min of a school\\"."}
 `.trim();
+}
 
 // ── action validator ──────────────────────────────────────────────────────────
 
-const VALID_AGE_GROUPS: AgeGroup[] = ['all', 'primary', 'secondary', 'highschool'];
+const VALID_EDUCATION_LEVELS: EducationLevel[] = ['primaria', 'secbaja', 'secalta'];
 const VALID_TRANSPORT_MODES: TransportMode[] = ['walking', 'motorized'];
 const VALID_PANEL_TABS = ['insight', 'ask'] as const;
 
@@ -208,7 +236,7 @@ type ActionValidation =
   | { ok: true; actions: AskAction[] }
   | { ok: false; reason: string };
 
-function validateActions(raw: unknown): ActionValidation {
+function validateActions(raw: unknown, country: CountryIso): ActionValidation {
   if (!Array.isArray(raw) || raw.length === 0) {
     return { ok: false, reason: 'navigation kind requires a non-empty actions array' };
   }
@@ -223,12 +251,24 @@ function validateActions(raw: unknown): ActionValidation {
     }
     const a = item as Record<string, unknown>;
     switch (a.type) {
-      case 'select_district': {
-        const code = a.cod_dist;
-        if (typeof code !== 'string' || !DISTRICT_BY_CODE.has(code)) {
-          return { ok: false, reason: `unknown district code: ${String(code)}` };
+      case 'set_country': {
+        const c = a.country;
+        if (typeof c !== 'string' || !(c in COUNTRIES)) {
+          return { ok: false, reason: `invalid country: ${String(c)}` };
         }
-        validated.push({ type: 'select_district', cod_dist: code });
+        validated.push({ type: 'set_country', country: c as CountryIso });
+        break;
+      }
+      case 'select_district': {
+        const ref = a.district ?? a.admin2_pcode;
+        if (typeof ref !== 'string' || !ref.trim()) {
+          return { ok: false, reason: 'select_district needs a district name' };
+        }
+        const code = resolveDistrict(country, ref);
+        if (!code) {
+          return { ok: false, reason: `unknown district: ${ref}` };
+        }
+        validated.push({ type: 'select_district', admin2_pcode: code });
         break;
       }
       case 'set_transport_mode': {
@@ -241,10 +281,10 @@ function validateActions(raw: unknown): ActionValidation {
       }
       case 'set_education_level': {
         const level = a.level;
-        if (typeof level !== 'string' || !VALID_AGE_GROUPS.includes(level as AgeGroup)) {
+        if (typeof level !== 'string' || !VALID_EDUCATION_LEVELS.includes(level as EducationLevel)) {
           return { ok: false, reason: `invalid education level: ${String(level)}` };
         }
-        validated.push({ type: 'set_education_level', level: level as AgeGroup });
+        validated.push({ type: 'set_education_level', level: level as EducationLevel });
         break;
       }
       case 'focus_panel_tab': {
@@ -274,8 +314,6 @@ function trimScopeHint(hint: unknown): string {
 }
 
 // ── LLM error handler ─────────────────────────────────────────────────────────
-// Detects rate limits specifically and surfaces them as a friendly message
-// with the retry-after duration parsed from the Groq error.
 
 interface MaybeApiError {
   status?: number;
@@ -289,10 +327,9 @@ function handleLlmError(err: unknown): NextResponse {
     const retryAfter = parseRetryAfter(e.message ?? '');
     return NextResponse.json(
       {
-        error:
-          retryAfter
-            ? `Daily LLM quota reached. Resets in ${retryAfter}.`
-            : 'Daily LLM quota reached. Try again later.',
+        error: retryAfter
+          ? `Daily LLM quota reached. Resets in ${retryAfter}.`
+          : 'Daily LLM quota reached. Try again later.',
       },
       { status: 429 }
     );
@@ -301,7 +338,6 @@ function handleLlmError(err: unknown): NextResponse {
 }
 
 function parseRetryAfter(msg: string): string | null {
-  // Matches "Please try again in 3m55.008s" / "in 124s" / "in 2m3.5s" etc.
   const match = msg.match(/try again in (\d+m)?\s?(\d+(?:\.\d+)?)s/i);
   if (!match) return null;
   const minutes = match[1] ? parseInt(match[1], 10) : 0;
@@ -322,24 +358,21 @@ function coerceResultShape(raw: unknown): ResultShape | undefined {
 
 // ── request validation ────────────────────────────────────────────────────────
 
-const RequestSchema = z.object({ question: z.string().min(1).max(500) });
+const RequestSchema = z.object({
+  question: z.string().min(1).max(500),
+  country: z.enum(['PAN', 'COL', 'CRI', 'ECU', 'PER']).default('PAN'),
+});
 
 // ── route ─────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  // Per-IP rate limit BEFORE parsing the body — a flooder shouldn't get
-  // free JSON parsing on every hit.
+  // Per-IP rate limit BEFORE parsing the body.
   const ip = ipFromHeaders(req.headers);
   const gate = askRateLimiter(ip);
   if (!gate.allowed) {
     return NextResponse.json(
-      {
-        error: `Too many requests. Try again in ${gate.retryAfterSec}s.`,
-      },
-      {
-        status: 429,
-        headers: { 'Retry-After': String(gate.retryAfterSec) },
-      }
+      { error: `Too many requests. Try again in ${gate.retryAfterSec}s.` },
+      { status: 429, headers: { 'Retry-After': String(gate.retryAfterSec) } }
     );
   }
 
@@ -349,10 +382,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request.' }, { status: 400 });
   }
 
-  const { question } = parsed.data;
+  const { question, country } = parsed.data;
 
-  // Cache: same question within session → skip the LLM round trip entirely.
-  const cached = responseCache.get(cacheKey(question));
+  // Cache: same question + country within session → skip the LLM round trip.
+  const cached = responseCache.get(cacheKey(country, question));
   if (cached) {
     return NextResponse.json(cached, { status: 200 });
   }
@@ -365,8 +398,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Server configuration error.' }, { status: 500 });
   }
   const groq = new OpenAI({ apiKey, baseURL: 'https://api.groq.com/openai/v1' });
+  const systemPrompt = buildSystemPrompt(country);
 
-  // First call: classify + draft response. SQL retries get a second LLM call below.
+  // First call: classify + draft response.
   let llmJson: Record<string, unknown>;
   try {
     const completion = await groq.chat.completions.create({
@@ -374,7 +408,7 @@ export async function POST(req: NextRequest) {
       response_format: { type: 'json_object' },
       temperature: 0,
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: systemPrompt },
         { role: 'user', content: question },
       ],
     });
@@ -388,16 +422,16 @@ export async function POST(req: NextRequest) {
 
   // ── kind: navigation ─────────────────────────────────────────────────────
   if (kind === 'navigation') {
-    const validation = validateActions(llmJson.actions);
+    const validation = validateActions(llmJson.actions, country);
     if (!validation.ok) {
       const fallback: AskResponse = {
         kind: 'out_of_scope',
         narrative: "I tried to interpret that as a navigation command but couldn't.",
         scopeHint: trimScopeHint(
-          'Try naming a Panama district directly, e.g. "Show me San Miguelito".'
+          `Try naming a ${COUNTRIES[country].name} district directly.`
         ),
       };
-      cachePut(question, fallback);
+      cachePut(country, question, fallback);
       return NextResponse.json(fallback, { status: 200 });
     }
     const navResponse: AskResponse = {
@@ -405,7 +439,7 @@ export async function POST(req: NextRequest) {
       narrative: typeof llmJson.narrative === 'string' ? llmJson.narrative : '',
       actions: validation.actions,
     };
-    cachePut(question, navResponse);
+    cachePut(country, question, navResponse);
     return NextResponse.json(navResponse, { status: 200 });
   }
 
@@ -416,7 +450,7 @@ export async function POST(req: NextRequest) {
       narrative: typeof llmJson.narrative === 'string' ? llmJson.narrative : '',
       scopeHint: trimScopeHint(llmJson.scopeHint),
     };
-    cachePut(question, oosResponse);
+    cachePut(country, question, oosResponse);
     return NextResponse.json(oosResponse, { status: 200 });
   }
 
@@ -426,10 +460,10 @@ export async function POST(req: NextRequest) {
       kind: 'out_of_scope',
       narrative: 'I could not classify that question.',
       scopeHint: trimScopeHint(
-        'Try a Panama-specific access question, e.g. "Top 5 districts with the worst walking access for high schoolers".'
+        'Try an access question, e.g. "Top 5 districts with the worst walking access for upper-secondary students".'
       ),
     };
-    cachePut(question, unknownResponse);
+    cachePut(country, question, unknownResponse);
     return NextResponse.json(unknownResponse, { status: 200 });
   }
 
@@ -437,7 +471,7 @@ export async function POST(req: NextRequest) {
   let narrative = typeof llmJson.narrative === 'string' ? llmJson.narrative : '';
   let resultShape = coerceResultShape(llmJson.resultShape);
 
-  let validation = validateSQL(sql);
+  let validation = validateSQL(sql, country);
 
   // One retry, telling the model what failed
   if (!validation.ok) {
@@ -447,7 +481,7 @@ export async function POST(req: NextRequest) {
         response_format: { type: 'json_object' },
         temperature: 0,
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: systemPrompt },
           {
             role: 'user',
             content: `Previous SQL failed validation: "${validation.reason}". Original question: ${question}`,
@@ -465,7 +499,7 @@ export async function POST(req: NextRequest) {
       sql = retryJson.sql.trim();
       narrative = typeof retryJson.narrative === 'string' ? retryJson.narrative : narrative;
       resultShape = coerceResultShape(retryJson.resultShape) ?? resultShape;
-      validation = validateSQL(sql);
+      validation = validateSQL(sql, country);
     } catch (err) {
       return handleLlmError(err);
     }
@@ -488,8 +522,8 @@ export async function POST(req: NextRequest) {
 
   const rows = (data as Record<string, unknown>[]) ?? [];
   const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
-  const highlightCodDist = rows
-    .map((r) => r.cod_dist)
+  const highlightAdm2 = rows
+    .map((r) => r.admin2_pcode)
     .filter((c): c is string => typeof c === 'string');
 
   const dataResponse: AskResponse = {
@@ -497,10 +531,10 @@ export async function POST(req: NextRequest) {
     sql,
     columns,
     rows,
-    highlightCodDist,
+    highlightAdm2,
     resultShape,
     narrative,
   };
-  cachePut(question, dataResponse);
+  cachePut(country, question, dataResponse);
   return NextResponse.json(dataResponse, { status: 200 });
 }

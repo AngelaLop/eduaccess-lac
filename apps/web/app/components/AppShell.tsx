@@ -6,20 +6,28 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import IndicatorPanel from './IndicatorPanel';
 import ScopeCard from './ScopeCard';
-import type { RankedHighlight } from './PanamaMap';
+import type { RankedHighlight } from './CountryMap';
 import type {
-  AgeGroup,
   AskAction,
   AskResponseKind,
+  CountryIso,
+  EducationLevel,
   IndicatorRow,
   IndicatorsByDist,
   PanelTab,
   ResultShape,
   TransportMode,
 } from '@/lib/types';
-import { AGE_GROUPS, AGE_GROUP_SHORT_LABELS, TRANSPORT_LABELS } from '@/lib/types';
+import {
+  COUNTRIES,
+  COUNTRY_ISOS,
+  DEFAULT_COUNTRY,
+  EDUCATION_LEVELS,
+  EDUCATION_LEVEL_SHORT_LABELS,
+  TRANSPORT_LABELS,
+} from '@/lib/types';
 
-const PanamaMap = dynamic(() => import('./PanamaMap'), { ssr: false });
+const CountryMap = dynamic(() => import('./CountryMap'), { ssr: false });
 import SimulationPanel from './SimulationPanel';
 
 const SIM_DURATION_MS = 20_000;
@@ -28,9 +36,9 @@ const SIM_MINUTES = 60;
 // ── constants ─────────────────────────────────────────────────────────────────
 
 const SEEDED_PROMPTS = [
-  'Top 5 districts with the worst walking access for high schoolers',
-  'Districts with over 1,000 high schoolers more than 30 min from a school',
-  'Compare primary vs high school walking access in Panama province',
+  'Top 5 districts with the worst walking access for upper-secondary students',
+  'Districts with over 1,000 upper-secondary students more than 30 min from a school',
+  'Compare primary vs upper-secondary walking access by province',
   'Rank provinces by average % within 15 min of a school',
 ] as const;
 
@@ -43,17 +51,14 @@ const NO_DATA_COLOR = '#d1d5db';
 // ── types ─────────────────────────────────────────────────────────────────────
 
 // Aggregate stats for the Insight landing (no district selected).
-// Computed in AppShell because indicators live there; rendered in IndicatorPanel.
 export interface InsightStats {
   nationalPct: number;
   totalUnderserved: number;
   topUnderserved: Array<{ row: IndicatorRow; underserved: number }>;
-  // cod_dist → name + province, for ALL districts — drives priority panel labels
-  districtMeta: Record<string, { nomb_dist: string; nomb_prov: string }>;
+  // admin2_pcode → name + province, for ALL districts — drives priority labels
+  districtMeta: Record<string, { admin2_name: string; admin1_name: string }>;
 }
 
-// ChatMessage mirrors the AskResponse contract so Stream B can populate
-// these fields without changing this shape.
 interface ChatMessage {
   role: 'user' | 'assistant';
   question?: string;
@@ -62,59 +67,31 @@ interface ChatMessage {
   sql?: string;
   columns?: string[];
   rows?: Record<string, unknown>[];
-  highlightCodDist?: string[];
+  highlightAdm2?: string[];
   resultShape?: ResultShape;
   narrative?: string;
   scopeHint?: string;
   actions?: AskAction[];
 }
 
-interface ScenarioRow {
-  cod_dist: string;
-  nomb_dist: string;
-  nomb_prov: string;
-  age_group: AgeGroup;
-  friction: TransportMode;
-  pop_total: number;
-  pop_le15: number;
-  pop_le30: number;
-  pop_le60: number;
-  pop_nodata: number;
-  pct_le15: number;
-  pct_le30: number;
-  pct_le60: number;
-}
-
 const EMPTY_INDICATORS: Record<TransportMode, IndicatorsByDist> = { walking: {}, motorized: {} };
 
-const COLS =
-  'cod_dist,nomb_dist,nomb_prov,age_group,friction,pop_total,pop_le15,pop_le30,pop_le60,pop_nodata,pct_le15,pct_le30,pct_le60';
+const VIEW_COLS =
+  'country_iso,admin2_pcode,admin2_name,admin1_name,education_level,mode,pct_le15,pct_le30,pct_le60,pop_total,pct_le30_osrm';
 
-function ingestRows(
-  rows: ScenarioRow[],
-  mode: TransportMode,
-  target: Record<TransportMode, IndicatorsByDist>
-) {
-  for (const raw of rows) {
-    const row: IndicatorRow = {
-      ...raw,
-      data_completeness_pct:
-        raw.pop_total > 0
-          ? Number((((raw.pop_total - raw.pop_nodata) / raw.pop_total) * 100).toFixed(1))
-          : 0,
-    };
-    if (!target[mode][row.cod_dist]) target[mode][row.cod_dist] = {};
-    target[mode][row.cod_dist][row.age_group] = row;
-  }
+/** Underserved school-age population in a cell (pop beyond a 30-min trip). */
+export function underservedOf(r: IndicatorRow): number {
+  return Math.max(0, Math.round(r.pop_total * (1 - (r.pct_le30 ?? 0) / 100)));
 }
 
 // ── component ─────────────────────────────────────────────────────────────────
 
 export default function AppShell() {
+  const [country, setCountry] = useState<CountryIso>(DEFAULT_COUNTRY);
   const [indicatorsByTransport, setIndicatorsByTransport] =
     useState<Record<TransportMode, IndicatorsByDist>>(EMPTY_INDICATORS);
   const [selectedTransport, setSelectedTransport] = useState<TransportMode>('walking');
-  const [selectedAgeGroup, setSelectedAgeGroup] = useState<AgeGroup>('highschool');
+  const [selectedLevel, setSelectedLevel] = useState<EducationLevel>('secalta');
   const [selectedDist, setSelectedDist] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -134,13 +111,14 @@ export default function AppShell() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const urlConsumedRef = useRef(false);
 
-  // URL-params bootstrap: ?tab=<insight|ask|simulation> opens that tab;
+  // URL-params bootstrap: ?tab=<insight|ask|simulation>, ?country=<PAN|COL>,
   // ?ask=<prompt> opens Ask AND auto-fires the question.
-  // Done in useEffect (not useState init) because window is unavailable during SSR.
   useEffect(() => {
     if (urlConsumedRef.current) return;
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
+    const ctry = params.get('country');
+    if (ctry === 'PAN' || ctry === 'COL') setCountry(ctry);
     const tab = params.get('tab');
     const askParam = params.get('ask');
     if (askParam) {
@@ -152,81 +130,108 @@ export default function AppShell() {
     }
   }, []);
 
+  // Load indicators whenever the country changes.
   useEffect(() => {
-    const grouped: Record<TransportMode, IndicatorsByDist> = { walking: {}, motorized: {} };
+    let cancelled = false;
+    setIsLoading(true);
+    setSelectedDist(null);
+    setChatHighlights([]);
+    setRankedHighlights(null);
 
-    Promise.all([
-      // Canonical walking scenario: WorldPop + MAP friction + walking
-      supabase.from('panama_district_indicators').select(COLS)
-        .eq('pop_source', 'worldpop').eq('friction_source', 'map').eq('friction', 'walking'),
-      // Motorized scenario: WorldPop + OSM road network + motorized
-      supabase.from('panama_district_indicators').select(COLS)
-        .eq('pop_source', 'worldpop').eq('friction_source', 'osm').eq('friction', 'motorized'),
-    ]).then(([walkRes, motoRes]) => {
-      if (walkRes.error || motoRes.error) {
-        console.error('Failed to load indicators:', walkRes.error ?? motoRes.error);
-        return;
+    (async () => {
+      // Sequential paging until a short page is returned. Reliable — it does
+      // not depend on a separate count query (a null count silently truncated
+      // the load to one page and greyed out most districts).
+      const PAGE = 1000;
+      const grouped: Record<TransportMode, IndicatorsByDist> = { walking: {}, motorized: {} };
+      let from = 0;
+      while (true) {
+        const { data, error } = await supabase
+          .from('v_indicators_adm2')
+          .select(VIEW_COLS)
+          .eq('country_iso', country)
+          .order('admin2_pcode', { ascending: true })
+          .range(from, from + PAGE - 1);
+        if (cancelled) return;
+        if (error) {
+          console.error('Failed to load indicators:', error);
+          break;
+        }
+        const rows = (data as IndicatorRow[]) ?? [];
+        for (const row of rows) {
+          const mode = row.mode;
+          if (mode !== 'walking' && mode !== 'motorized') continue;
+          if (!grouped[mode][row.admin2_pcode]) grouped[mode][row.admin2_pcode] = {};
+          grouped[mode][row.admin2_pcode][row.education_level] = row;
+        }
+        if (rows.length < PAGE) break;
+        from += PAGE;
       }
-      ingestRows(walkRes.data as ScenarioRow[], 'walking', grouped);
-      ingestRows(motoRes.data as ScenarioRow[], 'motorized', grouped);
+      if (cancelled) return;
       setIndicatorsByTransport(grouped);
       setIsLoading(false);
-    });
-  }, []);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [country]);
 
   const indicators = indicatorsByTransport[selectedTransport] ?? {};
 
   const insightStats = useMemo<InsightStats | null>(() => {
     const rows = Object.values(indicators)
-      .map((d) => d[selectedAgeGroup])
+      .map((d) => d[selectedLevel])
       .filter((r): r is IndicatorRow => r !== undefined)
-      .filter((r) => r.data_completeness_pct > 0);
-    // District meta: one entry per cod_dist using whichever age_group has data
-    const districtMeta: Record<string, { nomb_dist: string; nomb_prov: string }> = {};
-    for (const [cod, byAge] of Object.entries(indicators)) {
-      const sample = Object.values(byAge).find((r): r is IndicatorRow => r !== undefined);
-      if (sample) districtMeta[cod] = { nomb_dist: sample.nomb_dist, nomb_prov: sample.nomb_prov };
+      .filter((r) => r.pop_total > 0);
+    const districtMeta: Record<string, { admin2_name: string; admin1_name: string }> = {};
+    for (const [code, byLevel] of Object.entries(indicators)) {
+      const sample = Object.values(byLevel).find((r): r is IndicatorRow => r !== undefined);
+      if (sample) {
+        districtMeta[code] = {
+          admin2_name: sample.admin2_name,
+          admin1_name: sample.admin1_name,
+        };
+      }
     }
     if (rows.length === 0) return null;
     const totalPop = rows.reduce((s, r) => s + r.pop_total, 0);
-    const totalLe30 = rows.reduce((s, r) => s + r.pop_le30, 0);
+    const totalLe30 = rows.reduce((s, r) => s + r.pop_total * ((r.pct_le30 ?? 0) / 100), 0);
     const nationalPct = totalPop > 0 ? Math.round((totalLe30 / totalPop) * 100) : 0;
-    const totalUnderserved = totalPop - totalLe30;
+    const totalUnderserved = Math.round(totalPop - totalLe30);
     const topUnderserved = rows
-      .map((r) => ({ row: r, underserved: r.pop_total - r.pop_le30 }))
+      .map((r) => ({ row: r, underserved: underservedOf(r) }))
       .filter((x) => x.underserved > 0)
       .sort((a, b) => b.underserved - a.underserved)
       .slice(0, 5);
     return { nationalPct, totalUnderserved, topUnderserved, districtMeta };
-  }, [indicators, selectedAgeGroup]);
+  }, [indicators, selectedLevel]);
 
-  // Only true chat results dim the map. The default top-5-worst still
-  // shows in the Insight panel list, but the map stays at full opacity
-  // until the user actually asks something or selects a district.
   const highlightedDists = chatHighlights;
-
   const distIndicators = selectedDist ? (indicators[selectedDist] ?? null) : null;
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Clear the Ask-tab notification dot when the user lands on the Ask tab
   useEffect(() => {
     if (panelTab === 'ask') setAskBadge(false);
   }, [panelTab]);
 
   function dispatchAction(action: AskAction) {
     switch (action.type) {
+      case 'set_country':
+        setCountry(action.country);
+        break;
       case 'select_district':
-        setSelectedDist(action.cod_dist);
+        setSelectedDist(action.admin2_pcode);
         setChatHighlights([]);
         break;
       case 'set_transport_mode':
         setSelectedTransport(action.mode);
         break;
       case 'set_education_level':
-        setSelectedAgeGroup(action.level);
+        setSelectedLevel(action.level);
         break;
       case 'focus_panel_tab':
         setPanelTab(action.tab);
@@ -234,61 +239,72 @@ export default function AppShell() {
     }
   }
 
-  async function ask(q: string) {
-    if (!q.trim() || isAsking) return;
+  async function ask(q: string, opts: { country?: CountryIso; reask?: boolean } = {}) {
+    if (!q.trim()) return;
+    if (isAsking && !opts.reask) return;
+    const askCountry = opts.country ?? country;
     setIsAsking(true);
     setQuestion('');
-    setMessages((m) => [...m, { role: 'user', question: q }]);
+    if (!opts.reask) setMessages((m) => [...m, { role: 'user', question: q }]);
 
     try {
       const res = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: q }),
+        body: JSON.stringify({ question: q, country: askCountry }),
       });
       const data = await res.json();
 
       if (!res.ok || data.error) {
         setMessages((m) => [...m, { role: 'assistant', error: data.error ?? 'Unknown error.' }]);
-      } else {
-        setMessages((m) => [
-          ...m,
-          {
-            role: 'assistant',
-            kind: data.kind,
-            sql: data.sql,
-            columns: data.columns,
-            rows: data.rows,
-            highlightCodDist: data.highlightCodDist,
-            resultShape: data.resultShape,
-            narrative: data.narrative,
-            scopeHint: data.scopeHint,
-            actions: data.actions,
-          },
-        ]);
-        if (data.highlightCodDist?.length) {
-          // Dedupe while preserving rank order (first occurrence = best rank)
-          const ordered: string[] = [];
-          const seen = new Set<string>();
-          for (const c of data.highlightCodDist as string[]) {
-            if (seen.has(c)) continue;
-            seen.add(c);
-            ordered.push(c);
-          }
-          setChatHighlights(ordered);
-          setSelectedDist(null);
-          if (data.resultShape === 'ranking') {
-            setRankedHighlights(ordered.map((cod_dist, i) => ({ cod_dist, rank: i + 1 })));
-          } else {
-            setRankedHighlights(null);
-          }
+        return;
+      }
+
+      const actions: AskAction[] = Array.isArray(data.actions) ? data.actions : [];
+
+      // Cross-country: a set_country action means "switch the map and re-run
+      // the question there". Skip the navigation bubble; the re-ask answers.
+      const switchAction = actions.find((a) => a.type === 'set_country');
+      if (switchAction?.type === 'set_country' && !opts.reask) {
+        setCountry(switchAction.country);
+        void ask(q, { country: switchAction.country, reask: true });
+        return;
+      }
+
+      setMessages((m) => [
+        ...m,
+        {
+          role: 'assistant',
+          kind: data.kind,
+          sql: data.sql,
+          columns: data.columns,
+          rows: data.rows,
+          highlightAdm2: data.highlightAdm2,
+          resultShape: data.resultShape,
+          narrative: data.narrative,
+          scopeHint: data.scopeHint,
+          actions: data.actions,
+        },
+      ]);
+      if (data.highlightAdm2?.length) {
+        const ordered: string[] = [];
+        const seen = new Set<string>();
+        for (const c of data.highlightAdm2 as string[]) {
+          if (seen.has(c)) continue;
+          seen.add(c);
+          ordered.push(c);
+        }
+        setChatHighlights(ordered);
+        setSelectedDist(null);
+        if (data.resultShape === 'ranking') {
+          setRankedHighlights(ordered.map((admin2_pcode, i) => ({ admin2_pcode, rank: i + 1 })));
         } else {
           setRankedHighlights(null);
         }
-        if (Array.isArray(data.actions)) {
-          for (const action of data.actions as AskAction[]) dispatchAction(action);
-        }
+      } else {
+        setRankedHighlights(null);
       }
+      for (const action of actions) dispatchAction(action);
 
       if (panelTab !== 'ask') setAskBadge(true);
     } catch {
@@ -298,9 +314,8 @@ export default function AppShell() {
     }
   }
 
-  // Selecting a district from the map or insight list takes the user to the Insight tab
-  function selectDistrict(cod: string) {
-    setSelectedDist(cod);
+  function selectDistrict(code: string) {
+    setSelectedDist(code);
     setChatHighlights([]);
     setRankedHighlights(null);
     setPanelTab('insight');
@@ -309,8 +324,7 @@ export default function AppShell() {
   // ── simulation animation loop ───────────────────────────────────────────
   function simulationTick() {
     if (simPlayStartRef.current === null) return;
-    const realMs =
-      performance.now() - simPlayStartRef.current + simElapsedAtPauseRef.current;
+    const realMs = performance.now() - simPlayStartRef.current + simElapsedAtPauseRef.current;
     const t = Math.min(SIM_MINUTES, (realMs / SIM_DURATION_MS) * SIM_MINUTES);
     setSimMin(t);
     if (t >= SIM_MINUTES) {
@@ -326,7 +340,6 @@ export default function AppShell() {
 
   function playSimulation() {
     if (simIsFinished) {
-      // Reset before play
       simElapsedAtPauseRef.current = 0;
       setSimIsFinished(false);
       setSimMin(0);
@@ -356,8 +369,6 @@ export default function AppShell() {
     simAnimRef.current = requestAnimationFrame(simulationTick);
   }
 
-  // When leaving the simulation tab, stop the animation and reset state so
-  // the next visit starts clean.
   useEffect(() => {
     if (panelTab === 'simulation') return;
     if (simAnimRef.current) cancelAnimationFrame(simAnimRef.current);
@@ -369,7 +380,7 @@ export default function AppShell() {
     setSimMin(0);
   }, [panelTab]);
 
-  // Auto-fire ?ask=<prompt> from URL once on mount (landing page → Ask)
+  // Auto-fire ?ask=<prompt> from URL once on mount
   const askFireRef = useRef(false);
   useEffect(() => {
     if (askFireRef.current) return;
@@ -382,6 +393,8 @@ export default function AppShell() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const countryName = COUNTRIES[country].name;
+
   return (
     <div className="flex h-full flex-col md:flex-row">
       {/* ── Map ─────────────────────────────────────────────────────────────── */}
@@ -391,9 +404,10 @@ export default function AppShell() {
             <p className="animate-pulse text-sm text-neutral-500">Loading map data...</p>
           </div>
         )}
-        <PanamaMap
+        <CountryMap
+          country={country}
           indicators={indicators}
-          activeAgeGroup={selectedAgeGroup}
+          activeLevel={selectedLevel}
           activeTransport={selectedTransport}
           highlightedDists={highlightedDists}
           rankedHighlights={rankedHighlights}
@@ -412,14 +426,14 @@ export default function AppShell() {
       {/* ── Side panel ──────────────────────────────────────────────────────── */}
       <aside className="flex flex-1 flex-col overflow-hidden border-t border-neutral-200 bg-white md:flex-none md:basis-[35%] md:border-l md:border-t-0">
 
-        {/* Header + controls — always visible, never scrolls away */}
+        {/* Header + controls */}
         <div className="shrink-0 border-b border-neutral-200 px-4 pb-2 pt-3 md:px-5 md:pb-3 md:pt-4">
           <div className="mb-2 flex items-center justify-between md:mb-3">
             <div>
               <h1 className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
                 EduAccess LAC
               </h1>
-              <p className="mt-0.5 text-xs text-neutral-400">Panama · school access</p>
+              <p className="mt-0.5 text-xs text-neutral-400">{countryName} · school access</p>
             </div>
             <Link
               href="/"
@@ -427,6 +441,24 @@ export default function AppShell() {
             >
               ← Home
             </Link>
+          </div>
+
+          {/* Country switcher */}
+          <div className="mb-1.5 flex items-center gap-2 md:mb-2 md:gap-3">
+            <span className="hidden w-16 shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 md:block">
+              Country
+            </span>
+            <select
+              value={country}
+              onChange={(e) => setCountry(e.target.value as CountryIso)}
+              className="w-full rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-emerald-700 outline-none transition-colors hover:border-neutral-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 md:w-auto"
+            >
+              {COUNTRY_ISOS.map((c) => (
+                <option key={c} value={c}>
+                  {COUNTRIES[c].name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Transport */}
@@ -457,17 +489,17 @@ export default function AppShell() {
               Level
             </span>
             <div className="flex w-full gap-0.5 rounded-md bg-neutral-100 p-0.5 md:w-auto">
-              {AGE_GROUPS.map((g) => (
+              {EDUCATION_LEVELS.map((g) => (
                 <button
                   key={g}
-                  onClick={() => setSelectedAgeGroup(g)}
+                  onClick={() => setSelectedLevel(g)}
                   className={`flex-1 rounded px-2 py-1 text-xs font-medium whitespace-nowrap transition-colors md:flex-none ${
-                    selectedAgeGroup === g
+                    selectedLevel === g
                       ? 'bg-white text-emerald-700 shadow-sm'
                       : 'text-neutral-500 hover:text-neutral-700'
                   }`}
                 >
-                  {AGE_GROUP_SHORT_LABELS[g]}
+                  {EDUCATION_LEVEL_SHORT_LABELS[g]}
                 </button>
               ))}
             </div>
@@ -522,7 +554,7 @@ export default function AppShell() {
           </div>
         </div>
 
-        {/* Body — swaps based on panelTab */}
+        {/* Body */}
         <div className="flex min-h-0 flex-1 flex-col">
           {panelTab === 'insight' && (
             <div className="flex-1 overflow-y-auto px-5 py-4">
@@ -532,12 +564,13 @@ export default function AppShell() {
                 </p>
               )}
               <IndicatorPanel
+                country={country}
                 isLoading={isLoading}
                 insightStats={insightStats}
                 selectedDist={selectedDist}
                 distIndicators={distIndicators}
                 selectedTransport={selectedTransport}
-                selectedAgeGroup={selectedAgeGroup}
+                selectedLevel={selectedLevel}
                 onSelectDist={selectDistrict}
                 onClearSelection={() => setSelectedDist(null)}
                 onOpenSim={() => setPanelTab('simulation')}
@@ -549,7 +582,7 @@ export default function AppShell() {
             <div className="flex-1 overflow-y-auto px-5 py-4">
               <SimulationPanel
                 indicators={indicators}
-                ageGroup={selectedAgeGroup}
+                level={selectedLevel}
                 transport={selectedTransport}
                 simMin={simMin}
                 isPlaying={simIsPlaying}
@@ -565,7 +598,7 @@ export default function AppShell() {
             <div className="flex min-h-0 flex-1 flex-col">
               {messages.length === 0 ? (
                 <div className="min-h-0 flex-1 overflow-y-auto">
-                  <ScopeCard />
+                  <ScopeCard countryName={countryName} />
                   <div className="flex flex-col gap-1.5 px-4 pb-3">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
                       Try one
@@ -599,7 +632,7 @@ export default function AppShell() {
                 <input
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
-                  placeholder="Ask about school access in Panama..."
+                  placeholder={`Ask about school access in ${countryName}...`}
                   disabled={isAsking}
                   className="flex-1 rounded-md border border-neutral-200 px-3 py-1.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 disabled:opacity-50"
                 />
@@ -618,7 +651,7 @@ export default function AppShell() {
         {/* Footer */}
         <div className="shrink-0 border-t border-neutral-100 px-5 py-2">
           <p className="text-xs text-neutral-400">
-            Data: IDB Accessibility Platform · v1 preview · 2026
+            Data: IDB Accessibility Platform · FMM + OSRM routing · 2026
           </p>
         </div>
       </aside>
@@ -630,16 +663,8 @@ export default function AppShell() {
 
 function InsightIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-4 w-4"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+      strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
       <line x1="4" y1="20" x2="4" y2="13" />
       <line x1="10" y1="20" x2="10" y2="9" />
       <line x1="16" y1="20" x2="16" y2="14" />
@@ -650,16 +675,8 @@ function InsightIcon() {
 
 function AskIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-4 w-4"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+      strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   );
@@ -667,16 +684,8 @@ function AskIcon() {
 
 function SimulateIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-4 w-4"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+      strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
       <circle cx="12" cy="12" r="9" />
       <polyline points="12 7 12 12 15 14" />
     </svg>
@@ -744,10 +753,7 @@ function ChatBubble({ msg, onPromptClick }: ChatBubbleProps) {
             <thead className="bg-neutral-50">
               <tr>
                 {msg.columns?.map((c) => (
-                  <th
-                    key={c}
-                    className="whitespace-nowrap px-2 py-1.5 text-left font-medium text-neutral-500"
-                  >
+                  <th key={c} className="whitespace-nowrap px-2 py-1.5 text-left font-medium text-neutral-500">
                     {c}
                   </th>
                 ))}
@@ -792,6 +798,6 @@ function ChatBubble({ msg, onPromptClick }: ChatBubbleProps) {
 }
 
 const SUGGESTED_FALLBACK_PROMPTS = [
-  'Top 5 districts with the worst walking access for high schoolers',
-  'Compare primary vs high school walking access in Panama province',
+  'Top 5 districts with the worst walking access for upper-secondary students',
+  'Rank provinces by average % within 15 min of a school',
 ] as const;

@@ -1,1 +1,8507 @@
-[{"cod_dist":"0101","nomb_dist":"Bocas del Toro","nomb_prov":"Bocas del Toro"},{"cod_dist":"0102","nomb_dist":"Changuinola","nomb_prov":"Bocas del Toro"},{"cod_dist":"0103","nomb_dist":"ChiriquA Grande","nomb_prov":"Bocas del Toro"},{"cod_dist":"0104","nomb_dist":"Almirante","nomb_prov":"Bocas del Toro"},{"cod_dist":"0105","nomb_dist":"Comarca Naso Tjer Di","nomb_prov":"Bocas del Toro"},{"cod_dist":"0201","nomb_dist":"Aguadulce","nomb_prov":"Cocle"},{"cod_dist":"0202","nomb_dist":"Anton","nomb_prov":"Cocle"},{"cod_dist":"0203","nomb_dist":"La Pintada","nomb_prov":"Cocle"},{"cod_dist":"0204","nomb_dist":"Nata","nomb_prov":"Cocle"},{"cod_dist":"0205","nomb_dist":"Ola","nomb_prov":"Cocle"},{"cod_dist":"0206","nomb_dist":"Penonome","nomb_prov":"Cocle"},{"cod_dist":"0301","nomb_dist":"Colon","nomb_prov":"Colon"},{"cod_dist":"0302","nomb_dist":"Chagres","nomb_prov":"Colon"},{"cod_dist":"0303","nomb_dist":"Donoso","nomb_prov":"Colon"},{"cod_dist":"0304","nomb_dist":"Portobelo","nomb_prov":"Colon"},{"cod_dist":"0305","nomb_dist":"Santa Isabel","nomb_prov":"Colon"},{"cod_dist":"0306","nomb_dist":"Omar Torrijos Herrera","nomb_prov":"Colon"},{"cod_dist":"0401","nomb_dist":"Alanje","nomb_prov":"Chiriqui"},{"cod_dist":"0402","nomb_dist":"Baru","nomb_prov":"Chiriqui"},{"cod_dist":"0403","nomb_dist":"Boqueron","nomb_prov":"Chiriqui"},{"cod_dist":"0404","nomb_dist":"Boquete","nomb_prov":"Chiriqui"},{"cod_dist":"0405","nomb_dist":"Bugaba","nomb_prov":"Chiriqui"},{"cod_dist":"0406","nomb_dist":"David","nomb_prov":"Chiriqui"},{"cod_dist":"0407","nomb_dist":"Dolega","nomb_prov":"Chiriqui"},{"cod_dist":"0408","nomb_dist":"Gualaca","nomb_prov":"Chiriqui"},{"cod_dist":"0409","nomb_dist":"Remedios","nomb_prov":"Chiriqui"},{"cod_dist":"0410","nomb_dist":"Renacimiento","nomb_prov":"Chiriqui"},{"cod_dist":"0411","nomb_dist":"San Felix","nomb_prov":"Chiriqui"},{"cod_dist":"0412","nomb_dist":"San Lorenzo","nomb_prov":"Chiriqui"},{"cod_dist":"0413","nomb_dist":"Tole","nomb_prov":"Chiriqui"},{"cod_dist":"0414","nomb_dist":"Tierras Altas","nomb_prov":"Chiriqui"},{"cod_dist":"0501","nomb_dist":"Chepigana","nomb_prov":"Darien"},{"cod_dist":"0502","nomb_dist":"Pinogana","nomb_prov":"Darien"},{"cod_dist":"0503","nomb_dist":"Santa Fe","nomb_prov":"Darien"},{"cod_dist":"0601","nomb_dist":"Chitre","nomb_prov":"Herrera"},{"cod_dist":"0602","nomb_dist":"Las Minas","nomb_prov":"Herrera"},{"cod_dist":"0603","nomb_dist":"Los Pozos","nomb_prov":"Herrera"},{"cod_dist":"0604","nomb_dist":"Ocu","nomb_prov":"Herrera"},{"cod_dist":"0605","nomb_dist":"Parita","nomb_prov":"Herrera"},{"cod_dist":"0606","nomb_dist":"Pese","nomb_prov":"Herrera"},{"cod_dist":"0607","nomb_dist":"Santa MarAa","nomb_prov":"Herrera"},{"cod_dist":"0701","nomb_dist":"Guarare","nomb_prov":"Los Santos"},{"cod_dist":"0702","nomb_dist":"Las Tablas","nomb_prov":"Los Santos"},{"cod_dist":"0703","nomb_dist":"Los Santos","nomb_prov":"Los Santos"},{"cod_dist":"0704","nomb_dist":"Macaracas","nomb_prov":"Los Santos"},{"cod_dist":"0705","nomb_dist":"PedasA","nomb_prov":"Los Santos"},{"cod_dist":"0706","nomb_dist":"PocrA","nomb_prov":"Los Santos"},{"cod_dist":"0707","nomb_dist":"TonosA","nomb_prov":"Los Santos"},{"cod_dist":"0802","nomb_dist":"Balboa","nomb_prov":"Panama"},{"cod_dist":"0805","nomb_dist":"Chepo","nomb_prov":"Panama"},{"cod_dist":"0806","nomb_dist":"Chiman","nomb_prov":"Panama"},{"cod_dist":"0808","nomb_dist":"Panama","nomb_prov":"Panama"},{"cod_dist":"0810","nomb_dist":"San Miguelito","nomb_prov":"Panama"},{"cod_dist":"0811","nomb_dist":"Taboga","nomb_prov":"Panama"},{"cod_dist":"0901","nomb_dist":"Atalaya","nomb_prov":"Veraguas"},{"cod_dist":"0902","nomb_dist":"Calobre","nomb_prov":"Veraguas"},{"cod_dist":"0903","nomb_dist":"Canazas","nomb_prov":"Veraguas"},{"cod_dist":"0904","nomb_dist":"La Mesa","nomb_prov":"Veraguas"},{"cod_dist":"0905","nomb_dist":"Las Palmas","nomb_prov":"Veraguas"},{"cod_dist":"0906","nomb_dist":"Montijo","nomb_prov":"Veraguas"},{"cod_dist":"0907","nomb_dist":"RAo de JesAºs","nomb_prov":"Veraguas"},{"cod_dist":"0908","nomb_dist":"San Francisco","nomb_prov":"Veraguas"},{"cod_dist":"0909","nomb_dist":"Santa Fe","nomb_prov":"Veraguas"},{"cod_dist":"0910","nomb_dist":"Santiago","nomb_prov":"Veraguas"},{"cod_dist":"0911","nomb_dist":"Sona","nomb_prov":"Veraguas"},{"cod_dist":"0912","nomb_dist":"Mariato","nomb_prov":"Veraguas"},{"cod_dist":"1001","nomb_dist":"Comarca Kuna Yala","nomb_prov":"Comarca Kuna Yala"},{"cod_dist":"1101","nomb_dist":"Cemaco","nomb_prov":"Comarca Embera-Wounaan"},{"cod_dist":"1102","nomb_dist":"Sambu","nomb_prov":"Comarca Embera-Wounaan"},{"cod_dist":"1201","nomb_dist":"Besiko","nomb_prov":"Comarca Ngabe-Bugle"},{"cod_dist":"1202","nomb_dist":"Mirono","nomb_prov":"Comarca Ngabe-Bugle"},{"cod_dist":"1203","nomb_dist":"Muna","nomb_prov":"Comarca Ngabe-Bugle"},{"cod_dist":"1204","nomb_dist":"Nole Duima","nomb_prov":"Comarca Ngabe-Bugle"},{"cod_dist":"1205","nomb_dist":"Nurum","nomb_prov":"Comarca Ngabe-Bugle"},{"cod_dist":"1206","nomb_dist":"Kankintu","nomb_prov":"Comarca Ngabe-Bugle"},{"cod_dist":"1207","nomb_dist":"KusapAn","nomb_prov":"Comarca Ngabe-Bugle"},{"cod_dist":"1208","nomb_dist":"Jirondai","nomb_prov":"Comarca Ngabe-Bugle"},{"cod_dist":"1209","nomb_dist":"Santa Catalina o Calovebora (Bledeshia)","nomb_prov":"Comarca Ngabe-Bugle"},{"cod_dist":"1301","nomb_dist":"Arraijan","nomb_prov":"Panama Oeste"},{"cod_dist":"1303","nomb_dist":"Capira","nomb_prov":"Panama Oeste"},{"cod_dist":"1304","nomb_dist":"Chame","nomb_prov":"Panama Oeste"},{"cod_dist":"1307","nomb_dist":"La Chorrera","nomb_prov":"Panama Oeste"},{"cod_dist":"1309","nomb_dist":"San Carlos","nomb_prov":"Panama Oeste"}]
+{
+"PAN": [
+{
+"admin2_pcode": "PA0101",
+"admin2_name": "Bocas del Toro",
+"admin1_name": "Bocas del Toro"
+},
+{
+"admin2_pcode": "PA0102",
+"admin2_name": "Changuinola",
+"admin1_name": "Bocas del Toro"
+},
+{
+"admin2_pcode": "PA0103",
+"admin2_name": "Chiriquí Grande",
+"admin1_name": "Bocas del Toro"
+},
+{
+"admin2_pcode": "PA0201",
+"admin2_name": "Alanje",
+"admin1_name": "Chiriquí"
+},
+{
+"admin2_pcode": "PA0202",
+"admin2_name": "Barú",
+"admin1_name": "Chiriquí"
+},
+{
+"admin2_pcode": "PA0203",
+"admin2_name": "Boquerón",
+"admin1_name": "Chiriquí"
+},
+{
+"admin2_pcode": "PA0204",
+"admin2_name": "Boquete",
+"admin1_name": "Chiriquí"
+},
+{
+"admin2_pcode": "PA0205",
+"admin2_name": "Bugaba",
+"admin1_name": "Chiriquí"
+},
+{
+"admin2_pcode": "PA0206",
+"admin2_name": "David",
+"admin1_name": "Chiriquí"
+},
+{
+"admin2_pcode": "PA0207",
+"admin2_name": "Dolega",
+"admin1_name": "Chiriquí"
+},
+{
+"admin2_pcode": "PA0208",
+"admin2_name": "Gualaca",
+"admin1_name": "Chiriquí"
+},
+{
+"admin2_pcode": "PA0209",
+"admin2_name": "Remedios",
+"admin1_name": "Chiriquí"
+},
+{
+"admin2_pcode": "PA0210",
+"admin2_name": "Renacimiento",
+"admin1_name": "Chiriquí"
+},
+{
+"admin2_pcode": "PA0211",
+"admin2_name": "San Félix",
+"admin1_name": "Chiriquí"
+},
+{
+"admin2_pcode": "PA0212",
+"admin2_name": "San Lorenzo",
+"admin1_name": "Chiriquí"
+},
+{
+"admin2_pcode": "PA0213",
+"admin2_name": "Tolé",
+"admin1_name": "Chiriquí"
+},
+{
+"admin2_pcode": "PA0301",
+"admin2_name": "Aguadulce",
+"admin1_name": "Coclé"
+},
+{
+"admin2_pcode": "PA0302",
+"admin2_name": "Antón",
+"admin1_name": "Coclé"
+},
+{
+"admin2_pcode": "PA0303",
+"admin2_name": "La Pintada",
+"admin1_name": "Coclé"
+},
+{
+"admin2_pcode": "PA0304",
+"admin2_name": "Natá",
+"admin1_name": "Coclé"
+},
+{
+"admin2_pcode": "PA0305",
+"admin2_name": "Olá",
+"admin1_name": "Coclé"
+},
+{
+"admin2_pcode": "PA0306",
+"admin2_name": "Penonomé",
+"admin1_name": "Coclé"
+},
+{
+"admin2_pcode": "PA0401",
+"admin2_name": "Chagres",
+"admin1_name": "Colón"
+},
+{
+"admin2_pcode": "PA0402",
+"admin2_name": "Colón",
+"admin1_name": "Colón"
+},
+{
+"admin2_pcode": "PA0403",
+"admin2_name": "Donoso",
+"admin1_name": "Colón"
+},
+{
+"admin2_pcode": "PA0404",
+"admin2_name": "Portobelo",
+"admin1_name": "Colón"
+},
+{
+"admin2_pcode": "PA0405",
+"admin2_name": "Santa Isabel",
+"admin1_name": "Colón"
+},
+{
+"admin2_pcode": "PA0501",
+"admin2_name": "Chepigana",
+"admin1_name": "Darién"
+},
+{
+"admin2_pcode": "PA0502",
+"admin2_name": "Pinogana",
+"admin1_name": "Darién"
+},
+{
+"admin2_pcode": "PA0601",
+"admin2_name": "Cémaco",
+"admin1_name": "Emberá"
+},
+{
+"admin2_pcode": "PA0602",
+"admin2_name": "Sambú",
+"admin1_name": "Emberá"
+},
+{
+"admin2_pcode": "PA0701",
+"admin2_name": "Chitré",
+"admin1_name": "Herrera"
+},
+{
+"admin2_pcode": "PA0702",
+"admin2_name": "Las Minas",
+"admin1_name": "Herrera"
+},
+{
+"admin2_pcode": "PA0703",
+"admin2_name": "Los Pozos",
+"admin1_name": "Herrera"
+},
+{
+"admin2_pcode": "PA0704",
+"admin2_name": "Ocú",
+"admin1_name": "Herrera"
+},
+{
+"admin2_pcode": "PA0705",
+"admin2_name": "Parita",
+"admin1_name": "Herrera"
+},
+{
+"admin2_pcode": "PA0706",
+"admin2_name": "Pesé",
+"admin1_name": "Herrera"
+},
+{
+"admin2_pcode": "PA0707",
+"admin2_name": "Santa María",
+"admin1_name": "Herrera"
+},
+{
+"admin2_pcode": "PA0801",
+"admin2_name": "Kuna Yala",
+"admin1_name": "Kuna Yala"
+},
+{
+"admin2_pcode": "PA0901",
+"admin2_name": "Guararé",
+"admin1_name": "Los Santos"
+},
+{
+"admin2_pcode": "PA0902",
+"admin2_name": "Las Tablas",
+"admin1_name": "Los Santos"
+},
+{
+"admin2_pcode": "PA0903",
+"admin2_name": "Los Santos",
+"admin1_name": "Los Santos"
+},
+{
+"admin2_pcode": "PA0904",
+"admin2_name": "Macaracas",
+"admin1_name": "Los Santos"
+},
+{
+"admin2_pcode": "PA0905",
+"admin2_name": "Pedasí",
+"admin1_name": "Los Santos"
+},
+{
+"admin2_pcode": "PA0906",
+"admin2_name": "Pocrí",
+"admin1_name": "Los Santos"
+},
+{
+"admin2_pcode": "PA0907",
+"admin2_name": "Tonosí",
+"admin1_name": "Los Santos"
+},
+{
+"admin2_pcode": "PA1001",
+"admin2_name": "Besiko",
+"admin1_name": "Ngöbe Buglé"
+},
+{
+"admin2_pcode": "PA1002",
+"admin2_name": "Mironó",
+"admin1_name": "Ngöbe Buglé"
+},
+{
+"admin2_pcode": "PA1003",
+"admin2_name": "Müna",
+"admin1_name": "Ngöbe Buglé"
+},
+{
+"admin2_pcode": "PA1004",
+"admin2_name": "Nole Duima",
+"admin1_name": "Ngöbe Buglé"
+},
+{
+"admin2_pcode": "PA1005",
+"admin2_name": "Ñürüm",
+"admin1_name": "Ngöbe Buglé"
+},
+{
+"admin2_pcode": "PA1006",
+"admin2_name": "Kankintú",
+"admin1_name": "Ngöbe Buglé"
+},
+{
+"admin2_pcode": "PA1007",
+"admin2_name": "Kusapín",
+"admin1_name": "Ngöbe Buglé"
+},
+{
+"admin2_pcode": "PA1101",
+"admin2_name": "Arraiján",
+"admin1_name": "Panamá Oeste"
+},
+{
+"admin2_pcode": "PA1102",
+"admin2_name": "Capira",
+"admin1_name": "Panamá Oeste"
+},
+{
+"admin2_pcode": "PA1103",
+"admin2_name": "Chame",
+"admin1_name": "Panamá Oeste"
+},
+{
+"admin2_pcode": "PA1104",
+"admin2_name": "La Chorrera",
+"admin1_name": "Panamá Oeste"
+},
+{
+"admin2_pcode": "PA1105",
+"admin2_name": "San Carlos",
+"admin1_name": "Panamá Oeste"
+},
+{
+"admin2_pcode": "PA1201",
+"admin2_name": "Balboa",
+"admin1_name": "Panamá"
+},
+{
+"admin2_pcode": "PA1202",
+"admin2_name": "Chepo",
+"admin1_name": "Panamá"
+},
+{
+"admin2_pcode": "PA1203",
+"admin2_name": "Chimán",
+"admin1_name": "Panamá"
+},
+{
+"admin2_pcode": "PA1204",
+"admin2_name": "Panamá",
+"admin1_name": "Panamá"
+},
+{
+"admin2_pcode": "PA1205",
+"admin2_name": "San Miguelito",
+"admin1_name": "Panamá"
+},
+{
+"admin2_pcode": "PA1206",
+"admin2_name": "Taboga",
+"admin1_name": "Panamá"
+},
+{
+"admin2_pcode": "PA1301",
+"admin2_name": "Atalaya",
+"admin1_name": "Veraguas"
+},
+{
+"admin2_pcode": "PA1302",
+"admin2_name": "Calobre",
+"admin1_name": "Veraguas"
+},
+{
+"admin2_pcode": "PA1303",
+"admin2_name": "Cañazas",
+"admin1_name": "Veraguas"
+},
+{
+"admin2_pcode": "PA1304",
+"admin2_name": "La Mesa",
+"admin1_name": "Veraguas"
+},
+{
+"admin2_pcode": "PA1305",
+"admin2_name": "Las Palmas",
+"admin1_name": "Veraguas"
+},
+{
+"admin2_pcode": "PA1306",
+"admin2_name": "Mariato",
+"admin1_name": "Veraguas"
+},
+{
+"admin2_pcode": "PA1307",
+"admin2_name": "Montijo",
+"admin1_name": "Veraguas"
+},
+{
+"admin2_pcode": "PA1308",
+"admin2_name": "Río de Jesús",
+"admin1_name": "Veraguas"
+},
+{
+"admin2_pcode": "PA1309",
+"admin2_name": "San Francisco",
+"admin1_name": "Veraguas"
+},
+{
+"admin2_pcode": "PA1310",
+"admin2_name": "Santa Fe",
+"admin1_name": "Veraguas"
+},
+{
+"admin2_pcode": "PA1311",
+"admin2_name": "Santiago",
+"admin1_name": "Veraguas"
+},
+{
+"admin2_pcode": "PA1312",
+"admin2_name": "Soná",
+"admin1_name": "Veraguas"
+}
+],
+"COL": [
+{
+"admin2_pcode": "CO05001",
+"admin2_name": "Medellín",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05002",
+"admin2_name": "Abejorral",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05004",
+"admin2_name": "Abriaquí",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05021",
+"admin2_name": "Alejandría",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05030",
+"admin2_name": "Amagá",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05031",
+"admin2_name": "Amalfi",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05034",
+"admin2_name": "Andes",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05036",
+"admin2_name": "Angelópolis",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05038",
+"admin2_name": "Angostura",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05040",
+"admin2_name": "Anorí",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05042",
+"admin2_name": "Santa Fé de Antioquia",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05044",
+"admin2_name": "Anzá",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05045",
+"admin2_name": "Apartadó",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05051",
+"admin2_name": "Arboletes",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05055",
+"admin2_name": "Argelia",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05059",
+"admin2_name": "Armenia",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05079",
+"admin2_name": "Barbosa",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05086",
+"admin2_name": "Belmira",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05088",
+"admin2_name": "Bello",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05091",
+"admin2_name": "Betania",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05093",
+"admin2_name": "Betulia",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05101",
+"admin2_name": "Ciudad Bolívar",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05107",
+"admin2_name": "Briceño",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05113",
+"admin2_name": "Buriticá",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05120",
+"admin2_name": "Cáceres",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05125",
+"admin2_name": "Caicedo",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05129",
+"admin2_name": "Caldas",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05134",
+"admin2_name": "Campamento",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05138",
+"admin2_name": "Cañasgordas",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05142",
+"admin2_name": "Caracolí",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05145",
+"admin2_name": "Caramanta",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05147",
+"admin2_name": "Carepa",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05148",
+"admin2_name": "El Carmen de Viboral",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05150",
+"admin2_name": "Carolina",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05154",
+"admin2_name": "Caucasia",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05172",
+"admin2_name": "Chigorodó",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05190",
+"admin2_name": "Cisneros",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05197",
+"admin2_name": "Cocorná",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05206",
+"admin2_name": "Concepción",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05209",
+"admin2_name": "Concordia",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05212",
+"admin2_name": "Copacabana",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05234",
+"admin2_name": "Dabeiba",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05237",
+"admin2_name": "Donmatías",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05240",
+"admin2_name": "Ebéjico",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05250",
+"admin2_name": "El Bagre",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05264",
+"admin2_name": "Entrerríos",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05266",
+"admin2_name": "Envigado",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05282",
+"admin2_name": "Fredonia",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05284",
+"admin2_name": "Frontino",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05306",
+"admin2_name": "Giraldo",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05308",
+"admin2_name": "Girardota",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05310",
+"admin2_name": "Gómez Plata",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05313",
+"admin2_name": "Granada",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05315",
+"admin2_name": "Guadalupe",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05318",
+"admin2_name": "Guarne",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05321",
+"admin2_name": "Guatapé",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05347",
+"admin2_name": "Heliconia",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05353",
+"admin2_name": "Hispania",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05360",
+"admin2_name": "Itagüí",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05361",
+"admin2_name": "Ituango",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05364",
+"admin2_name": "Jardín",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05368",
+"admin2_name": "Jericó",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05376",
+"admin2_name": "La Ceja",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05380",
+"admin2_name": "La Estrella",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05390",
+"admin2_name": "La Pintada",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05400",
+"admin2_name": "La Unión",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05411",
+"admin2_name": "Liborina",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05425",
+"admin2_name": "Maceo",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05440",
+"admin2_name": "Marinilla",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05467",
+"admin2_name": "Montebello",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05475",
+"admin2_name": "Murindó",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05480",
+"admin2_name": "Mutatá",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05483",
+"admin2_name": "Nariño",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05490",
+"admin2_name": "Necoclí",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05495",
+"admin2_name": "Nechí",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05501",
+"admin2_name": "Olaya",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05541",
+"admin2_name": "Peñol",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05543",
+"admin2_name": "Peque",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05576",
+"admin2_name": "Pueblorrico",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05579",
+"admin2_name": "Puerto Berrío",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05585",
+"admin2_name": "Puerto Nare",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05591",
+"admin2_name": "Puerto Triunfo",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05604",
+"admin2_name": "Remedios",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05607",
+"admin2_name": "Retiro",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05615",
+"admin2_name": "Rionegro",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05628",
+"admin2_name": "Sabanalarga",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05631",
+"admin2_name": "Sabaneta",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05642",
+"admin2_name": "Salgar",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05647",
+"admin2_name": "San Andrés de Cuerquía",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05649",
+"admin2_name": "San Carlos",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05652",
+"admin2_name": "San Francisco",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05656",
+"admin2_name": "San Jerónimo",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05658",
+"admin2_name": "San José de la Montaña",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05659",
+"admin2_name": "San Juan de Urabá",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05660",
+"admin2_name": "San Luis",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05664",
+"admin2_name": "San Pedro de los Milagros",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05665",
+"admin2_name": "San Pedro de Urabá",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05667",
+"admin2_name": "San Rafael",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05670",
+"admin2_name": "San Roque",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05674",
+"admin2_name": "San Vicente Ferrer",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05679",
+"admin2_name": "Santa Bárbara",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05686",
+"admin2_name": "Santa Rosa de Osos",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05690",
+"admin2_name": "Santo Domingo",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05697",
+"admin2_name": "El Santuario",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05736",
+"admin2_name": "Segovia",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05756",
+"admin2_name": "Sonsón",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05761",
+"admin2_name": "Sopetrán",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05789",
+"admin2_name": "Támesis",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05790",
+"admin2_name": "Tarazá",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05792",
+"admin2_name": "Tarso",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05809",
+"admin2_name": "Titiribí",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05819",
+"admin2_name": "Toledo",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05837",
+"admin2_name": "Turbo",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05842",
+"admin2_name": "Uramita",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05847",
+"admin2_name": "Urrao",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05854",
+"admin2_name": "Valdivia",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05856",
+"admin2_name": "Valparaíso",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05858",
+"admin2_name": "Vegachí",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05861",
+"admin2_name": "Venecia",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05873",
+"admin2_name": "Vigía del Fuerte",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05885",
+"admin2_name": "Yalí",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05887",
+"admin2_name": "Yarumal",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05890",
+"admin2_name": "Yolombó",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05893",
+"admin2_name": "Yondó",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO05895",
+"admin2_name": "Zaragoza",
+"admin1_name": "Antioquia"
+},
+{
+"admin2_pcode": "CO08001",
+"admin2_name": "Barranquilla",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08078",
+"admin2_name": "Baranoa",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08137",
+"admin2_name": "Campo de la Cruz",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08141",
+"admin2_name": "Candelaria",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08296",
+"admin2_name": "Galapa",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08372",
+"admin2_name": "Juan de Acosta",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08421",
+"admin2_name": "Luruaco",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08433",
+"admin2_name": "Malambo",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08436",
+"admin2_name": "Manatí",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08520",
+"admin2_name": "Palmar de Varela",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08549",
+"admin2_name": "Piojó",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08558",
+"admin2_name": "Polonuevo",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08560",
+"admin2_name": "Ponedera",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08573",
+"admin2_name": "Puerto Colombia",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08606",
+"admin2_name": "Repelón",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08634",
+"admin2_name": "Sabanagrande",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08638",
+"admin2_name": "Sabanalarga",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08675",
+"admin2_name": "Santa Lucía",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08685",
+"admin2_name": "Santo Tomás",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08758",
+"admin2_name": "Soledad",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08770",
+"admin2_name": "Suan",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08832",
+"admin2_name": "Tubará",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO08849",
+"admin2_name": "Usiacurí",
+"admin1_name": "Atlántico"
+},
+{
+"admin2_pcode": "CO11001",
+"admin2_name": "Bogotá, D.C.",
+"admin1_name": "Bogotá, D.C."
+},
+{
+"admin2_pcode": "CO13001",
+"admin2_name": "Cartagena de Indias",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13006",
+"admin2_name": "Achí",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13030",
+"admin2_name": "Altos del Rosario",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13042",
+"admin2_name": "Arenal",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13052",
+"admin2_name": "Arjona",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13062",
+"admin2_name": "Arroyohondo",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13074",
+"admin2_name": "Barranco de Loba",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13140",
+"admin2_name": "Calamar",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13160",
+"admin2_name": "Cantagallo",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13188",
+"admin2_name": "Cicuco",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13212",
+"admin2_name": "Córdoba",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13222",
+"admin2_name": "Clemencia",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13244",
+"admin2_name": "El Carmen de Bolívar",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13248",
+"admin2_name": "El Guamo",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13268",
+"admin2_name": "El Peñón",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13300",
+"admin2_name": "Hatillo de Loba",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13430",
+"admin2_name": "Magangué",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13433",
+"admin2_name": "Mahates",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13440",
+"admin2_name": "Margarita",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13442",
+"admin2_name": "María La Baja",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13458",
+"admin2_name": "Montecristo",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13468",
+"admin2_name": "Mompós",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13473",
+"admin2_name": "Morales",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13490",
+"admin2_name": "Norosí",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13549",
+"admin2_name": "Pinillos",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13580",
+"admin2_name": "Regidor",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13600",
+"admin2_name": "Río Viejo",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13620",
+"admin2_name": "San Cristóbal",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13647",
+"admin2_name": "San Estanislao",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13650",
+"admin2_name": "San Fernando",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13654",
+"admin2_name": "San Jacinto",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13655",
+"admin2_name": "San Jacinto del Cauca",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13657",
+"admin2_name": "San Juan Nepomuceno",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13667",
+"admin2_name": "San Martín de Loba",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13670",
+"admin2_name": "San Pablo",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13673",
+"admin2_name": "Santa Catalina",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13683",
+"admin2_name": "Santa Rosa",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13688",
+"admin2_name": "Santa Rosa del Sur",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13744",
+"admin2_name": "Simití",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13760",
+"admin2_name": "Soplaviento",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13780",
+"admin2_name": "Talaigua Nuevo",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13810",
+"admin2_name": "Tiquisio",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13836",
+"admin2_name": "Turbaco",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13838",
+"admin2_name": "Turbaná",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13873",
+"admin2_name": "Villanueva",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO13894",
+"admin2_name": "Zambrano",
+"admin1_name": "Bolívar"
+},
+{
+"admin2_pcode": "CO15001",
+"admin2_name": "Tunja",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15022",
+"admin2_name": "Almeida",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15047",
+"admin2_name": "Aquitania",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15051",
+"admin2_name": "Arcabuco",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15087",
+"admin2_name": "Belén",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15090",
+"admin2_name": "Berbeo",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15092",
+"admin2_name": "Betéitiva",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15097",
+"admin2_name": "Boavita",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15104",
+"admin2_name": "Boyacá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15106",
+"admin2_name": "Briceño",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15109",
+"admin2_name": "Buenavista",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15114",
+"admin2_name": "Busbanzá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15131",
+"admin2_name": "Caldas",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15135",
+"admin2_name": "Campohermoso",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15162",
+"admin2_name": "Cerinza",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15172",
+"admin2_name": "Chinavita",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15176",
+"admin2_name": "Chiquinquirá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15180",
+"admin2_name": "Chiscas",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15183",
+"admin2_name": "Chita",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15185",
+"admin2_name": "Chitaraque",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15187",
+"admin2_name": "Chivatá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15189",
+"admin2_name": "Ciénega",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15204",
+"admin2_name": "Cómbita",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15212",
+"admin2_name": "Coper",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15215",
+"admin2_name": "Corrales",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15218",
+"admin2_name": "Covarachía",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15223",
+"admin2_name": "Cubará",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15224",
+"admin2_name": "Cucaita",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15226",
+"admin2_name": "Cuítiva",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15232",
+"admin2_name": "Chíquiza",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15236",
+"admin2_name": "Chivor",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15238",
+"admin2_name": "Duitama",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15244",
+"admin2_name": "El Cocuy",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15248",
+"admin2_name": "El Espino",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15272",
+"admin2_name": "Firavitoba",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15276",
+"admin2_name": "Floresta",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15293",
+"admin2_name": "Gachantivá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15296",
+"admin2_name": "Gámeza",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15299",
+"admin2_name": "Garagoa",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15317",
+"admin2_name": "Guacamayas",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15322",
+"admin2_name": "Guateque",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15325",
+"admin2_name": "Guayatá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15332",
+"admin2_name": "Güicán de la Sierra",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15362",
+"admin2_name": "Iza",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15367",
+"admin2_name": "Jenesano",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15368",
+"admin2_name": "Jericó",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15377",
+"admin2_name": "Labranzagrande",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15380",
+"admin2_name": "La Capilla",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15401",
+"admin2_name": "La Victoria",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15403",
+"admin2_name": "La Uvita",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15407",
+"admin2_name": "Villa de Leyva",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15425",
+"admin2_name": "Macanal",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15442",
+"admin2_name": "Maripí",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15455",
+"admin2_name": "Miraflores",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15464",
+"admin2_name": "Mongua",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15466",
+"admin2_name": "Monguí",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15469",
+"admin2_name": "Moniquirá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15476",
+"admin2_name": "Motavita",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15480",
+"admin2_name": "Muzo",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15491",
+"admin2_name": "Nobsa",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15494",
+"admin2_name": "Nuevo Colón",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15500",
+"admin2_name": "Oicatá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15507",
+"admin2_name": "Otanche",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15511",
+"admin2_name": "Pachavita",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15514",
+"admin2_name": "Páez",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15516",
+"admin2_name": "Paipa",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15518",
+"admin2_name": "Pajarito",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15522",
+"admin2_name": "Panqueba",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15531",
+"admin2_name": "Pauna",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15533",
+"admin2_name": "Paya",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15537",
+"admin2_name": "Paz de Río",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15542",
+"admin2_name": "Pesca",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15550",
+"admin2_name": "Pisba",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15572",
+"admin2_name": "Puerto Boyacá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15580",
+"admin2_name": "Quípama",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15599",
+"admin2_name": "Ramiriquí",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15600",
+"admin2_name": "Ráquira",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15621",
+"admin2_name": "Rondón",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15632",
+"admin2_name": "Saboyá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15638",
+"admin2_name": "Sáchica",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15646",
+"admin2_name": "Samacá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15660",
+"admin2_name": "San Eduardo",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15664",
+"admin2_name": "San José de Pare",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15667",
+"admin2_name": "San Luis de Gaceno",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15673",
+"admin2_name": "San Mateo",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15676",
+"admin2_name": "San Miguel de Sema",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15681",
+"admin2_name": "San Pablo de Borbur",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15686",
+"admin2_name": "Santana",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15690",
+"admin2_name": "Santa María",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15693",
+"admin2_name": "Santa Rosa de Viterbo",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15696",
+"admin2_name": "Santa Sofía",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15720",
+"admin2_name": "Sativanorte",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15723",
+"admin2_name": "Sativasur",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15740",
+"admin2_name": "Siachoque",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15753",
+"admin2_name": "Soatá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15755",
+"admin2_name": "Socotá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15757",
+"admin2_name": "Socha",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15759",
+"admin2_name": "Sogamoso",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15761",
+"admin2_name": "Somondoco",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15762",
+"admin2_name": "Sora",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15763",
+"admin2_name": "Sotaquirá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15764",
+"admin2_name": "Soracá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15774",
+"admin2_name": "Susacón",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15776",
+"admin2_name": "Sutamarchán",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15778",
+"admin2_name": "Sutatenza",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15790",
+"admin2_name": "Tasco",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15798",
+"admin2_name": "Tenza",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15804",
+"admin2_name": "Tibaná",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15806",
+"admin2_name": "Tibasosa",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15808",
+"admin2_name": "Tinjacá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15810",
+"admin2_name": "Tipacoque",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15814",
+"admin2_name": "Toca",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15816",
+"admin2_name": "Togüí",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15820",
+"admin2_name": "Tópaga",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15822",
+"admin2_name": "Tota",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15832",
+"admin2_name": "Tununguá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15835",
+"admin2_name": "Turmequé",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15837",
+"admin2_name": "Tuta",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15839",
+"admin2_name": "Tutazá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15842",
+"admin2_name": "Úmbita",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15861",
+"admin2_name": "Ventaquemada",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15879",
+"admin2_name": "Viracachá",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO15897",
+"admin2_name": "Zetaquira",
+"admin1_name": "Boyacá"
+},
+{
+"admin2_pcode": "CO17001",
+"admin2_name": "Manizales",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17013",
+"admin2_name": "Aguadas",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17042",
+"admin2_name": "Anserma",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17050",
+"admin2_name": "Aranzazu",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17088",
+"admin2_name": "Belalcázar",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17174",
+"admin2_name": "Chinchiná",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17272",
+"admin2_name": "Filadelfia",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17380",
+"admin2_name": "La Dorada",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17388",
+"admin2_name": "La Merced",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17433",
+"admin2_name": "Manzanares",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17442",
+"admin2_name": "Marmato",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17444",
+"admin2_name": "Marquetalia",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17446",
+"admin2_name": "Marulanda",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17486",
+"admin2_name": "Neira",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17495",
+"admin2_name": "Norcasia",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17513",
+"admin2_name": "Pácora",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17524",
+"admin2_name": "Palestina",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17541",
+"admin2_name": "Pensilvania",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17614",
+"admin2_name": "Riosucio",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17616",
+"admin2_name": "Risaralda",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17653",
+"admin2_name": "Salamina",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17662",
+"admin2_name": "Samaná",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17665",
+"admin2_name": "San José",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17777",
+"admin2_name": "Supía",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17867",
+"admin2_name": "Victoria",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17873",
+"admin2_name": "Villamaría",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO17877",
+"admin2_name": "Viterbo",
+"admin1_name": "Caldas"
+},
+{
+"admin2_pcode": "CO18001",
+"admin2_name": "Florencia",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18029",
+"admin2_name": "Albania",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18094",
+"admin2_name": "Belén de los Andaquíes",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18150",
+"admin2_name": "Cartagena del Chairá",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18205",
+"admin2_name": "Curillo",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18247",
+"admin2_name": "El Doncello",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18256",
+"admin2_name": "El Paujíl",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18410",
+"admin2_name": "La Montañita",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18460",
+"admin2_name": "Milán",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18479",
+"admin2_name": "Morelia",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18592",
+"admin2_name": "Puerto Rico",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18610",
+"admin2_name": "San José del Fragua",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18753",
+"admin2_name": "San Vicente del Caguán",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18756",
+"admin2_name": "Solano",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18785",
+"admin2_name": "Solita",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO18860",
+"admin2_name": "Valparaíso",
+"admin1_name": "Caquetá"
+},
+{
+"admin2_pcode": "CO19001",
+"admin2_name": "Popayán",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19022",
+"admin2_name": "Almaguer",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19050",
+"admin2_name": "Argelia",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19075",
+"admin2_name": "Balboa",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19100",
+"admin2_name": "Bolívar",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19110",
+"admin2_name": "Buenos Aires",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19130",
+"admin2_name": "Cajibío",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19137",
+"admin2_name": "Caldono",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19142",
+"admin2_name": "Caloto",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19212",
+"admin2_name": "Corinto",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19256",
+"admin2_name": "El Tambo",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19290",
+"admin2_name": "Florencia",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19300",
+"admin2_name": "Guachené",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19318",
+"admin2_name": "Guapi",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19355",
+"admin2_name": "Inzá",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19364",
+"admin2_name": "Jambaló",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19392",
+"admin2_name": "La Sierra",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19397",
+"admin2_name": "La Vega",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19418",
+"admin2_name": "López de Micay",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19450",
+"admin2_name": "Mercaderes",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19455",
+"admin2_name": "Miranda",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19473",
+"admin2_name": "Morales",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19513",
+"admin2_name": "Padilla",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19517",
+"admin2_name": "Páez",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19532",
+"admin2_name": "Patía",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19533",
+"admin2_name": "Piamonte",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19548",
+"admin2_name": "Piendamó - Tunía",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19573",
+"admin2_name": "Puerto Tejada",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19585",
+"admin2_name": "Puracé",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19622",
+"admin2_name": "Rosas",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19693",
+"admin2_name": "San Sebastián",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19698",
+"admin2_name": "Santander de Quilichao",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19701",
+"admin2_name": "Santa Rosa",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19743",
+"admin2_name": "Silvia",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19760",
+"admin2_name": "Sotará - Paispamba",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19780",
+"admin2_name": "Suárez",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19785",
+"admin2_name": "Sucre",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19807",
+"admin2_name": "Timbío",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19809",
+"admin2_name": "Timbiquí",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19821",
+"admin2_name": "Toribío",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19824",
+"admin2_name": "Totoró",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO19845",
+"admin2_name": "Villa Rica",
+"admin1_name": "Cauca"
+},
+{
+"admin2_pcode": "CO20001",
+"admin2_name": "Valledupar",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20011",
+"admin2_name": "Aguachica",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20013",
+"admin2_name": "Agustín Codazzi",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20032",
+"admin2_name": "Astrea",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20045",
+"admin2_name": "Becerril",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20060",
+"admin2_name": "Bosconia",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20175",
+"admin2_name": "Chimichagua",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20178",
+"admin2_name": "Chiriguaná",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20228",
+"admin2_name": "Curumaní",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20238",
+"admin2_name": "El Copey",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20250",
+"admin2_name": "El Paso",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20295",
+"admin2_name": "Gamarra",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20310",
+"admin2_name": "González",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20383",
+"admin2_name": "La Gloria",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20400",
+"admin2_name": "La Jagua de Ibirico",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20443",
+"admin2_name": "Manaure Balcón del Cesar",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20517",
+"admin2_name": "Pailitas",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20550",
+"admin2_name": "Pelaya",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20570",
+"admin2_name": "Pueblo Bello",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20614",
+"admin2_name": "Río de Oro",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20621",
+"admin2_name": "La Paz",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20710",
+"admin2_name": "San Alberto",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20750",
+"admin2_name": "San Diego",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20770",
+"admin2_name": "San Martín",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO20787",
+"admin2_name": "Tamalameque",
+"admin1_name": "Cesar"
+},
+{
+"admin2_pcode": "CO23001",
+"admin2_name": "Montería",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23068",
+"admin2_name": "Ayapel",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23079",
+"admin2_name": "Buenavista",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23090",
+"admin2_name": "Canalete",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23162",
+"admin2_name": "Cereté",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23168",
+"admin2_name": "Chimá",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23182",
+"admin2_name": "Chinú",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23189",
+"admin2_name": "Ciénaga de Oro",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23300",
+"admin2_name": "Cotorra",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23350",
+"admin2_name": "La Apartada",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23417",
+"admin2_name": "Lorica",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23419",
+"admin2_name": "Los Córdobas",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23464",
+"admin2_name": "Momil",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23466",
+"admin2_name": "Montelíbano",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23500",
+"admin2_name": "Moñitos",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23555",
+"admin2_name": "Planeta Rica",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23570",
+"admin2_name": "Pueblo Nuevo",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23574",
+"admin2_name": "Puerto Escondido",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23580",
+"admin2_name": "Puerto Libertador",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23586",
+"admin2_name": "Purísima de la Concepción",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23660",
+"admin2_name": "Sahagún",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23670",
+"admin2_name": "San Andrés de Sotavento",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23672",
+"admin2_name": "San Antero",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23675",
+"admin2_name": "San Bernardo del Viento",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23678",
+"admin2_name": "San Carlos",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23682",
+"admin2_name": "San José de Uré",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23686",
+"admin2_name": "San Pelayo",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23807",
+"admin2_name": "Tierralta",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23815",
+"admin2_name": "Tuchín",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO23855",
+"admin2_name": "Valencia",
+"admin1_name": "Córdoba"
+},
+{
+"admin2_pcode": "CO25001",
+"admin2_name": "Agua de Dios",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25019",
+"admin2_name": "Albán",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25035",
+"admin2_name": "Anapoima",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25040",
+"admin2_name": "Anolaima",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25053",
+"admin2_name": "Arbeláez",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25086",
+"admin2_name": "Beltrán",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25095",
+"admin2_name": "Bituima",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25099",
+"admin2_name": "Bojacá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25120",
+"admin2_name": "Cabrera",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25123",
+"admin2_name": "Cachipay",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25126",
+"admin2_name": "Cajicá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25148",
+"admin2_name": "Caparrapí",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25151",
+"admin2_name": "Cáqueza",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25154",
+"admin2_name": "Carmen de Carupa",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25168",
+"admin2_name": "Chaguaní",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25175",
+"admin2_name": "Chía",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25178",
+"admin2_name": "Chipaque",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25181",
+"admin2_name": "Choachí",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25183",
+"admin2_name": "Chocontá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25200",
+"admin2_name": "Cogua",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25214",
+"admin2_name": "Cota",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25224",
+"admin2_name": "Cucunubá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25245",
+"admin2_name": "El Colegio",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25258",
+"admin2_name": "El Peñón",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25260",
+"admin2_name": "El Rosal",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25269",
+"admin2_name": "Facatativá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25279",
+"admin2_name": "Fómeque",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25281",
+"admin2_name": "Fosca",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25286",
+"admin2_name": "Funza",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25288",
+"admin2_name": "Fúquene",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25290",
+"admin2_name": "Fusagasugá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25293",
+"admin2_name": "Gachalá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25295",
+"admin2_name": "Gachancipá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25297",
+"admin2_name": "Gachetá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25299",
+"admin2_name": "Gama",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25307",
+"admin2_name": "Girardot",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25312",
+"admin2_name": "Granada",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25317",
+"admin2_name": "Guachetá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25320",
+"admin2_name": "Guaduas",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25322",
+"admin2_name": "Guasca",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25324",
+"admin2_name": "Guataquí",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25326",
+"admin2_name": "Guatavita",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25328",
+"admin2_name": "Guayabal de Síquima",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25335",
+"admin2_name": "Guayabetal",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25339",
+"admin2_name": "Gutiérrez",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25368",
+"admin2_name": "Jerusalén",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25372",
+"admin2_name": "Junín",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25377",
+"admin2_name": "La Calera",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25386",
+"admin2_name": "La Mesa",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25394",
+"admin2_name": "La Palma",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25398",
+"admin2_name": "La Peña",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25402",
+"admin2_name": "La Vega",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25407",
+"admin2_name": "Lenguazaque",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25426",
+"admin2_name": "Machetá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25430",
+"admin2_name": "Madrid",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25436",
+"admin2_name": "Manta",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25438",
+"admin2_name": "Medina",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25473",
+"admin2_name": "Mosquera",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25483",
+"admin2_name": "Nariño",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25486",
+"admin2_name": "Nemocón",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25488",
+"admin2_name": "Nilo",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25489",
+"admin2_name": "Nimaima",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25491",
+"admin2_name": "Nocaima",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25506",
+"admin2_name": "Venecia",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25513",
+"admin2_name": "Pacho",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25518",
+"admin2_name": "Paime",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25524",
+"admin2_name": "Pandi",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25530",
+"admin2_name": "Paratebueno",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25535",
+"admin2_name": "Pasca",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25572",
+"admin2_name": "Puerto Salgar",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25580",
+"admin2_name": "Pulí",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25592",
+"admin2_name": "Quebradanegra",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25594",
+"admin2_name": "Quetame",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25596",
+"admin2_name": "Quipile",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25599",
+"admin2_name": "Apulo",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25612",
+"admin2_name": "Ricaurte",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25645",
+"admin2_name": "San Antonio del Tequendama",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25649",
+"admin2_name": "San Bernardo",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25653",
+"admin2_name": "San Cayetano",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25658",
+"admin2_name": "San Francisco",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25662",
+"admin2_name": "San Juan de Rioseco",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25718",
+"admin2_name": "Sasaima",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25736",
+"admin2_name": "Sesquilé",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25740",
+"admin2_name": "Sibaté",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25743",
+"admin2_name": "Silvania",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25745",
+"admin2_name": "Simijaca",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25754",
+"admin2_name": "Soacha",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25758",
+"admin2_name": "Sopó",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25769",
+"admin2_name": "Subachoque",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25772",
+"admin2_name": "Suesca",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25777",
+"admin2_name": "Supatá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25779",
+"admin2_name": "Susa",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25781",
+"admin2_name": "Sutatausa",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25785",
+"admin2_name": "Tabio",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25793",
+"admin2_name": "Tausa",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25797",
+"admin2_name": "Tena",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25799",
+"admin2_name": "Tenjo",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25805",
+"admin2_name": "Tibacuy",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25807",
+"admin2_name": "Tibirita",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25815",
+"admin2_name": "Tocaima",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25817",
+"admin2_name": "Tocancipá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25823",
+"admin2_name": "Topaipí",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25839",
+"admin2_name": "Ubalá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25841",
+"admin2_name": "Ubaque",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25843",
+"admin2_name": "Villa de San Diego de Ubaté",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25845",
+"admin2_name": "Une",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25851",
+"admin2_name": "Útica",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25862",
+"admin2_name": "Vergara",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25867",
+"admin2_name": "Vianí",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25871",
+"admin2_name": "Villagómez",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25873",
+"admin2_name": "Villapinzón",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25875",
+"admin2_name": "Villeta",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25878",
+"admin2_name": "Viotá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25885",
+"admin2_name": "Yacopí",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25898",
+"admin2_name": "Zipacón",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO25899",
+"admin2_name": "Zipaquirá",
+"admin1_name": "Cundinamarca"
+},
+{
+"admin2_pcode": "CO27001",
+"admin2_name": "Quibdó",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27006",
+"admin2_name": "Acandí",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27025",
+"admin2_name": "Alto Baudó",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27050",
+"admin2_name": "Atrato",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27073",
+"admin2_name": "Bagadó",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27075",
+"admin2_name": "Bahía Solano",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27077",
+"admin2_name": "Bajo Baudó",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27099",
+"admin2_name": "Bojayá",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27135",
+"admin2_name": "El Cantón del San Pablo",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27150",
+"admin2_name": "Carmen del Darién",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27160",
+"admin2_name": "Cértegui",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27205",
+"admin2_name": "Condoto",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27245",
+"admin2_name": "El Carmen de Atrato",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27250",
+"admin2_name": "El Litoral del San Juan",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27361",
+"admin2_name": "Istmina",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27372",
+"admin2_name": "Juradó",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27413",
+"admin2_name": "Lloró",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27425",
+"admin2_name": "Medio Atrato",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27430",
+"admin2_name": "Medio Baudó",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27450",
+"admin2_name": "Medio San Juan",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27491",
+"admin2_name": "Nóvita",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27495",
+"admin2_name": "Nuquí",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27580",
+"admin2_name": "Río Iró",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27600",
+"admin2_name": "Río Quito",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27615",
+"admin2_name": "Riosucio",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27660",
+"admin2_name": "San José del Palmar",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27745",
+"admin2_name": "Sipí",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27787",
+"admin2_name": "Tadó",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27800",
+"admin2_name": "Unguía",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO27810",
+"admin2_name": "Unión Panamericana",
+"admin1_name": "Chocó"
+},
+{
+"admin2_pcode": "CO41001",
+"admin2_name": "Neiva",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41006",
+"admin2_name": "Acevedo",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41013",
+"admin2_name": "Agrado",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41016",
+"admin2_name": "Aipe",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41020",
+"admin2_name": "Algeciras",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41026",
+"admin2_name": "Altamira",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41078",
+"admin2_name": "Baraya",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41132",
+"admin2_name": "Campoalegre",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41206",
+"admin2_name": "Colombia",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41244",
+"admin2_name": "Elías",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41298",
+"admin2_name": "Garzón",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41306",
+"admin2_name": "Gigante",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41319",
+"admin2_name": "Guadalupe",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41349",
+"admin2_name": "Hobo",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41357",
+"admin2_name": "Íquira",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41359",
+"admin2_name": "Isnos",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41378",
+"admin2_name": "La Argentina",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41396",
+"admin2_name": "La Plata",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41483",
+"admin2_name": "Nátaga",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41503",
+"admin2_name": "Oporapa",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41518",
+"admin2_name": "Paicol",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41524",
+"admin2_name": "Palermo",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41530",
+"admin2_name": "Palestina",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41548",
+"admin2_name": "Pital",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41551",
+"admin2_name": "Pitalito",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41615",
+"admin2_name": "Rivera",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41660",
+"admin2_name": "Saladoblanco",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41668",
+"admin2_name": "San Agustín",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41676",
+"admin2_name": "Santa María",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41770",
+"admin2_name": "Suaza",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41791",
+"admin2_name": "Tarqui",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41797",
+"admin2_name": "Tesalia",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41799",
+"admin2_name": "Tello",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41801",
+"admin2_name": "Teruel",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41807",
+"admin2_name": "Timaná",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41872",
+"admin2_name": "Villavieja",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO41885",
+"admin2_name": "Yaguará",
+"admin1_name": "Huila"
+},
+{
+"admin2_pcode": "CO44001",
+"admin2_name": "Riohacha",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO44035",
+"admin2_name": "Albania",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO44078",
+"admin2_name": "Barrancas",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO44090",
+"admin2_name": "Dibulla",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO44098",
+"admin2_name": "Distracción",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO44110",
+"admin2_name": "El Molino",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO44279",
+"admin2_name": "Fonseca",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO44378",
+"admin2_name": "Hatonuevo",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO44420",
+"admin2_name": "La Jagua del Pilar",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO44430",
+"admin2_name": "Maicao",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO44560",
+"admin2_name": "Manaure",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO44650",
+"admin2_name": "San Juan del Cesar",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO44847",
+"admin2_name": "Uribia",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO44855",
+"admin2_name": "Urumita",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO44874",
+"admin2_name": "Villanueva",
+"admin1_name": "La Guajira"
+},
+{
+"admin2_pcode": "CO47001",
+"admin2_name": "Santa Marta",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47030",
+"admin2_name": "Algarrobo",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47053",
+"admin2_name": "Aracataca",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47058",
+"admin2_name": "Ariguaní",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47161",
+"admin2_name": "Cerro de San Antonio",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47170",
+"admin2_name": "Chivolo",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47189",
+"admin2_name": "Ciénaga",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47205",
+"admin2_name": "Concordia",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47245",
+"admin2_name": "El Banco",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47258",
+"admin2_name": "El Piñón",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47268",
+"admin2_name": "El Retén",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47288",
+"admin2_name": "Fundación",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47318",
+"admin2_name": "Guamal",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47460",
+"admin2_name": "Nueva Granada",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47541",
+"admin2_name": "Pedraza",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47545",
+"admin2_name": "Pijiño del Carmen",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47551",
+"admin2_name": "Pivijay",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47555",
+"admin2_name": "Plato",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47570",
+"admin2_name": "Puebloviejo",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47605",
+"admin2_name": "Remolino",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47660",
+"admin2_name": "Sabanas de San Ángel",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47675",
+"admin2_name": "Salamina",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47692",
+"admin2_name": "San Sebastián de Buenavista",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47703",
+"admin2_name": "San Zenón",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47707",
+"admin2_name": "Santa Ana",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47720",
+"admin2_name": "Santa Bárbara de Pinto",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47745",
+"admin2_name": "Sitionuevo",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47798",
+"admin2_name": "Tenerife",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47960",
+"admin2_name": "Zapayán",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO47980",
+"admin2_name": "Zona Bananera",
+"admin1_name": "Magdalena"
+},
+{
+"admin2_pcode": "CO50001",
+"admin2_name": "Villavicencio",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50006",
+"admin2_name": "Acacías",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50110",
+"admin2_name": "Barranca de Upía",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50124",
+"admin2_name": "Cabuyaro",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50150",
+"admin2_name": "Castilla la Nueva",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50223",
+"admin2_name": "Cubarral",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50226",
+"admin2_name": "Cumaral",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50245",
+"admin2_name": "El Calvario",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50251",
+"admin2_name": "El Castillo",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50270",
+"admin2_name": "El Dorado",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50287",
+"admin2_name": "Fuente de Oro",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50313",
+"admin2_name": "Granada",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50318",
+"admin2_name": "Guamal",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50325",
+"admin2_name": "Mapiripán",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50330",
+"admin2_name": "Mesetas",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50350",
+"admin2_name": "La Macarena",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50370",
+"admin2_name": "Uribe",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50400",
+"admin2_name": "Lejanías",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50450",
+"admin2_name": "Puerto Concordia",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50568",
+"admin2_name": "Puerto Gaitán",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50573",
+"admin2_name": "Puerto López",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50577",
+"admin2_name": "Puerto Lleras",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50590",
+"admin2_name": "Puerto Rico",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50606",
+"admin2_name": "Restrepo",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50680",
+"admin2_name": "San Carlos de Guaroa",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50683",
+"admin2_name": "San Juan de Arama",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50686",
+"admin2_name": "San Juanito",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50689",
+"admin2_name": "San Martín",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO50711",
+"admin2_name": "Vistahermosa",
+"admin1_name": "Meta"
+},
+{
+"admin2_pcode": "CO52001",
+"admin2_name": "Pasto",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52019",
+"admin2_name": "Albán",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52022",
+"admin2_name": "Aldana",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52036",
+"admin2_name": "Ancuya",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52051",
+"admin2_name": "Arboleda",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52079",
+"admin2_name": "Barbacoas",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52083",
+"admin2_name": "Belén",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52110",
+"admin2_name": "Buesaco",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52203",
+"admin2_name": "Colón",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52207",
+"admin2_name": "Consacá",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52210",
+"admin2_name": "Contadero",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52215",
+"admin2_name": "Córdoba",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52224",
+"admin2_name": "Cuaspud Carlosama",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52227",
+"admin2_name": "Cumbal",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52233",
+"admin2_name": "Cumbitara",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52240",
+"admin2_name": "Chachagüí",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52250",
+"admin2_name": "El Charco",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52254",
+"admin2_name": "El Peñol",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52256",
+"admin2_name": "El Rosario",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52258",
+"admin2_name": "El Tablón de Gómez",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52260",
+"admin2_name": "El Tambo",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52287",
+"admin2_name": "Funes",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52317",
+"admin2_name": "Guachucal",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52320",
+"admin2_name": "Guaitarilla",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52323",
+"admin2_name": "Gualmatán",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52352",
+"admin2_name": "Iles",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52354",
+"admin2_name": "Imués",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52356",
+"admin2_name": "Ipiales",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52378",
+"admin2_name": "La Cruz",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52381",
+"admin2_name": "La Florida",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52385",
+"admin2_name": "La Llanada",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52390",
+"admin2_name": "La Tola",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52399",
+"admin2_name": "La Unión",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52405",
+"admin2_name": "Leiva",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52411",
+"admin2_name": "Linares",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52418",
+"admin2_name": "Los Andes",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52427",
+"admin2_name": "Magüí",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52435",
+"admin2_name": "Mallama",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52473",
+"admin2_name": "Mosquera",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52480",
+"admin2_name": "Nariño",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52490",
+"admin2_name": "Olaya Herrera",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52506",
+"admin2_name": "Ospina",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52520",
+"admin2_name": "Francisco Pizarro",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52540",
+"admin2_name": "Policarpa",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52560",
+"admin2_name": "Potosí",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52565",
+"admin2_name": "Providencia",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52573",
+"admin2_name": "Puerres",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52585",
+"admin2_name": "Pupiales",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52612",
+"admin2_name": "Ricaurte",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52621",
+"admin2_name": "Roberto Payán",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52678",
+"admin2_name": "Samaniego",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52683",
+"admin2_name": "Sandoná",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52685",
+"admin2_name": "San Bernardo",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52687",
+"admin2_name": "San Lorenzo",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52693",
+"admin2_name": "San Pablo",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52694",
+"admin2_name": "San Pedro de Cartago",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52696",
+"admin2_name": "Santa Bárbara",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52699",
+"admin2_name": "Santacruz",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52720",
+"admin2_name": "Sapuyes",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52786",
+"admin2_name": "Taminango",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52788",
+"admin2_name": "Tangua",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52835",
+"admin2_name": "San Andrés de Tumaco",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52838",
+"admin2_name": "Túquerres",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO52885",
+"admin2_name": "Yacuanquer",
+"admin1_name": "Nariño"
+},
+{
+"admin2_pcode": "CO54001",
+"admin2_name": "San José de Cúcuta",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54003",
+"admin2_name": "Ábrego",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54051",
+"admin2_name": "Arboledas",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54099",
+"admin2_name": "Bochalema",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54109",
+"admin2_name": "Bucarasica",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54125",
+"admin2_name": "Cácota",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54128",
+"admin2_name": "Cáchira",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54172",
+"admin2_name": "Chinácota",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54174",
+"admin2_name": "Chitagá",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54206",
+"admin2_name": "Convención",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54223",
+"admin2_name": "Cucutilla",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54239",
+"admin2_name": "Durania",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54245",
+"admin2_name": "El Carmen",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54250",
+"admin2_name": "El Tarra",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54261",
+"admin2_name": "El Zulia",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54313",
+"admin2_name": "Gramalote",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54344",
+"admin2_name": "Hacarí",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54347",
+"admin2_name": "Herrán",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54377",
+"admin2_name": "Labateca",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54385",
+"admin2_name": "La Esperanza",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54398",
+"admin2_name": "La Playa",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54405",
+"admin2_name": "Los Patios",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54418",
+"admin2_name": "Lourdes",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54480",
+"admin2_name": "Mutiscua",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54498",
+"admin2_name": "Ocaña",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54518",
+"admin2_name": "Pamplona",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54520",
+"admin2_name": "Pamplonita",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54553",
+"admin2_name": "Puerto Santander",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54599",
+"admin2_name": "Ragonvalia",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54660",
+"admin2_name": "Salazar",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54670",
+"admin2_name": "San Calixto",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54673",
+"admin2_name": "San Cayetano",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54680",
+"admin2_name": "Santiago",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54720",
+"admin2_name": "Sardinata",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54743",
+"admin2_name": "Silos",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54800",
+"admin2_name": "Teorama",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54810",
+"admin2_name": "Tibú",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54820",
+"admin2_name": "Toledo",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54871",
+"admin2_name": "Villa Caro",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO54874",
+"admin2_name": "Villa del Rosario",
+"admin1_name": "Norte de Santander"
+},
+{
+"admin2_pcode": "CO63001",
+"admin2_name": "Armenia",
+"admin1_name": "Quindio"
+},
+{
+"admin2_pcode": "CO63111",
+"admin2_name": "Buenavista",
+"admin1_name": "Quindio"
+},
+{
+"admin2_pcode": "CO63130",
+"admin2_name": "Calarcá",
+"admin1_name": "Quindio"
+},
+{
+"admin2_pcode": "CO63190",
+"admin2_name": "Circasia",
+"admin1_name": "Quindio"
+},
+{
+"admin2_pcode": "CO63212",
+"admin2_name": "Córdoba",
+"admin1_name": "Quindio"
+},
+{
+"admin2_pcode": "CO63272",
+"admin2_name": "Filandia",
+"admin1_name": "Quindio"
+},
+{
+"admin2_pcode": "CO63302",
+"admin2_name": "Génova",
+"admin1_name": "Quindio"
+},
+{
+"admin2_pcode": "CO63401",
+"admin2_name": "La Tebaida",
+"admin1_name": "Quindio"
+},
+{
+"admin2_pcode": "CO63470",
+"admin2_name": "Montenegro",
+"admin1_name": "Quindio"
+},
+{
+"admin2_pcode": "CO63548",
+"admin2_name": "Pijao",
+"admin1_name": "Quindio"
+},
+{
+"admin2_pcode": "CO63594",
+"admin2_name": "Quimbaya",
+"admin1_name": "Quindio"
+},
+{
+"admin2_pcode": "CO63690",
+"admin2_name": "Salento",
+"admin1_name": "Quindio"
+},
+{
+"admin2_pcode": "CO66001",
+"admin2_name": "Pereira",
+"admin1_name": "Risaralda"
+},
+{
+"admin2_pcode": "CO66045",
+"admin2_name": "Apía",
+"admin1_name": "Risaralda"
+},
+{
+"admin2_pcode": "CO66075",
+"admin2_name": "Balboa",
+"admin1_name": "Risaralda"
+},
+{
+"admin2_pcode": "CO66088",
+"admin2_name": "Belén de Umbría",
+"admin1_name": "Risaralda"
+},
+{
+"admin2_pcode": "CO66170",
+"admin2_name": "Dosquebradas",
+"admin1_name": "Risaralda"
+},
+{
+"admin2_pcode": "CO66318",
+"admin2_name": "Guática",
+"admin1_name": "Risaralda"
+},
+{
+"admin2_pcode": "CO66383",
+"admin2_name": "La Celia",
+"admin1_name": "Risaralda"
+},
+{
+"admin2_pcode": "CO66400",
+"admin2_name": "La Virginia",
+"admin1_name": "Risaralda"
+},
+{
+"admin2_pcode": "CO66440",
+"admin2_name": "Marsella",
+"admin1_name": "Risaralda"
+},
+{
+"admin2_pcode": "CO66456",
+"admin2_name": "Mistrató",
+"admin1_name": "Risaralda"
+},
+{
+"admin2_pcode": "CO66572",
+"admin2_name": "Pueblo Rico",
+"admin1_name": "Risaralda"
+},
+{
+"admin2_pcode": "CO66594",
+"admin2_name": "Quinchía",
+"admin1_name": "Risaralda"
+},
+{
+"admin2_pcode": "CO66682",
+"admin2_name": "Santa Rosa de Cabal",
+"admin1_name": "Risaralda"
+},
+{
+"admin2_pcode": "CO66687",
+"admin2_name": "Santuario",
+"admin1_name": "Risaralda"
+},
+{
+"admin2_pcode": "CO68001",
+"admin2_name": "Bucaramanga",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68013",
+"admin2_name": "Aguada",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68020",
+"admin2_name": "Albania",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68051",
+"admin2_name": "Aratoca",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68077",
+"admin2_name": "Barbosa",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68079",
+"admin2_name": "Barichara",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68081",
+"admin2_name": "Barrancabermeja",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68092",
+"admin2_name": "Betulia",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68101",
+"admin2_name": "Bolívar",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68121",
+"admin2_name": "Cabrera",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68132",
+"admin2_name": "California",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68147",
+"admin2_name": "Capitanejo",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68152",
+"admin2_name": "Carcasí",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68160",
+"admin2_name": "Cepitá",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68162",
+"admin2_name": "Cerrito",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68167",
+"admin2_name": "Charalá",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68169",
+"admin2_name": "Charta",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68176",
+"admin2_name": "Chima",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68179",
+"admin2_name": "Chipatá",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68190",
+"admin2_name": "Cimitarra",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68207",
+"admin2_name": "Concepción",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68209",
+"admin2_name": "Confines",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68211",
+"admin2_name": "Contratación",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68217",
+"admin2_name": "Coromoro",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68229",
+"admin2_name": "Curití",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68235",
+"admin2_name": "El Carmen de Chucuri",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68245",
+"admin2_name": "El Guacamayo",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68250",
+"admin2_name": "El Peñón",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68255",
+"admin2_name": "El Playón",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68264",
+"admin2_name": "Encino",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68266",
+"admin2_name": "Enciso",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68271",
+"admin2_name": "Florián",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68276",
+"admin2_name": "Floridablanca",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68296",
+"admin2_name": "Galán",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68298",
+"admin2_name": "Gámbita",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68307",
+"admin2_name": "Girón",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68318",
+"admin2_name": "Guaca",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68320",
+"admin2_name": "Guadalupe",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68322",
+"admin2_name": "Guapotá",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68324",
+"admin2_name": "Guavatá",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68327",
+"admin2_name": "Güepsa",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68344",
+"admin2_name": "Hato",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68368",
+"admin2_name": "Jesús María",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68370",
+"admin2_name": "Jordán",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68377",
+"admin2_name": "La Belleza",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68385",
+"admin2_name": "Landázuri",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68397",
+"admin2_name": "La Paz",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68406",
+"admin2_name": "Lebrija",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68418",
+"admin2_name": "Los Santos",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68425",
+"admin2_name": "Macaravita",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68432",
+"admin2_name": "Málaga",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68444",
+"admin2_name": "Matanza",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68464",
+"admin2_name": "Mogotes",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68468",
+"admin2_name": "Molagavita",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68498",
+"admin2_name": "Ocamonte",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68500",
+"admin2_name": "Oiba",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68502",
+"admin2_name": "Onzaga",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68522",
+"admin2_name": "Palmar",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68524",
+"admin2_name": "Palmas del Socorro",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68533",
+"admin2_name": "Páramo",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68547",
+"admin2_name": "Piedecuesta",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68549",
+"admin2_name": "Pinchote",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68572",
+"admin2_name": "Puente Nacional",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68573",
+"admin2_name": "Puerto Parra",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68575",
+"admin2_name": "Puerto Wilches",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68615",
+"admin2_name": "Rionegro",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68655",
+"admin2_name": "Sabana de Torres",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68669",
+"admin2_name": "San Andrés",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68673",
+"admin2_name": "San Benito",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68679",
+"admin2_name": "San Gil",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68682",
+"admin2_name": "San Joaquín",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68684",
+"admin2_name": "San José de Miranda",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68686",
+"admin2_name": "San Miguel",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68689",
+"admin2_name": "San Vicente de Chucurí",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68705",
+"admin2_name": "Santa Bárbara",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68720",
+"admin2_name": "Santa Helena del Opón",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68745",
+"admin2_name": "Simacota",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68755",
+"admin2_name": "Socorro",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68770",
+"admin2_name": "Suaita",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68773",
+"admin2_name": "Sucre",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68780",
+"admin2_name": "Suratá",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68820",
+"admin2_name": "Tona",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68855",
+"admin2_name": "Valle de San José",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68861",
+"admin2_name": "Vélez",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68867",
+"admin2_name": "Vetas",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68872",
+"admin2_name": "Villanueva",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO68895",
+"admin2_name": "Zapatoca",
+"admin1_name": "Santander"
+},
+{
+"admin2_pcode": "CO70001",
+"admin2_name": "Sincelejo",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70110",
+"admin2_name": "Buenavista",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70124",
+"admin2_name": "Caimito",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70204",
+"admin2_name": "Colosó",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70215",
+"admin2_name": "Corozal",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70221",
+"admin2_name": "Coveñas",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70230",
+"admin2_name": "Chalán",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70233",
+"admin2_name": "El Roble",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70235",
+"admin2_name": "Galeras",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70265",
+"admin2_name": "Guaranda",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70400",
+"admin2_name": "La Unión",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70418",
+"admin2_name": "Los Palmitos",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70429",
+"admin2_name": "Majagual",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70473",
+"admin2_name": "Morroa",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70508",
+"admin2_name": "Ovejas",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70523",
+"admin2_name": "Palmito",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70670",
+"admin2_name": "Sampués",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70678",
+"admin2_name": "San Benito Abad",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70702",
+"admin2_name": "San Juan de Betulia",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70708",
+"admin2_name": "San Marcos",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70713",
+"admin2_name": "San Onofre",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70717",
+"admin2_name": "San Pedro",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70742",
+"admin2_name": "San Luis de Sincé",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70771",
+"admin2_name": "Sucre",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70820",
+"admin2_name": "Santiago de Tolú",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO70823",
+"admin2_name": "San José de Toluviejo",
+"admin1_name": "Sucre"
+},
+{
+"admin2_pcode": "CO73001",
+"admin2_name": "Ibagué",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73024",
+"admin2_name": "Alpujarra",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73026",
+"admin2_name": "Alvarado",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73030",
+"admin2_name": "Ambalema",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73043",
+"admin2_name": "Anzoátegui",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73055",
+"admin2_name": "Armero",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73067",
+"admin2_name": "Ataco",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73124",
+"admin2_name": "Cajamarca",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73148",
+"admin2_name": "Carmen de Apicalá",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73152",
+"admin2_name": "Casabianca",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73168",
+"admin2_name": "Chaparral",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73200",
+"admin2_name": "Coello",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73217",
+"admin2_name": "Coyaima",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73226",
+"admin2_name": "Cunday",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73236",
+"admin2_name": "Dolores",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73268",
+"admin2_name": "Espinal",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73270",
+"admin2_name": "Falan",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73275",
+"admin2_name": "Flandes",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73283",
+"admin2_name": "Fresno",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73319",
+"admin2_name": "Guamo",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73347",
+"admin2_name": "Herveo",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73349",
+"admin2_name": "Honda",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73352",
+"admin2_name": "Icononzo",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73408",
+"admin2_name": "Lérida",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73411",
+"admin2_name": "Líbano",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73443",
+"admin2_name": "San Sebastián de Mariquita",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73449",
+"admin2_name": "Melgar",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73461",
+"admin2_name": "Murillo",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73483",
+"admin2_name": "Natagaima",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73504",
+"admin2_name": "Ortega",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73520",
+"admin2_name": "Palocabildo",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73547",
+"admin2_name": "Piedras",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73555",
+"admin2_name": "Planadas",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73563",
+"admin2_name": "Prado",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73585",
+"admin2_name": "Purificación",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73616",
+"admin2_name": "Rioblanco",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73622",
+"admin2_name": "Roncesvalles",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73624",
+"admin2_name": "Rovira",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73671",
+"admin2_name": "Saldaña",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73675",
+"admin2_name": "San Antonio",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73678",
+"admin2_name": "San Luis",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73686",
+"admin2_name": "Santa Isabel",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73770",
+"admin2_name": "Suárez",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73854",
+"admin2_name": "Valle de San Juan",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73861",
+"admin2_name": "Venadillo",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73870",
+"admin2_name": "Villahermosa",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO73873",
+"admin2_name": "Villarrica",
+"admin1_name": "Tolima"
+},
+{
+"admin2_pcode": "CO76001",
+"admin2_name": "Cali",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76020",
+"admin2_name": "Alcalá",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76036",
+"admin2_name": "Andalucía",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76041",
+"admin2_name": "Ansermanuevo",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76054",
+"admin2_name": "Argelia",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76100",
+"admin2_name": "Bolívar",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76109",
+"admin2_name": "Buenaventura",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76111",
+"admin2_name": "Guadalajara de Buga",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76113",
+"admin2_name": "Bugalagrande",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76122",
+"admin2_name": "Caicedonia",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76126",
+"admin2_name": "Calima",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76130",
+"admin2_name": "Candelaria",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76147",
+"admin2_name": "Cartago",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76233",
+"admin2_name": "Dagua",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76243",
+"admin2_name": "El Águila",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76246",
+"admin2_name": "El Cairo",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76248",
+"admin2_name": "El Cerrito",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76250",
+"admin2_name": "El Dovio",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76275",
+"admin2_name": "Florida",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76306",
+"admin2_name": "Ginebra",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76318",
+"admin2_name": "Guacarí",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76364",
+"admin2_name": "Jamundí",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76377",
+"admin2_name": "La Cumbre",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76400",
+"admin2_name": "La Unión",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76403",
+"admin2_name": "La Victoria",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76497",
+"admin2_name": "Obando",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76520",
+"admin2_name": "Palmira",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76563",
+"admin2_name": "Pradera",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76606",
+"admin2_name": "Restrepo",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76616",
+"admin2_name": "Riofrío",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76622",
+"admin2_name": "Roldanillo",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76670",
+"admin2_name": "San Pedro",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76736",
+"admin2_name": "Sevilla",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76823",
+"admin2_name": "Toro",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76828",
+"admin2_name": "Trujillo",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76834",
+"admin2_name": "Tuluá",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76845",
+"admin2_name": "Ulloa",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76863",
+"admin2_name": "Versalles",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76869",
+"admin2_name": "Vijes",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76890",
+"admin2_name": "Yotoco",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76892",
+"admin2_name": "Yumbo",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO76895",
+"admin2_name": "Zarzal",
+"admin1_name": "Valle del Cauca"
+},
+{
+"admin2_pcode": "CO81001",
+"admin2_name": "Arauca",
+"admin1_name": "Arauca"
+},
+{
+"admin2_pcode": "CO81065",
+"admin2_name": "Arauquita",
+"admin1_name": "Arauca"
+},
+{
+"admin2_pcode": "CO81220",
+"admin2_name": "Cravo Norte",
+"admin1_name": "Arauca"
+},
+{
+"admin2_pcode": "CO81300",
+"admin2_name": "Fortul",
+"admin1_name": "Arauca"
+},
+{
+"admin2_pcode": "CO81591",
+"admin2_name": "Puerto Rondón",
+"admin1_name": "Arauca"
+},
+{
+"admin2_pcode": "CO81736",
+"admin2_name": "Saravena",
+"admin1_name": "Arauca"
+},
+{
+"admin2_pcode": "CO81794",
+"admin2_name": "Tame",
+"admin1_name": "Arauca"
+},
+{
+"admin2_pcode": "CO85001",
+"admin2_name": "Yopal",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85010",
+"admin2_name": "Aguazul",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85015",
+"admin2_name": "Chámeza",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85125",
+"admin2_name": "Hato Corozal",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85136",
+"admin2_name": "La Salina",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85139",
+"admin2_name": "Maní",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85162",
+"admin2_name": "Monterrey",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85225",
+"admin2_name": "Nunchía",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85230",
+"admin2_name": "Orocué",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85250",
+"admin2_name": "Paz de Ariporo",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85263",
+"admin2_name": "Pore",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85279",
+"admin2_name": "Recetor",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85300",
+"admin2_name": "Sabanalarga",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85315",
+"admin2_name": "Sácama",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85325",
+"admin2_name": "San Luis de Palenque",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85400",
+"admin2_name": "Támara",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85410",
+"admin2_name": "Tauramena",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85430",
+"admin2_name": "Trinidad",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO85440",
+"admin2_name": "Villanueva",
+"admin1_name": "Casanare"
+},
+{
+"admin2_pcode": "CO86001",
+"admin2_name": "Mocoa",
+"admin1_name": "Putumayo"
+},
+{
+"admin2_pcode": "CO86219",
+"admin2_name": "Colón",
+"admin1_name": "Putumayo"
+},
+{
+"admin2_pcode": "CO86320",
+"admin2_name": "Orito",
+"admin1_name": "Putumayo"
+},
+{
+"admin2_pcode": "CO86568",
+"admin2_name": "Puerto Asís",
+"admin1_name": "Putumayo"
+},
+{
+"admin2_pcode": "CO86569",
+"admin2_name": "Puerto Caicedo",
+"admin1_name": "Putumayo"
+},
+{
+"admin2_pcode": "CO86571",
+"admin2_name": "Puerto Guzmán",
+"admin1_name": "Putumayo"
+},
+{
+"admin2_pcode": "CO86573",
+"admin2_name": "Puerto Leguízamo",
+"admin1_name": "Putumayo"
+},
+{
+"admin2_pcode": "CO86749",
+"admin2_name": "Sibundoy",
+"admin1_name": "Putumayo"
+},
+{
+"admin2_pcode": "CO86755",
+"admin2_name": "San Francisco",
+"admin1_name": "Putumayo"
+},
+{
+"admin2_pcode": "CO86757",
+"admin2_name": "San Miguel",
+"admin1_name": "Putumayo"
+},
+{
+"admin2_pcode": "CO86760",
+"admin2_name": "Santiago",
+"admin1_name": "Putumayo"
+},
+{
+"admin2_pcode": "CO86865",
+"admin2_name": "Valle del Guamuez",
+"admin1_name": "Putumayo"
+},
+{
+"admin2_pcode": "CO86885",
+"admin2_name": "Villagarzón",
+"admin1_name": "Putumayo"
+},
+{
+"admin2_pcode": "CO88001",
+"admin2_name": "San Andrés",
+"admin1_name": "Archipiélago de San Andrés, Providencia y Santa Catalina"
+},
+{
+"admin2_pcode": "CO88564",
+"admin2_name": "Providencia",
+"admin1_name": "Archipiélago de San Andrés, Providencia y Santa Catalina"
+},
+{
+"admin2_pcode": "CO91001",
+"admin2_name": "Leticia",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "CO91263",
+"admin2_name": "El Encanto",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "CO91405",
+"admin2_name": "La Chorrera",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "CO91407",
+"admin2_name": "La Pedrera",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "CO91430",
+"admin2_name": "La Victoria",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "CO91460",
+"admin2_name": "Mirití - Paraná",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "CO91530",
+"admin2_name": "Puerto Alegría",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "CO91536",
+"admin2_name": "Puerto Arica",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "CO91540",
+"admin2_name": "Puerto Nariño",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "CO91669",
+"admin2_name": "Puerto Santander",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "CO91798",
+"admin2_name": "Tarapacá",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "CO94001",
+"admin2_name": "Inírida",
+"admin1_name": "Guainía"
+},
+{
+"admin2_pcode": "CO94343",
+"admin2_name": "Barrancominas",
+"admin1_name": "Guainía"
+},
+{
+"admin2_pcode": "CO94663",
+"admin2_name": "Mapiripana",
+"admin1_name": "Guainía"
+},
+{
+"admin2_pcode": "CO94883",
+"admin2_name": "San Felipe",
+"admin1_name": "Guainía"
+},
+{
+"admin2_pcode": "CO94884",
+"admin2_name": "Puerto Colombia",
+"admin1_name": "Guainía"
+},
+{
+"admin2_pcode": "CO94885",
+"admin2_name": "La Guadalupe",
+"admin1_name": "Guainía"
+},
+{
+"admin2_pcode": "CO94886",
+"admin2_name": "Cacahual",
+"admin1_name": "Guainía"
+},
+{
+"admin2_pcode": "CO94887",
+"admin2_name": "Pana Pana",
+"admin1_name": "Guainía"
+},
+{
+"admin2_pcode": "CO94888",
+"admin2_name": "Morichal",
+"admin1_name": "Guainía"
+},
+{
+"admin2_pcode": "CO95001",
+"admin2_name": "San José del Guaviare",
+"admin1_name": "Guaviare"
+},
+{
+"admin2_pcode": "CO95015",
+"admin2_name": "Calamar",
+"admin1_name": "Guaviare"
+},
+{
+"admin2_pcode": "CO95025",
+"admin2_name": "El Retorno",
+"admin1_name": "Guaviare"
+},
+{
+"admin2_pcode": "CO95200",
+"admin2_name": "Miraflores",
+"admin1_name": "Guaviare"
+},
+{
+"admin2_pcode": "CO97001",
+"admin2_name": "Mitú",
+"admin1_name": "Vaupés"
+},
+{
+"admin2_pcode": "CO97161",
+"admin2_name": "Carurú",
+"admin1_name": "Vaupés"
+},
+{
+"admin2_pcode": "CO97511",
+"admin2_name": "Pacoa",
+"admin1_name": "Vaupés"
+},
+{
+"admin2_pcode": "CO97666",
+"admin2_name": "Taraira",
+"admin1_name": "Vaupés"
+},
+{
+"admin2_pcode": "CO97777",
+"admin2_name": "Papunahua",
+"admin1_name": "Vaupés"
+},
+{
+"admin2_pcode": "CO97889",
+"admin2_name": "Yavaraté",
+"admin1_name": "Vaupés"
+},
+{
+"admin2_pcode": "CO99001",
+"admin2_name": "Puerto Carreño",
+"admin1_name": "Vichada"
+},
+{
+"admin2_pcode": "CO99524",
+"admin2_name": "La Primavera",
+"admin1_name": "Vichada"
+},
+{
+"admin2_pcode": "CO99624",
+"admin2_name": "Santa Rosalía",
+"admin1_name": "Vichada"
+},
+{
+"admin2_pcode": "CO99773",
+"admin2_name": "Cumaribo",
+"admin1_name": "Vichada"
+}
+],
+"CRI": [
+{
+"admin2_pcode": "CR101",
+"admin2_name": "San Jose",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR102",
+"admin2_name": "Escazu",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR103",
+"admin2_name": "Desamparados",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR104",
+"admin2_name": "Puriscal",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR105",
+"admin2_name": "Tarrazu",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR106",
+"admin2_name": "Aserri",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR107",
+"admin2_name": "Mora",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR108",
+"admin2_name": "Goicoechea",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR109",
+"admin2_name": "Santa Ana",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR110",
+"admin2_name": "Alajuelita",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR111",
+"admin2_name": "Vazquez De Coronado",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR112",
+"admin2_name": "Acosta",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR113",
+"admin2_name": "Tibas",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR114",
+"admin2_name": "Moravia",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR115",
+"admin2_name": "Montes De Oca",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR116",
+"admin2_name": "Turrubares",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR117",
+"admin2_name": "Dota",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR118",
+"admin2_name": "Curridabat",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR119",
+"admin2_name": "Perez Zeledon",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR120",
+"admin2_name": "Leon Cortes",
+"admin1_name": "San Jose"
+},
+{
+"admin2_pcode": "CR201",
+"admin2_name": "Alajuela",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR202",
+"admin2_name": "San Ramon",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR203",
+"admin2_name": "Grecia",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR204",
+"admin2_name": "San Mateo",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR205",
+"admin2_name": "Atenas",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR206",
+"admin2_name": "Naranjo",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR207",
+"admin2_name": "Palmares",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR208",
+"admin2_name": "Poas",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR209",
+"admin2_name": "Orotina",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR210",
+"admin2_name": "San Carlos",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR211",
+"admin2_name": "Alfaro Ruiz",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR212",
+"admin2_name": "Valverde Vega",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR213",
+"admin2_name": "Upala",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR214",
+"admin2_name": "Los Chiles",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR215",
+"admin2_name": "Guatuso",
+"admin1_name": "Alajuela"
+},
+{
+"admin2_pcode": "CR301",
+"admin2_name": "Cartago",
+"admin1_name": "Cartago"
+},
+{
+"admin2_pcode": "CR302",
+"admin2_name": "Paraiso",
+"admin1_name": "Cartago"
+},
+{
+"admin2_pcode": "CR303",
+"admin2_name": "La Union",
+"admin1_name": "Cartago"
+},
+{
+"admin2_pcode": "CR304",
+"admin2_name": "Jimenez",
+"admin1_name": "Cartago"
+},
+{
+"admin2_pcode": "CR305",
+"admin2_name": "Turrialba",
+"admin1_name": "Cartago"
+},
+{
+"admin2_pcode": "CR306",
+"admin2_name": "Alvarado",
+"admin1_name": "Cartago"
+},
+{
+"admin2_pcode": "CR307",
+"admin2_name": "Oreamuno",
+"admin1_name": "Cartago"
+},
+{
+"admin2_pcode": "CR308",
+"admin2_name": "El Guarco",
+"admin1_name": "Cartago"
+},
+{
+"admin2_pcode": "CR401",
+"admin2_name": "Heredia",
+"admin1_name": "Heredia"
+},
+{
+"admin2_pcode": "CR402",
+"admin2_name": "Barva",
+"admin1_name": "Heredia"
+},
+{
+"admin2_pcode": "CR403",
+"admin2_name": "Santo Domingo",
+"admin1_name": "Heredia"
+},
+{
+"admin2_pcode": "CR404",
+"admin2_name": "Santa Barbara",
+"admin1_name": "Heredia"
+},
+{
+"admin2_pcode": "CR405",
+"admin2_name": "San Rafael",
+"admin1_name": "Heredia"
+},
+{
+"admin2_pcode": "CR406",
+"admin2_name": "San Isidro",
+"admin1_name": "Heredia"
+},
+{
+"admin2_pcode": "CR407",
+"admin2_name": "Belen",
+"admin1_name": "Heredia"
+},
+{
+"admin2_pcode": "CR408",
+"admin2_name": "Flores",
+"admin1_name": "Heredia"
+},
+{
+"admin2_pcode": "CR409",
+"admin2_name": "San Pablo",
+"admin1_name": "Heredia"
+},
+{
+"admin2_pcode": "CR410",
+"admin2_name": "Sarapiqui",
+"admin1_name": "Heredia"
+},
+{
+"admin2_pcode": "CR501",
+"admin2_name": "Liberia",
+"admin1_name": "Guanacaste"
+},
+{
+"admin2_pcode": "CR502",
+"admin2_name": "Nicoya",
+"admin1_name": "Guanacaste"
+},
+{
+"admin2_pcode": "CR503",
+"admin2_name": "Santa Cruz",
+"admin1_name": "Guanacaste"
+},
+{
+"admin2_pcode": "CR504",
+"admin2_name": "Bagaces",
+"admin1_name": "Guanacaste"
+},
+{
+"admin2_pcode": "CR505",
+"admin2_name": "Carrillo",
+"admin1_name": "Guanacaste"
+},
+{
+"admin2_pcode": "CR506",
+"admin2_name": "Cañas",
+"admin1_name": "Guanacaste"
+},
+{
+"admin2_pcode": "CR507",
+"admin2_name": "Abangares",
+"admin1_name": "Guanacaste"
+},
+{
+"admin2_pcode": "CR508",
+"admin2_name": "Tilaran",
+"admin1_name": "Guanacaste"
+},
+{
+"admin2_pcode": "CR509",
+"admin2_name": "Nandayure",
+"admin1_name": "Guanacaste"
+},
+{
+"admin2_pcode": "CR510",
+"admin2_name": "La Cruz",
+"admin1_name": "Guanacaste"
+},
+{
+"admin2_pcode": "CR511",
+"admin2_name": "Hojancha",
+"admin1_name": "Guanacaste"
+},
+{
+"admin2_pcode": "CR601",
+"admin2_name": "Puntarenas",
+"admin1_name": "Puntarenas"
+},
+{
+"admin2_pcode": "CR602",
+"admin2_name": "Esparza",
+"admin1_name": "Puntarenas"
+},
+{
+"admin2_pcode": "CR603",
+"admin2_name": "Buenos Aires",
+"admin1_name": "Puntarenas"
+},
+{
+"admin2_pcode": "CR604",
+"admin2_name": "Montes De Oro",
+"admin1_name": "Puntarenas"
+},
+{
+"admin2_pcode": "CR605",
+"admin2_name": "Osa",
+"admin1_name": "Puntarenas"
+},
+{
+"admin2_pcode": "CR606",
+"admin2_name": "Aguirre",
+"admin1_name": "Puntarenas"
+},
+{
+"admin2_pcode": "CR607",
+"admin2_name": "Golfito",
+"admin1_name": "Puntarenas"
+},
+{
+"admin2_pcode": "CR608",
+"admin2_name": "Coto Brus",
+"admin1_name": "Puntarenas"
+},
+{
+"admin2_pcode": "CR609",
+"admin2_name": "Parrita",
+"admin1_name": "Puntarenas"
+},
+{
+"admin2_pcode": "CR610",
+"admin2_name": "Corredores",
+"admin1_name": "Puntarenas"
+},
+{
+"admin2_pcode": "CR611",
+"admin2_name": "Garabito",
+"admin1_name": "Puntarenas"
+},
+{
+"admin2_pcode": "CR701",
+"admin2_name": "Limon",
+"admin1_name": "Limon"
+},
+{
+"admin2_pcode": "CR702",
+"admin2_name": "Pococi",
+"admin1_name": "Limon"
+},
+{
+"admin2_pcode": "CR703",
+"admin2_name": "Siquirres",
+"admin1_name": "Limon"
+},
+{
+"admin2_pcode": "CR704",
+"admin2_name": "Talamanca",
+"admin1_name": "Limon"
+},
+{
+"admin2_pcode": "CR705",
+"admin2_name": "Matina",
+"admin1_name": "Limon"
+},
+{
+"admin2_pcode": "CR706",
+"admin2_name": "Guacimo",
+"admin1_name": "Limon"
+}
+],
+"ECU": [
+{
+"admin2_pcode": "EC0101",
+"admin2_name": "Cuenca",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0102",
+"admin2_name": "Giron",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0103",
+"admin2_name": "Gualaceo",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0104",
+"admin2_name": "Nabon",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0105",
+"admin2_name": "Paute",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0106",
+"admin2_name": "Pucara",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0107",
+"admin2_name": "San Fernando",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0108",
+"admin2_name": "Santa Isabel",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0109",
+"admin2_name": "Sigsig",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0110",
+"admin2_name": "Oña",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0111",
+"admin2_name": "Chordeleg",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0112",
+"admin2_name": "El Pan",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0113",
+"admin2_name": "Sevilla de Oro",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0114",
+"admin2_name": "Guachapala",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0115",
+"admin2_name": "Camilo Ponce Enriquez",
+"admin1_name": "Azuay"
+},
+{
+"admin2_pcode": "EC0201",
+"admin2_name": "Guaranda",
+"admin1_name": "Bolivar"
+},
+{
+"admin2_pcode": "EC0202",
+"admin2_name": "Chillanes",
+"admin1_name": "Bolivar"
+},
+{
+"admin2_pcode": "EC0203",
+"admin2_name": "Chimbo",
+"admin1_name": "Bolivar"
+},
+{
+"admin2_pcode": "EC0204",
+"admin2_name": "Echeandia",
+"admin1_name": "Bolivar"
+},
+{
+"admin2_pcode": "EC0205",
+"admin2_name": "San Miguel",
+"admin1_name": "Bolivar"
+},
+{
+"admin2_pcode": "EC0206",
+"admin2_name": "Caluma",
+"admin1_name": "Bolivar"
+},
+{
+"admin2_pcode": "EC0207",
+"admin2_name": "Las Naves",
+"admin1_name": "Bolivar"
+},
+{
+"admin2_pcode": "EC0301",
+"admin2_name": "Azogues",
+"admin1_name": "Cañar"
+},
+{
+"admin2_pcode": "EC0302",
+"admin2_name": "Biblian",
+"admin1_name": "Cañar"
+},
+{
+"admin2_pcode": "EC0303",
+"admin2_name": "Cañar",
+"admin1_name": "Cañar"
+},
+{
+"admin2_pcode": "EC0304",
+"admin2_name": "La Troncal",
+"admin1_name": "Cañar"
+},
+{
+"admin2_pcode": "EC0305",
+"admin2_name": "El Tambo",
+"admin1_name": "Cañar"
+},
+{
+"admin2_pcode": "EC0306",
+"admin2_name": "Deleg",
+"admin1_name": "Cañar"
+},
+{
+"admin2_pcode": "EC0307",
+"admin2_name": "Suscal",
+"admin1_name": "Cañar"
+},
+{
+"admin2_pcode": "EC0401",
+"admin2_name": "Tulcan",
+"admin1_name": "Carchi"
+},
+{
+"admin2_pcode": "EC0402",
+"admin2_name": "Bolivar",
+"admin1_name": "Carchi"
+},
+{
+"admin2_pcode": "EC0403",
+"admin2_name": "Espejo",
+"admin1_name": "Carchi"
+},
+{
+"admin2_pcode": "EC0404",
+"admin2_name": "Mira",
+"admin1_name": "Carchi"
+},
+{
+"admin2_pcode": "EC0405",
+"admin2_name": "Montufar",
+"admin1_name": "Carchi"
+},
+{
+"admin2_pcode": "EC0406",
+"admin2_name": "San Pedro de Huaca",
+"admin1_name": "Carchi"
+},
+{
+"admin2_pcode": "EC0501",
+"admin2_name": "Latacunga",
+"admin1_name": "Cotopaxi"
+},
+{
+"admin2_pcode": "EC0502",
+"admin2_name": "La Mana",
+"admin1_name": "Cotopaxi"
+},
+{
+"admin2_pcode": "EC0503",
+"admin2_name": "Pangua",
+"admin1_name": "Cotopaxi"
+},
+{
+"admin2_pcode": "EC0504",
+"admin2_name": "Pujili",
+"admin1_name": "Cotopaxi"
+},
+{
+"admin2_pcode": "EC0505",
+"admin2_name": "Salcedo",
+"admin1_name": "Cotopaxi"
+},
+{
+"admin2_pcode": "EC0506",
+"admin2_name": "Saquisili",
+"admin1_name": "Cotopaxi"
+},
+{
+"admin2_pcode": "EC0507",
+"admin2_name": "Sigchos",
+"admin1_name": "Cotopaxi"
+},
+{
+"admin2_pcode": "EC0601",
+"admin2_name": "Riobamba",
+"admin1_name": "Chimborazo"
+},
+{
+"admin2_pcode": "EC0602",
+"admin2_name": "Alausi",
+"admin1_name": "Chimborazo"
+},
+{
+"admin2_pcode": "EC0603",
+"admin2_name": "Colta",
+"admin1_name": "Chimborazo"
+},
+{
+"admin2_pcode": "EC0604",
+"admin2_name": "Chambo",
+"admin1_name": "Chimborazo"
+},
+{
+"admin2_pcode": "EC0605",
+"admin2_name": "Chunchi",
+"admin1_name": "Chimborazo"
+},
+{
+"admin2_pcode": "EC0606",
+"admin2_name": "Guamote",
+"admin1_name": "Chimborazo"
+},
+{
+"admin2_pcode": "EC0607",
+"admin2_name": "Guano",
+"admin1_name": "Chimborazo"
+},
+{
+"admin2_pcode": "EC0608",
+"admin2_name": "Pallatanga",
+"admin1_name": "Chimborazo"
+},
+{
+"admin2_pcode": "EC0609",
+"admin2_name": "Penipe",
+"admin1_name": "Chimborazo"
+},
+{
+"admin2_pcode": "EC0610",
+"admin2_name": "Cumanda",
+"admin1_name": "Chimborazo"
+},
+{
+"admin2_pcode": "EC0701",
+"admin2_name": "Machala",
+"admin1_name": "El Oro"
+},
+{
+"admin2_pcode": "EC0702",
+"admin2_name": "Arenillas",
+"admin1_name": "El Oro"
+},
+{
+"admin2_pcode": "EC0703",
+"admin2_name": "Atahualpa",
+"admin1_name": "El Oro"
+},
+{
+"admin2_pcode": "EC0704",
+"admin2_name": "Balsas",
+"admin1_name": "El Oro"
+},
+{
+"admin2_pcode": "EC0705",
+"admin2_name": "Chilla",
+"admin1_name": "El Oro"
+},
+{
+"admin2_pcode": "EC0706",
+"admin2_name": "El Guabo",
+"admin1_name": "El Oro"
+},
+{
+"admin2_pcode": "EC0707",
+"admin2_name": "Huaquillas",
+"admin1_name": "El Oro"
+},
+{
+"admin2_pcode": "EC0708",
+"admin2_name": "Marcabeli",
+"admin1_name": "El Oro"
+},
+{
+"admin2_pcode": "EC0709",
+"admin2_name": "Pasaje",
+"admin1_name": "El Oro"
+},
+{
+"admin2_pcode": "EC0710",
+"admin2_name": "Piñas",
+"admin1_name": "El Oro"
+},
+{
+"admin2_pcode": "EC0711",
+"admin2_name": "Portovelo",
+"admin1_name": "El Oro"
+},
+{
+"admin2_pcode": "EC0712",
+"admin2_name": "Santa Rosa",
+"admin1_name": "El Oro"
+},
+{
+"admin2_pcode": "EC0713",
+"admin2_name": "Zaruma",
+"admin1_name": "El Oro"
+},
+{
+"admin2_pcode": "EC0714",
+"admin2_name": "Las Lajas",
+"admin1_name": "El Oro"
+},
+{
+"admin2_pcode": "EC0801",
+"admin2_name": "Esmeraldas",
+"admin1_name": "Esmeraldas"
+},
+{
+"admin2_pcode": "EC0802",
+"admin2_name": "Eloy Alfaro",
+"admin1_name": "Esmeraldas"
+},
+{
+"admin2_pcode": "EC0803",
+"admin2_name": "Muisne",
+"admin1_name": "Esmeraldas"
+},
+{
+"admin2_pcode": "EC0804",
+"admin2_name": "Quininde",
+"admin1_name": "Esmeraldas"
+},
+{
+"admin2_pcode": "EC0805",
+"admin2_name": "San Lorenzo",
+"admin1_name": "Esmeraldas"
+},
+{
+"admin2_pcode": "EC0806",
+"admin2_name": "Atacames",
+"admin1_name": "Esmeraldas"
+},
+{
+"admin2_pcode": "EC0807",
+"admin2_name": "Rioverde",
+"admin1_name": "Esmeraldas"
+},
+{
+"admin2_pcode": "EC0808",
+"admin2_name": "La Concordia",
+"admin1_name": "Esmeraldas"
+},
+{
+"admin2_pcode": "EC0901",
+"admin2_name": "Guayaquil",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0902",
+"admin2_name": "Alfredo Baquerizo Moreno",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0903",
+"admin2_name": "Balao",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0904",
+"admin2_name": "Balzar",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0905",
+"admin2_name": "Colimes",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0906",
+"admin2_name": "Daule",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0907",
+"admin2_name": "Duran",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0908",
+"admin2_name": "Empalme",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0909",
+"admin2_name": "El Triunfo",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0910",
+"admin2_name": "Milagro",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0911",
+"admin2_name": "Naranjal",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0912",
+"admin2_name": "Naranjito",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0913",
+"admin2_name": "Palestina",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0914",
+"admin2_name": "Pedro Carbo",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0916",
+"admin2_name": "Samborondon",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0918",
+"admin2_name": "Santa Lucia",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0919",
+"admin2_name": "Salitre",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0920",
+"admin2_name": "San Jacinto de Yaguachi",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0921",
+"admin2_name": "Playas",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0922",
+"admin2_name": "Simon Bolivar",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0923",
+"admin2_name": "Crnel. Marcelino Maridueña",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0924",
+"admin2_name": "Lomas de Sargentillo",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0925",
+"admin2_name": "Nobol",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0927",
+"admin2_name": "Gnral. Antonio Elizalde",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC0928",
+"admin2_name": "Isidro Ayora",
+"admin1_name": "Guayas"
+},
+{
+"admin2_pcode": "EC1001",
+"admin2_name": "Ibarra",
+"admin1_name": "Imbabura"
+},
+{
+"admin2_pcode": "EC1002",
+"admin2_name": "Antonio Ante",
+"admin1_name": "Imbabura"
+},
+{
+"admin2_pcode": "EC1003",
+"admin2_name": "Cotacachi",
+"admin1_name": "Imbabura"
+},
+{
+"admin2_pcode": "EC1004",
+"admin2_name": "Otavalo",
+"admin1_name": "Imbabura"
+},
+{
+"admin2_pcode": "EC1005",
+"admin2_name": "Pimampiro",
+"admin1_name": "Imbabura"
+},
+{
+"admin2_pcode": "EC1006",
+"admin2_name": "San Miguel de Urcuqui",
+"admin1_name": "Imbabura"
+},
+{
+"admin2_pcode": "EC1101",
+"admin2_name": "Loja",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1102",
+"admin2_name": "Calvas",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1103",
+"admin2_name": "Catamayo",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1104",
+"admin2_name": "Celica",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1105",
+"admin2_name": "Chaguarpamba",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1106",
+"admin2_name": "Espindola",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1107",
+"admin2_name": "Gonzanama",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1108",
+"admin2_name": "Macara",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1109",
+"admin2_name": "Paltas",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1110",
+"admin2_name": "Puyango",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1111",
+"admin2_name": "Saraguro",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1112",
+"admin2_name": "Sozoranga",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1113",
+"admin2_name": "Zapotillo",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1114",
+"admin2_name": "Pindal",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1115",
+"admin2_name": "Quilanga",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1116",
+"admin2_name": "Olmedo",
+"admin1_name": "Loja"
+},
+{
+"admin2_pcode": "EC1201",
+"admin2_name": "Babahoyo",
+"admin1_name": "Los Rios"
+},
+{
+"admin2_pcode": "EC1202",
+"admin2_name": "Baba",
+"admin1_name": "Los Rios"
+},
+{
+"admin2_pcode": "EC1203",
+"admin2_name": "Montalvo",
+"admin1_name": "Los Rios"
+},
+{
+"admin2_pcode": "EC1204",
+"admin2_name": "Puebloviejo",
+"admin1_name": "Los Rios"
+},
+{
+"admin2_pcode": "EC1205",
+"admin2_name": "Quevedo",
+"admin1_name": "Los Rios"
+},
+{
+"admin2_pcode": "EC1206",
+"admin2_name": "Urdaneta",
+"admin1_name": "Los Rios"
+},
+{
+"admin2_pcode": "EC1207",
+"admin2_name": "Ventanas",
+"admin1_name": "Los Rios"
+},
+{
+"admin2_pcode": "EC1208",
+"admin2_name": "Vinces",
+"admin1_name": "Los Rios"
+},
+{
+"admin2_pcode": "EC1209",
+"admin2_name": "Palenque",
+"admin1_name": "Los Rios"
+},
+{
+"admin2_pcode": "EC1210",
+"admin2_name": "Buena Fe",
+"admin1_name": "Los Rios"
+},
+{
+"admin2_pcode": "EC1211",
+"admin2_name": "Valencia",
+"admin1_name": "Los Rios"
+},
+{
+"admin2_pcode": "EC1212",
+"admin2_name": "Mocache",
+"admin1_name": "Los Rios"
+},
+{
+"admin2_pcode": "EC1213",
+"admin2_name": "Quinsaloma",
+"admin1_name": "Los Rios"
+},
+{
+"admin2_pcode": "EC1301",
+"admin2_name": "Portoviejo",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1302",
+"admin2_name": "Bolivar",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1303",
+"admin2_name": "Chone",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1304",
+"admin2_name": "El Carmen",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1305",
+"admin2_name": "Flavio Alfaro",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1306",
+"admin2_name": "Jipijapa",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1307",
+"admin2_name": "Junin",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1308",
+"admin2_name": "Manta",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1309",
+"admin2_name": "Montecristi",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1310",
+"admin2_name": "Pajan",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1311",
+"admin2_name": "Pichincha",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1312",
+"admin2_name": "Rocafuerte",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1313",
+"admin2_name": "Santa Ana",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1314",
+"admin2_name": "Sucre",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1315",
+"admin2_name": "Tosagua",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1316",
+"admin2_name": "24 de Mayo",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1317",
+"admin2_name": "Pedernales",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1318",
+"admin2_name": "Olmedo",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1319",
+"admin2_name": "Puerto Lopez",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1320",
+"admin2_name": "Jama",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1321",
+"admin2_name": "Jaramijo",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1322",
+"admin2_name": "San Vicente",
+"admin1_name": "Manabi"
+},
+{
+"admin2_pcode": "EC1401",
+"admin2_name": "Morona",
+"admin1_name": "Morona Santiago"
+},
+{
+"admin2_pcode": "EC1402",
+"admin2_name": "Gualaquiza",
+"admin1_name": "Morona Santiago"
+},
+{
+"admin2_pcode": "EC1403",
+"admin2_name": "Limon Indanza",
+"admin1_name": "Morona Santiago"
+},
+{
+"admin2_pcode": "EC1404",
+"admin2_name": "Palora",
+"admin1_name": "Morona Santiago"
+},
+{
+"admin2_pcode": "EC1405",
+"admin2_name": "Santiago",
+"admin1_name": "Morona Santiago"
+},
+{
+"admin2_pcode": "EC1406",
+"admin2_name": "Sucua",
+"admin1_name": "Morona Santiago"
+},
+{
+"admin2_pcode": "EC1407",
+"admin2_name": "Huamboya",
+"admin1_name": "Morona Santiago"
+},
+{
+"admin2_pcode": "EC1408",
+"admin2_name": "San Juan Bosco",
+"admin1_name": "Morona Santiago"
+},
+{
+"admin2_pcode": "EC1409",
+"admin2_name": "Taisha",
+"admin1_name": "Morona Santiago"
+},
+{
+"admin2_pcode": "EC1410",
+"admin2_name": "Logroðo",
+"admin1_name": "Morona Santiago"
+},
+{
+"admin2_pcode": "EC1411",
+"admin2_name": "Pablo Sexto",
+"admin1_name": "Morona Santiago"
+},
+{
+"admin2_pcode": "EC1412",
+"admin2_name": "Tiwintza",
+"admin1_name": "Morona Santiago"
+},
+{
+"admin2_pcode": "EC1501",
+"admin2_name": "Tena",
+"admin1_name": "Napo"
+},
+{
+"admin2_pcode": "EC1503",
+"admin2_name": "Archidona",
+"admin1_name": "Napo"
+},
+{
+"admin2_pcode": "EC1504",
+"admin2_name": "El Chaco",
+"admin1_name": "Napo"
+},
+{
+"admin2_pcode": "EC1507",
+"admin2_name": "Quijos",
+"admin1_name": "Napo"
+},
+{
+"admin2_pcode": "EC1509",
+"admin2_name": "Carlos Julio Arosemena Tola",
+"admin1_name": "Napo"
+},
+{
+"admin2_pcode": "EC1601",
+"admin2_name": "Pastaza",
+"admin1_name": "Pastaza"
+},
+{
+"admin2_pcode": "EC1602",
+"admin2_name": "Mera",
+"admin1_name": "Pastaza"
+},
+{
+"admin2_pcode": "EC1603",
+"admin2_name": "Santa Clara",
+"admin1_name": "Pastaza"
+},
+{
+"admin2_pcode": "EC1604",
+"admin2_name": "Arajuno",
+"admin1_name": "Pastaza"
+},
+{
+"admin2_pcode": "EC1701",
+"admin2_name": "Quito",
+"admin1_name": "Pichincha"
+},
+{
+"admin2_pcode": "EC1702",
+"admin2_name": "Cayambe",
+"admin1_name": "Pichincha"
+},
+{
+"admin2_pcode": "EC1703",
+"admin2_name": "Mejia",
+"admin1_name": "Pichincha"
+},
+{
+"admin2_pcode": "EC1704",
+"admin2_name": "Pedro Moncayo",
+"admin1_name": "Pichincha"
+},
+{
+"admin2_pcode": "EC1705",
+"admin2_name": "Rumiðahui",
+"admin1_name": "Pichincha"
+},
+{
+"admin2_pcode": "EC1707",
+"admin2_name": "San Miguel de Los Bancos",
+"admin1_name": "Pichincha"
+},
+{
+"admin2_pcode": "EC1708",
+"admin2_name": "Pedro Vicente Maldonado",
+"admin1_name": "Pichincha"
+},
+{
+"admin2_pcode": "EC1709",
+"admin2_name": "Puerto Quito",
+"admin1_name": "Pichincha"
+},
+{
+"admin2_pcode": "EC1801",
+"admin2_name": "Ambato",
+"admin1_name": "Tungurahua"
+},
+{
+"admin2_pcode": "EC1802",
+"admin2_name": "Baños de Agua Santa",
+"admin1_name": "Tungurahua"
+},
+{
+"admin2_pcode": "EC1803",
+"admin2_name": "Cevallos",
+"admin1_name": "Tungurahua"
+},
+{
+"admin2_pcode": "EC1804",
+"admin2_name": "Mocha",
+"admin1_name": "Tungurahua"
+},
+{
+"admin2_pcode": "EC1805",
+"admin2_name": "Patate",
+"admin1_name": "Tungurahua"
+},
+{
+"admin2_pcode": "EC1806",
+"admin2_name": "Quero",
+"admin1_name": "Tungurahua"
+},
+{
+"admin2_pcode": "EC1807",
+"admin2_name": "San Pedro de Pelileo",
+"admin1_name": "Tungurahua"
+},
+{
+"admin2_pcode": "EC1808",
+"admin2_name": "Santiago de Pillaro",
+"admin1_name": "Tungurahua"
+},
+{
+"admin2_pcode": "EC1809",
+"admin2_name": "Tisaleo",
+"admin1_name": "Tungurahua"
+},
+{
+"admin2_pcode": "EC1901",
+"admin2_name": "Zamora",
+"admin1_name": "Zamora Chinchipe"
+},
+{
+"admin2_pcode": "EC1902",
+"admin2_name": "Chinchipe",
+"admin1_name": "Zamora Chinchipe"
+},
+{
+"admin2_pcode": "EC1903",
+"admin2_name": "Nangaritza",
+"admin1_name": "Zamora Chinchipe"
+},
+{
+"admin2_pcode": "EC1904",
+"admin2_name": "Yacuambi",
+"admin1_name": "Zamora Chinchipe"
+},
+{
+"admin2_pcode": "EC1905",
+"admin2_name": "Yantzaza",
+"admin1_name": "Zamora Chinchipe"
+},
+{
+"admin2_pcode": "EC1906",
+"admin2_name": "El Pangui",
+"admin1_name": "Zamora Chinchipe"
+},
+{
+"admin2_pcode": "EC1907",
+"admin2_name": "Centinela del Condor",
+"admin1_name": "Zamora Chinchipe"
+},
+{
+"admin2_pcode": "EC1908",
+"admin2_name": "Palanda",
+"admin1_name": "Zamora Chinchipe"
+},
+{
+"admin2_pcode": "EC1909",
+"admin2_name": "Paquisha",
+"admin1_name": "Zamora Chinchipe"
+},
+{
+"admin2_pcode": "EC2001",
+"admin2_name": "San Cristobal",
+"admin1_name": "Galapagos"
+},
+{
+"admin2_pcode": "EC2002",
+"admin2_name": "Isabela",
+"admin1_name": "Galapagos"
+},
+{
+"admin2_pcode": "EC2003",
+"admin2_name": "Santa Cruz",
+"admin1_name": "Galapagos"
+},
+{
+"admin2_pcode": "EC2101",
+"admin2_name": "Lago Agrio",
+"admin1_name": "Sucumbios"
+},
+{
+"admin2_pcode": "EC2102",
+"admin2_name": "Gonzalo Pizarro",
+"admin1_name": "Sucumbios"
+},
+{
+"admin2_pcode": "EC2103",
+"admin2_name": "Putumayo",
+"admin1_name": "Sucumbios"
+},
+{
+"admin2_pcode": "EC2104",
+"admin2_name": "Shushufindi",
+"admin1_name": "Sucumbios"
+},
+{
+"admin2_pcode": "EC2105",
+"admin2_name": "Sucumbios",
+"admin1_name": "Sucumbios"
+},
+{
+"admin2_pcode": "EC2106",
+"admin2_name": "Cascales",
+"admin1_name": "Sucumbios"
+},
+{
+"admin2_pcode": "EC2107",
+"admin2_name": "Cuyabeno",
+"admin1_name": "Sucumbios"
+},
+{
+"admin2_pcode": "EC2201",
+"admin2_name": "Orellana",
+"admin1_name": "Orellana"
+},
+{
+"admin2_pcode": "EC2202",
+"admin2_name": "Aguarico",
+"admin1_name": "Orellana"
+},
+{
+"admin2_pcode": "EC2203",
+"admin2_name": "La Joya de los Sachas",
+"admin1_name": "Orellana"
+},
+{
+"admin2_pcode": "EC2204",
+"admin2_name": "Loreto",
+"admin1_name": "Orellana"
+},
+{
+"admin2_pcode": "EC2301",
+"admin2_name": "Santo Domingo",
+"admin1_name": "Santo Domingo de los Tsachilas"
+},
+{
+"admin2_pcode": "EC2401",
+"admin2_name": "Santa Elena",
+"admin1_name": "Santa Elena"
+},
+{
+"admin2_pcode": "EC2402",
+"admin2_name": "La Libertad",
+"admin1_name": "Santa Elena"
+},
+{
+"admin2_pcode": "EC2403",
+"admin2_name": "Salinas",
+"admin1_name": "Santa Elena"
+},
+{
+"admin2_pcode": "EC9001",
+"admin2_name": "Las Golondrinas",
+"admin1_name": "Zona No Delimitada"
+},
+{
+"admin2_pcode": "EC9003",
+"admin2_name": "Manga del Cura",
+"admin1_name": "Zona No Delimitada"
+},
+{
+"admin2_pcode": "EC9004",
+"admin2_name": "El Piedrero",
+"admin1_name": "Zona No Delimitada"
+}
+],
+"PER": [
+{
+"admin2_pcode": "PE0101",
+"admin2_name": "Chachapoyas",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "PE0102",
+"admin2_name": "Bagua",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "PE0103",
+"admin2_name": "Bongara",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "PE0104",
+"admin2_name": "Condorcanqui",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "PE0105",
+"admin2_name": "Luya",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "PE0106",
+"admin2_name": "Rodriguez de Mendoza",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "PE0107",
+"admin2_name": "Utcubamba",
+"admin1_name": "Amazonas"
+},
+{
+"admin2_pcode": "PE0201",
+"admin2_name": "Huaraz",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0202",
+"admin2_name": "Aija",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0203",
+"admin2_name": "Antonio Raymondi",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0204",
+"admin2_name": "Asuncion",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0205",
+"admin2_name": "Bolognesi",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0206",
+"admin2_name": "Carhuaz",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0207",
+"admin2_name": "Carlos Fermin Fitzcarrald",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0208",
+"admin2_name": "Casma",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0209",
+"admin2_name": "Corongo",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0210",
+"admin2_name": "Huari",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0211",
+"admin2_name": "Huarmey",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0212",
+"admin2_name": "Huaylas",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0213",
+"admin2_name": "Mariscal Luzuriaga",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0214",
+"admin2_name": "Ocros",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0215",
+"admin2_name": "Pallasca",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0216",
+"admin2_name": "Pomabamba",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0217",
+"admin2_name": "Recuay",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0218",
+"admin2_name": "Santa",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0219",
+"admin2_name": "Sihuas",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0220",
+"admin2_name": "Yungay",
+"admin1_name": "Ancash"
+},
+{
+"admin2_pcode": "PE0301",
+"admin2_name": "Abancay",
+"admin1_name": "Apurimac"
+},
+{
+"admin2_pcode": "PE0302",
+"admin2_name": "Andahuaylas",
+"admin1_name": "Apurimac"
+},
+{
+"admin2_pcode": "PE0303",
+"admin2_name": "Antabamba",
+"admin1_name": "Apurimac"
+},
+{
+"admin2_pcode": "PE0304",
+"admin2_name": "Aymaraes",
+"admin1_name": "Apurimac"
+},
+{
+"admin2_pcode": "PE0305",
+"admin2_name": "Cotabambas",
+"admin1_name": "Apurimac"
+},
+{
+"admin2_pcode": "PE0306",
+"admin2_name": "Chincheros",
+"admin1_name": "Apurimac"
+},
+{
+"admin2_pcode": "PE0307",
+"admin2_name": "Grau",
+"admin1_name": "Apurimac"
+},
+{
+"admin2_pcode": "PE0401",
+"admin2_name": "Arequipa",
+"admin1_name": "Arequipa"
+},
+{
+"admin2_pcode": "PE0402",
+"admin2_name": "Camana",
+"admin1_name": "Arequipa"
+},
+{
+"admin2_pcode": "PE0403",
+"admin2_name": "Caraveli",
+"admin1_name": "Arequipa"
+},
+{
+"admin2_pcode": "PE0404",
+"admin2_name": "Castilla",
+"admin1_name": "Arequipa"
+},
+{
+"admin2_pcode": "PE0405",
+"admin2_name": "Caylloma",
+"admin1_name": "Arequipa"
+},
+{
+"admin2_pcode": "PE0406",
+"admin2_name": "Condesuyos",
+"admin1_name": "Arequipa"
+},
+{
+"admin2_pcode": "PE0407",
+"admin2_name": "Islay",
+"admin1_name": "Arequipa"
+},
+{
+"admin2_pcode": "PE0408",
+"admin2_name": "La Union",
+"admin1_name": "Arequipa"
+},
+{
+"admin2_pcode": "PE0501",
+"admin2_name": "Huamanga",
+"admin1_name": "Ayacucho"
+},
+{
+"admin2_pcode": "PE0502",
+"admin2_name": "Cangallo",
+"admin1_name": "Ayacucho"
+},
+{
+"admin2_pcode": "PE0503",
+"admin2_name": "Huanca Sancos",
+"admin1_name": "Ayacucho"
+},
+{
+"admin2_pcode": "PE0504",
+"admin2_name": "Huanta",
+"admin1_name": "Ayacucho"
+},
+{
+"admin2_pcode": "PE0505",
+"admin2_name": "La Mar",
+"admin1_name": "Ayacucho"
+},
+{
+"admin2_pcode": "PE0506",
+"admin2_name": "Lucanas",
+"admin1_name": "Ayacucho"
+},
+{
+"admin2_pcode": "PE0507",
+"admin2_name": "Parinacochas",
+"admin1_name": "Ayacucho"
+},
+{
+"admin2_pcode": "PE0508",
+"admin2_name": "Paucar del Sara Sara",
+"admin1_name": "Ayacucho"
+},
+{
+"admin2_pcode": "PE0509",
+"admin2_name": "Sucre",
+"admin1_name": "Ayacucho"
+},
+{
+"admin2_pcode": "PE0510",
+"admin2_name": "Victor Fajardo",
+"admin1_name": "Ayacucho"
+},
+{
+"admin2_pcode": "PE0511",
+"admin2_name": "Vilcas Huaman",
+"admin1_name": "Ayacucho"
+},
+{
+"admin2_pcode": "PE0601",
+"admin2_name": "Cajamarca",
+"admin1_name": "Cajamarca"
+},
+{
+"admin2_pcode": "PE0602",
+"admin2_name": "Cajabamba",
+"admin1_name": "Cajamarca"
+},
+{
+"admin2_pcode": "PE0603",
+"admin2_name": "Celendin",
+"admin1_name": "Cajamarca"
+},
+{
+"admin2_pcode": "PE0604",
+"admin2_name": "Chota",
+"admin1_name": "Cajamarca"
+},
+{
+"admin2_pcode": "PE0605",
+"admin2_name": "Contumaza",
+"admin1_name": "Cajamarca"
+},
+{
+"admin2_pcode": "PE0606",
+"admin2_name": "Cutervo",
+"admin1_name": "Cajamarca"
+},
+{
+"admin2_pcode": "PE0607",
+"admin2_name": "Hualgayoc",
+"admin1_name": "Cajamarca"
+},
+{
+"admin2_pcode": "PE0608",
+"admin2_name": "Jaen",
+"admin1_name": "Cajamarca"
+},
+{
+"admin2_pcode": "PE0609",
+"admin2_name": "San Ignacio",
+"admin1_name": "Cajamarca"
+},
+{
+"admin2_pcode": "PE0610",
+"admin2_name": "San Marcos",
+"admin1_name": "Cajamarca"
+},
+{
+"admin2_pcode": "PE0611",
+"admin2_name": "San Miguel",
+"admin1_name": "Cajamarca"
+},
+{
+"admin2_pcode": "PE0612",
+"admin2_name": "San Pablo",
+"admin1_name": "Cajamarca"
+},
+{
+"admin2_pcode": "PE0613",
+"admin2_name": "Santa Cruz",
+"admin1_name": "Cajamarca"
+},
+{
+"admin2_pcode": "PE0701",
+"admin2_name": "Callao",
+"admin1_name": "Callao"
+},
+{
+"admin2_pcode": "PE0801",
+"admin2_name": "Cusco",
+"admin1_name": "Cusco"
+},
+{
+"admin2_pcode": "PE0802",
+"admin2_name": "Acomayo",
+"admin1_name": "Cusco"
+},
+{
+"admin2_pcode": "PE0803",
+"admin2_name": "Anta",
+"admin1_name": "Cusco"
+},
+{
+"admin2_pcode": "PE0804",
+"admin2_name": "Calca",
+"admin1_name": "Cusco"
+},
+{
+"admin2_pcode": "PE0805",
+"admin2_name": "Canas",
+"admin1_name": "Cusco"
+},
+{
+"admin2_pcode": "PE0806",
+"admin2_name": "Canchis",
+"admin1_name": "Cusco"
+},
+{
+"admin2_pcode": "PE0807",
+"admin2_name": "Chumbivilcas",
+"admin1_name": "Cusco"
+},
+{
+"admin2_pcode": "PE0808",
+"admin2_name": "Espinar",
+"admin1_name": "Cusco"
+},
+{
+"admin2_pcode": "PE0809",
+"admin2_name": "La Convencion",
+"admin1_name": "Cusco"
+},
+{
+"admin2_pcode": "PE0810",
+"admin2_name": "Paruro",
+"admin1_name": "Cusco"
+},
+{
+"admin2_pcode": "PE0811",
+"admin2_name": "Paucartambo",
+"admin1_name": "Cusco"
+},
+{
+"admin2_pcode": "PE0812",
+"admin2_name": "Quispicanchi",
+"admin1_name": "Cusco"
+},
+{
+"admin2_pcode": "PE0813",
+"admin2_name": "Urubamba",
+"admin1_name": "Cusco"
+},
+{
+"admin2_pcode": "PE0901",
+"admin2_name": "Huancavelica",
+"admin1_name": "Huancavelica"
+},
+{
+"admin2_pcode": "PE0902",
+"admin2_name": "Acobamba",
+"admin1_name": "Huancavelica"
+},
+{
+"admin2_pcode": "PE0903",
+"admin2_name": "Angaraes",
+"admin1_name": "Huancavelica"
+},
+{
+"admin2_pcode": "PE0904",
+"admin2_name": "Castrovirreyna",
+"admin1_name": "Huancavelica"
+},
+{
+"admin2_pcode": "PE0905",
+"admin2_name": "Churcampa",
+"admin1_name": "Huancavelica"
+},
+{
+"admin2_pcode": "PE0906",
+"admin2_name": "Huaytara",
+"admin1_name": "Huancavelica"
+},
+{
+"admin2_pcode": "PE0907",
+"admin2_name": "Tayacaja",
+"admin1_name": "Huancavelica"
+},
+{
+"admin2_pcode": "PE1001",
+"admin2_name": "Huanuco",
+"admin1_name": "Huanuco"
+},
+{
+"admin2_pcode": "PE1002",
+"admin2_name": "Ambo",
+"admin1_name": "Huanuco"
+},
+{
+"admin2_pcode": "PE1003",
+"admin2_name": "Dos de Mayo",
+"admin1_name": "Huanuco"
+},
+{
+"admin2_pcode": "PE1004",
+"admin2_name": "Huacaybamba",
+"admin1_name": "Huanuco"
+},
+{
+"admin2_pcode": "PE1005",
+"admin2_name": "Huamalies",
+"admin1_name": "Huanuco"
+},
+{
+"admin2_pcode": "PE1006",
+"admin2_name": "Leoncio Prado",
+"admin1_name": "Huanuco"
+},
+{
+"admin2_pcode": "PE1007",
+"admin2_name": "Marañon",
+"admin1_name": "Huanuco"
+},
+{
+"admin2_pcode": "PE1008",
+"admin2_name": "Pachitea",
+"admin1_name": "Huanuco"
+},
+{
+"admin2_pcode": "PE1009",
+"admin2_name": "Puerto Inca",
+"admin1_name": "Huanuco"
+},
+{
+"admin2_pcode": "PE1010",
+"admin2_name": "Lauricocha",
+"admin1_name": "Huanuco"
+},
+{
+"admin2_pcode": "PE1011",
+"admin2_name": "Yarowilca",
+"admin1_name": "Huanuco"
+},
+{
+"admin2_pcode": "PE1101",
+"admin2_name": "Ica",
+"admin1_name": "Ica"
+},
+{
+"admin2_pcode": "PE1102",
+"admin2_name": "Chincha",
+"admin1_name": "Ica"
+},
+{
+"admin2_pcode": "PE1103",
+"admin2_name": "Nasca",
+"admin1_name": "Ica"
+},
+{
+"admin2_pcode": "PE1104",
+"admin2_name": "Palpa",
+"admin1_name": "Ica"
+},
+{
+"admin2_pcode": "PE1105",
+"admin2_name": "Pisco",
+"admin1_name": "Ica"
+},
+{
+"admin2_pcode": "PE1201",
+"admin2_name": "Huancayo",
+"admin1_name": "Junin"
+},
+{
+"admin2_pcode": "PE1202",
+"admin2_name": "Concepcion",
+"admin1_name": "Junin"
+},
+{
+"admin2_pcode": "PE1203",
+"admin2_name": "Chanchamayo",
+"admin1_name": "Junin"
+},
+{
+"admin2_pcode": "PE1204",
+"admin2_name": "Jauja",
+"admin1_name": "Junin"
+},
+{
+"admin2_pcode": "PE1205",
+"admin2_name": "Junin",
+"admin1_name": "Junin"
+},
+{
+"admin2_pcode": "PE1206",
+"admin2_name": "Satipo",
+"admin1_name": "Junin"
+},
+{
+"admin2_pcode": "PE1207",
+"admin2_name": "Tarma",
+"admin1_name": "Junin"
+},
+{
+"admin2_pcode": "PE1208",
+"admin2_name": "Yauli",
+"admin1_name": "Junin"
+},
+{
+"admin2_pcode": "PE1209",
+"admin2_name": "Chupaca",
+"admin1_name": "Junin"
+},
+{
+"admin2_pcode": "PE1301",
+"admin2_name": "Trujillo",
+"admin1_name": "La Libertad"
+},
+{
+"admin2_pcode": "PE1302",
+"admin2_name": "Ascope",
+"admin1_name": "La Libertad"
+},
+{
+"admin2_pcode": "PE1303",
+"admin2_name": "Bolivar",
+"admin1_name": "La Libertad"
+},
+{
+"admin2_pcode": "PE1304",
+"admin2_name": "Chepen",
+"admin1_name": "La Libertad"
+},
+{
+"admin2_pcode": "PE1305",
+"admin2_name": "Julcan",
+"admin1_name": "La Libertad"
+},
+{
+"admin2_pcode": "PE1306",
+"admin2_name": "Otuzco",
+"admin1_name": "La Libertad"
+},
+{
+"admin2_pcode": "PE1307",
+"admin2_name": "Pacasmayo",
+"admin1_name": "La Libertad"
+},
+{
+"admin2_pcode": "PE1308",
+"admin2_name": "Pataz",
+"admin1_name": "La Libertad"
+},
+{
+"admin2_pcode": "PE1309",
+"admin2_name": "Sanchez Carrion",
+"admin1_name": "La Libertad"
+},
+{
+"admin2_pcode": "PE1310",
+"admin2_name": "Santiago de Chuco",
+"admin1_name": "La Libertad"
+},
+{
+"admin2_pcode": "PE1311",
+"admin2_name": "Gran Chimu",
+"admin1_name": "La Libertad"
+},
+{
+"admin2_pcode": "PE1312",
+"admin2_name": "Viru",
+"admin1_name": "La Libertad"
+},
+{
+"admin2_pcode": "PE1401",
+"admin2_name": "Chiclayo",
+"admin1_name": "Lambayeque"
+},
+{
+"admin2_pcode": "PE1402",
+"admin2_name": "Ferreñafe",
+"admin1_name": "Lambayeque"
+},
+{
+"admin2_pcode": "PE1403",
+"admin2_name": "Lambayeque",
+"admin1_name": "Lambayeque"
+},
+{
+"admin2_pcode": "PE1501",
+"admin2_name": "Lima",
+"admin1_name": "Lima"
+},
+{
+"admin2_pcode": "PE1502",
+"admin2_name": "Barranca",
+"admin1_name": "Lima"
+},
+{
+"admin2_pcode": "PE1503",
+"admin2_name": "Cajatambo",
+"admin1_name": "Lima"
+},
+{
+"admin2_pcode": "PE1504",
+"admin2_name": "Canta",
+"admin1_name": "Lima"
+},
+{
+"admin2_pcode": "PE1505",
+"admin2_name": "Cañete",
+"admin1_name": "Lima"
+},
+{
+"admin2_pcode": "PE1506",
+"admin2_name": "Huaral",
+"admin1_name": "Lima"
+},
+{
+"admin2_pcode": "PE1507",
+"admin2_name": "Huarochiri",
+"admin1_name": "Lima"
+},
+{
+"admin2_pcode": "PE1508",
+"admin2_name": "Huaura",
+"admin1_name": "Lima"
+},
+{
+"admin2_pcode": "PE1509",
+"admin2_name": "Oyon",
+"admin1_name": "Lima"
+},
+{
+"admin2_pcode": "PE1510",
+"admin2_name": "Yauyos",
+"admin1_name": "Lima"
+},
+{
+"admin2_pcode": "PE1601",
+"admin2_name": "Maynas",
+"admin1_name": "Loreto"
+},
+{
+"admin2_pcode": "PE1602",
+"admin2_name": "Alto Amazonas",
+"admin1_name": "Loreto"
+},
+{
+"admin2_pcode": "PE1603",
+"admin2_name": "Loreto",
+"admin1_name": "Loreto"
+},
+{
+"admin2_pcode": "PE1604",
+"admin2_name": "Mariscal Ramon Castilla",
+"admin1_name": "Loreto"
+},
+{
+"admin2_pcode": "PE1605",
+"admin2_name": "Requena",
+"admin1_name": "Loreto"
+},
+{
+"admin2_pcode": "PE1606",
+"admin2_name": "Ucayali",
+"admin1_name": "Loreto"
+},
+{
+"admin2_pcode": "PE1607",
+"admin2_name": "Datem del Marañon",
+"admin1_name": "Loreto"
+},
+{
+"admin2_pcode": "PE1608",
+"admin2_name": "Putumayo",
+"admin1_name": "Loreto"
+},
+{
+"admin2_pcode": "PE1701",
+"admin2_name": "Tambopata",
+"admin1_name": "Madre de Dios"
+},
+{
+"admin2_pcode": "PE1702",
+"admin2_name": "Manu",
+"admin1_name": "Madre de Dios"
+},
+{
+"admin2_pcode": "PE1703",
+"admin2_name": "Tahuamanu",
+"admin1_name": "Madre de Dios"
+},
+{
+"admin2_pcode": "PE1801",
+"admin2_name": "Mariscal Nieto",
+"admin1_name": "Moquegua"
+},
+{
+"admin2_pcode": "PE1802",
+"admin2_name": "General Sanchez Cerro",
+"admin1_name": "Moquegua"
+},
+{
+"admin2_pcode": "PE1803",
+"admin2_name": "Ilo",
+"admin1_name": "Moquegua"
+},
+{
+"admin2_pcode": "PE1901",
+"admin2_name": "Pasco",
+"admin1_name": "Pasco"
+},
+{
+"admin2_pcode": "PE1902",
+"admin2_name": "Daniel Alcides Carrion",
+"admin1_name": "Pasco"
+},
+{
+"admin2_pcode": "PE1903",
+"admin2_name": "Oxapampa",
+"admin1_name": "Pasco"
+},
+{
+"admin2_pcode": "PE2001",
+"admin2_name": "Piura",
+"admin1_name": "Piura"
+},
+{
+"admin2_pcode": "PE2002",
+"admin2_name": "Ayabaca",
+"admin1_name": "Piura"
+},
+{
+"admin2_pcode": "PE2003",
+"admin2_name": "Huancabamba",
+"admin1_name": "Piura"
+},
+{
+"admin2_pcode": "PE2004",
+"admin2_name": "Morropon",
+"admin1_name": "Piura"
+},
+{
+"admin2_pcode": "PE2005",
+"admin2_name": "Paita",
+"admin1_name": "Piura"
+},
+{
+"admin2_pcode": "PE2006",
+"admin2_name": "Sullana",
+"admin1_name": "Piura"
+},
+{
+"admin2_pcode": "PE2007",
+"admin2_name": "Talara",
+"admin1_name": "Piura"
+},
+{
+"admin2_pcode": "PE2008",
+"admin2_name": "Sechura",
+"admin1_name": "Piura"
+},
+{
+"admin2_pcode": "PE2101",
+"admin2_name": "Puno",
+"admin1_name": "Puno"
+},
+{
+"admin2_pcode": "PE2102",
+"admin2_name": "Azangaro",
+"admin1_name": "Puno"
+},
+{
+"admin2_pcode": "PE2103",
+"admin2_name": "Carabaya",
+"admin1_name": "Puno"
+},
+{
+"admin2_pcode": "PE2104",
+"admin2_name": "Chucuito",
+"admin1_name": "Puno"
+},
+{
+"admin2_pcode": "PE2105",
+"admin2_name": "El Collao",
+"admin1_name": "Puno"
+},
+{
+"admin2_pcode": "PE2106",
+"admin2_name": "Huancane",
+"admin1_name": "Puno"
+},
+{
+"admin2_pcode": "PE2107",
+"admin2_name": "Lampa",
+"admin1_name": "Puno"
+},
+{
+"admin2_pcode": "PE2108",
+"admin2_name": "Melgar",
+"admin1_name": "Puno"
+},
+{
+"admin2_pcode": "PE2109",
+"admin2_name": "Moho",
+"admin1_name": "Puno"
+},
+{
+"admin2_pcode": "PE2110",
+"admin2_name": "San Antonio de Putina",
+"admin1_name": "Puno"
+},
+{
+"admin2_pcode": "PE2111",
+"admin2_name": "San Roman",
+"admin1_name": "Puno"
+},
+{
+"admin2_pcode": "PE2112",
+"admin2_name": "Sandia",
+"admin1_name": "Puno"
+},
+{
+"admin2_pcode": "PE2113",
+"admin2_name": "Yunguyo",
+"admin1_name": "Puno"
+},
+{
+"admin2_pcode": "PE2201",
+"admin2_name": "Moyobamba",
+"admin1_name": "San Martin"
+},
+{
+"admin2_pcode": "PE2202",
+"admin2_name": "Bellavista",
+"admin1_name": "San Martin"
+},
+{
+"admin2_pcode": "PE2203",
+"admin2_name": "El Dorado",
+"admin1_name": "San Martin"
+},
+{
+"admin2_pcode": "PE2204",
+"admin2_name": "Huallaga",
+"admin1_name": "San Martin"
+},
+{
+"admin2_pcode": "PE2205",
+"admin2_name": "Lamas",
+"admin1_name": "San Martin"
+},
+{
+"admin2_pcode": "PE2206",
+"admin2_name": "Mariscal Caceres",
+"admin1_name": "San Martin"
+},
+{
+"admin2_pcode": "PE2207",
+"admin2_name": "Picota",
+"admin1_name": "San Martin"
+},
+{
+"admin2_pcode": "PE2208",
+"admin2_name": "Rioja",
+"admin1_name": "San Martin"
+},
+{
+"admin2_pcode": "PE2209",
+"admin2_name": "San Martin",
+"admin1_name": "San Martin"
+},
+{
+"admin2_pcode": "PE2210",
+"admin2_name": "Tocache",
+"admin1_name": "San Martin"
+},
+{
+"admin2_pcode": "PE2301",
+"admin2_name": "Tacna",
+"admin1_name": "Tacna"
+},
+{
+"admin2_pcode": "PE2302",
+"admin2_name": "Candarave",
+"admin1_name": "Tacna"
+},
+{
+"admin2_pcode": "PE2303",
+"admin2_name": "Jorge Basadre",
+"admin1_name": "Tacna"
+},
+{
+"admin2_pcode": "PE2304",
+"admin2_name": "Tarata",
+"admin1_name": "Tacna"
+},
+{
+"admin2_pcode": "PE2401",
+"admin2_name": "Tumbes",
+"admin1_name": "Tumbes"
+},
+{
+"admin2_pcode": "PE2402",
+"admin2_name": "Contralmirante Villar",
+"admin1_name": "Tumbes"
+},
+{
+"admin2_pcode": "PE2403",
+"admin2_name": "Zarumilla",
+"admin1_name": "Tumbes"
+},
+{
+"admin2_pcode": "PE2501",
+"admin2_name": "Coronel Portillo",
+"admin1_name": "Ucayali"
+},
+{
+"admin2_pcode": "PE2502",
+"admin2_name": "Atalaya",
+"admin1_name": "Ucayali"
+},
+{
+"admin2_pcode": "PE2503",
+"admin2_name": "Padre Abad",
+"admin1_name": "Ucayali"
+},
+{
+"admin2_pcode": "PE2504",
+"admin2_name": "Purus",
+"admin1_name": "Ucayali"
+}
+]
+}

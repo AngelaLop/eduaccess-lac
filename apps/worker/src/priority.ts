@@ -1,29 +1,28 @@
 /**
- * Priority scorer — derives "where to invest next" rankings.
+ * Priority scorer (v4 — multi-country) — derives "where to invest next".
  *
- * Runs AFTER the Robustness Auditor finishes, because it reads from
- * robustness_reports. Pure SQL aggregation, no LLM.
+ * Runs AFTER the Robustness Auditor for a country, reading from
+ * robustness_reports + v_indicators_adm2. Pure aggregation, no LLM.
  *
- * Inputs per cell (district x age_group x transport_mode):
+ * Inputs per cell (admin2_pcode x education_level x transport_mode):
  *   - children_underserved = pop_total - pop_le30
  *   - access_gap           = 100 - pct_le30
  *   - robustness           = score_overall from robustness_reports
  *
- * Score (0-100): a weighted combination, then ranked within country.
- *
  *   raw = log_norm(children_underserved) * access_gap * (robustness / 100)
  *
- * The robustness factor PENALIZES low-confidence cells: we don't want to
- * recommend building a school based on a number we can't trust. log-norming
- * the children count keeps small districts from being drowned by Panama City.
+ * The robustness factor penalizes low-confidence cells. log-norming the
+ * children count keeps small districts from being drowned by the capital.
+ * Ranks are computed within the country, per education_level x mode.
  */
 
 import { sb } from './supabase.js';
-import type { AgeGroup, TransportMode } from './scores.js';
+import type { EducationLevel, TransportMode } from './scores.js';
 
 interface PriorityInput {
-  cod_dist: string;
-  age_group: AgeGroup;
+  country_iso: string;
+  admin2_pcode: string;
+  education_level: EducationLevel;
   transport_mode: TransportMode;
   children_underserved: number;
   pct_le30: number;
@@ -38,51 +37,53 @@ interface PriorityRow extends PriorityInput {
 
 const clamp = (x: number, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, x));
 
-export async function computeAndWritePriorities(auditRunId: string): Promise<number> {
-  // Pull all canonical-scenario indicators (worldpop + map + walking|motorized × 4 ages)
-  // joined to the just-written robustness_reports for this run.
+export async function computeAndWritePriorities(
+  auditRunId: string,
+  countryIso: string
+): Promise<number> {
   const { data: indicators, error: indErr } = await sb
-    .from('panama_district_indicators')
-    .select('cod_dist, age_group, friction, pop_total, pop_le30')
-    .eq('pop_source', 'worldpop')
-    .eq('friction_source', 'map');
+    .from('v_indicators_adm2')
+    .select('admin2_pcode, education_level, mode, pct_le30, pop_total')
+    .eq('country_iso', countryIso);
   if (indErr) throw indErr;
 
   const { data: reports, error: repErr } = await sb
     .from('robustness_reports')
-    .select('cod_dist, age_group, transport_mode, score_overall')
+    .select('admin2_pcode, education_level, transport_mode, score_overall')
     .eq('audit_run_id', auditRunId);
   if (repErr) throw repErr;
 
   const robByKey = new Map<string, number>();
   for (const r of reports ?? []) {
-    robByKey.set(`${r.cod_dist}|${r.age_group}|${r.transport_mode}`, Number(r.score_overall));
+    robByKey.set(
+      `${r.admin2_pcode}|${r.education_level}|${r.transport_mode}`,
+      Number(r.score_overall)
+    );
   }
 
-  // Build PriorityInput per (cod, age, mode), filter cells with no underserved children
   const inputs: PriorityInput[] = [];
   for (const row of indicators ?? []) {
-    const transport_mode = row.friction as TransportMode;
-    const key = `${row.cod_dist}|${row.age_group}|${transport_mode}`;
+    const transport_mode = row.mode as TransportMode;
+    const key = `${row.admin2_pcode}|${row.education_level}|${transport_mode}`;
     const robustness = robByKey.get(key);
     if (robustness === undefined) continue;
-    const pop_total = Number(row.pop_total);
-    const pop_le30 = Number(row.pop_le30);
-    const underserved = Math.max(0, pop_total - pop_le30);
+    const pop_total = Number(row.pop_total ?? 0);
     if (pop_total <= 0) continue;
-    const pct_le30 = pop_total > 0 ? (pop_le30 / pop_total) * 100 : 0;
+    const pct_le30 = Number(row.pct_le30 ?? 0);
+    const pop_le30 = pop_total * (pct_le30 / 100);
     inputs.push({
-      cod_dist: row.cod_dist,
-      age_group: row.age_group as AgeGroup,
+      country_iso: countryIso,
+      admin2_pcode: row.admin2_pcode,
+      education_level: row.education_level as EducationLevel,
       transport_mode,
-      children_underserved: underserved,
+      children_underserved: Math.max(0, Math.round(pop_total - pop_le30)),
       pct_le30: Number(pct_le30.toFixed(1)),
       robustness,
     });
   }
 
-  // Compute raw scores. log-norm by max children in this group×mode partition.
-  const partitionKey = (i: PriorityInput) => `${i.age_group}|${i.transport_mode}`;
+  // log-norm by max children in this education_level x mode partition.
+  const partitionKey = (i: PriorityInput) => `${i.education_level}|${i.transport_mode}`;
   const partitionMaxChildren = new Map<string, number>();
   for (const i of inputs) {
     const k = partitionKey(i);
@@ -90,17 +91,14 @@ export async function computeAndWritePriorities(auditRunId: string): Promise<num
   }
 
   const scoredRows = inputs.map((i) => {
-    const k = partitionKey(i);
-    const maxC = partitionMaxChildren.get(k) ?? 1;
+    const maxC = partitionMaxChildren.get(partitionKey(i)) ?? 1;
     const childrenNorm = maxC > 0 ? Math.log10(i.children_underserved + 1) / Math.log10(maxC + 1) : 0;
-    const accessGap = 100 - i.pct_le30; // 0-100
-    const robustnessFactor = i.robustness / 100;
-    const raw = childrenNorm * accessGap * robustnessFactor;
-    // Normalize to 0-100 within the partition by dividing by the partition's max raw
+    const accessGap = 100 - i.pct_le30;
+    const raw = childrenNorm * accessGap * (i.robustness / 100);
     return { i, raw };
   });
 
-  // Per-partition normalization to 0-100, then rank
+  // Per-partition normalization to 0-100, then rank.
   const partitions = new Map<string, typeof scoredRows>();
   for (const s of scoredRows) {
     const k = partitionKey(s.i);
@@ -125,13 +123,13 @@ export async function computeAndWritePriorities(auditRunId: string): Promise<num
 
   if (finalRows.length === 0) return 0;
 
-  // Upsert in chunks
   const CHUNK = 500;
   for (let i = 0; i < finalRows.length; i += CHUNK) {
-    const chunk = finalRows.slice(i, i + CHUNK);
     const { error: upErr } = await sb
       .from('priority_scores')
-      .upsert(chunk, { onConflict: 'cod_dist,age_group,transport_mode' });
+      .upsert(finalRows.slice(i, i + CHUNK), {
+        onConflict: 'country_iso,admin2_pcode,education_level,transport_mode',
+      });
     if (upErr) throw upErr;
   }
 

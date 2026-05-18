@@ -3,30 +3,29 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import type {
-  AgeGroup,
+  EducationLevel,
   RobustnessDimension,
   RobustnessReport,
   TransportMode,
 } from '@/lib/types';
 
 interface Props {
-  cod_dist: string;
-  age_group: AgeGroup;
+  country_iso: string;
+  admin2_pcode: string;
+  education_level: EducationLevel;
   transport_mode: TransportMode;
 }
 
 const DIMENSION_LABELS: Record<RobustnessDimension, string> = {
   data_completeness: 'Data completeness',
   sample_size: 'Sample size',
-  friction_agreement: 'MAP vs OSM agreement',
-  pop_agreement: 'WorldPop vs Census agreement',
+  method_agreement: 'FMM vs OSRM agreement',
 };
 
 const DIMENSION_HELP: Record<RobustnessDimension, string> = {
-  data_completeness: '% of population with usable travel-time data',
-  sample_size: 'how many people in this age group — small is noisy',
-  friction_agreement: 'do the two friction surfaces agree on % within 30 min?',
-  pop_agreement: 'do WorldPop and Census disagree on the population?',
+  data_completeness: 'is the accessibility value present and valid for this cell?',
+  sample_size: 'how many people in this education level — small is noisy',
+  method_agreement: 'do the FMM and OSRM routing methods agree on % within 30 min?',
 };
 
 function scoreColor(score: number): string {
@@ -38,7 +37,6 @@ function scoreColor(score: number): string {
 }
 
 function scoreTextColor(score: number): string {
-  if (score >= 80) return 'text-emerald-700';
   if (score >= 60) return 'text-emerald-700';
   if (score >= 40) return 'text-amber-700';
   if (score >= 20) return 'text-orange-700';
@@ -75,7 +73,12 @@ function DimensionBar({
   );
 }
 
-export default function RobustnessCard({ cod_dist, age_group, transport_mode }: Props) {
+export default function RobustnessCard({
+  country_iso,
+  admin2_pcode,
+  education_level,
+  transport_mode,
+}: Props) {
   const [report, setReport] = useState<RobustnessReport | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -87,10 +90,11 @@ export default function RobustnessCard({ cod_dist, age_group, transport_mode }: 
     supabase
       .from('robustness_reports')
       .select(
-        'cod_dist, age_group, transport_mode, score_data_completeness, score_sample_size, score_friction_agreement, score_pop_agreement, score_overall, weakest_dimension, narrative, caveats, audit_run_id, computed_at'
+        'country_iso, admin2_pcode, education_level, transport_mode, score_data_completeness, score_sample_size, score_method_agreement, score_overall, weakest_dimension, narrative, caveats, audit_run_id, computed_at'
       )
-      .eq('cod_dist', cod_dist)
-      .eq('age_group', age_group)
+      .eq('country_iso', country_iso)
+      .eq('admin2_pcode', admin2_pcode)
+      .eq('education_level', education_level)
       .eq('transport_mode', transport_mode)
       .maybeSingle()
       .then(({ data, error }) => {
@@ -103,7 +107,7 @@ export default function RobustnessCard({ cod_dist, age_group, transport_mode }: 
     return () => {
       cancelled = true;
     };
-  }, [cod_dist, age_group, transport_mode]);
+  }, [country_iso, admin2_pcode, education_level, transport_mode]);
 
   if (loading) {
     return (
@@ -125,7 +129,7 @@ export default function RobustnessCard({ cod_dist, age_group, transport_mode }: 
           scenario.
         </p>
         <p className="mt-2 text-neutral-400">
-          Population: WorldPop 2023 · Friction: MAP (Weiss et al. 2020) · Travel-time: FMM 1km grid
+          Population: WorldPop 2023 · Routing: FMM (friction surface) + OSRM (road network)
         </p>
       </section>
     );
@@ -134,8 +138,7 @@ export default function RobustnessCard({ cod_dist, age_group, transport_mode }: 
   const dimensions: { dim: RobustnessDimension; value: number }[] = [
     { dim: 'data_completeness', value: report.score_data_completeness },
     { dim: 'sample_size', value: report.score_sample_size },
-    { dim: 'friction_agreement', value: report.score_friction_agreement },
-    { dim: 'pop_agreement', value: report.score_pop_agreement },
+    { dim: 'method_agreement', value: report.score_method_agreement },
   ];
 
   const computedAt = new Date(report.computed_at);
@@ -180,7 +183,7 @@ export default function RobustnessCard({ cod_dist, age_group, transport_mode }: 
 
       <p className="mt-3 border-t border-neutral-200 pt-2 text-[10px] text-neutral-400">
         Computed by the Robustness Auditor
-        {computedDate ? ` on ${computedDate}` : ''} · 4 numeric dimensions ·
+        {computedDate ? ` on ${computedDate}` : ''} · 3 numeric dimensions ·
         text generated from the scores by a rule-based explainer (no LLM
         on this cell)
       </p>

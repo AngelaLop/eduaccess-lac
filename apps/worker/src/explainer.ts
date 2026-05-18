@@ -1,9 +1,9 @@
 /**
- * Deterministic Robustness Explainer
+ * Deterministic Robustness Explainer (v4)
  *
- * Replaces the v2 per-cell LLM call. For every cell we have 4 numeric
- * scores from scores.ts; this module composes a one-sentence narrative
- * plus 1-3 specific caveats, both grounded in those numbers.
+ * For every cell we have 3 numeric scores from scores.ts; this module
+ * composes a one-sentence narrative plus 1-3 specific caveats, both
+ * grounded in those numbers.
  *
  * Why deterministic, not LLM:
  *  - Faster (no network), free (no tokens), idempotent.
@@ -12,12 +12,11 @@
  *  - Stays available when Groq quota is exhausted.
  *
  * The LLM is reserved for one job per refresh per country (the audit
- * brief in country-brief.ts) and for on-demand polish on cells the user
- * actually opens (v4: /api/audit-cell).
+ * brief in country-brief.ts).
  */
 
 import { createHash } from 'node:crypto';
-import type { CellBundle, CellScores } from './scores.js';
+import type { IndicatorCell, CellScores } from './scores.js';
 
 export interface ExplainerOutput {
   narrative: string;
@@ -25,10 +24,9 @@ export interface ExplainerOutput {
   input_hash: string;
 }
 
-/** Bump when scoring thresholds or text templates change. */
-export const FACTS_VERSION = 1;
+/** Bump when scoring thresholds or text templates change. v4: 3-dimension model. */
+export const FACTS_VERSION = 2;
 
-// Score-band labels used in narrative text.
 function band(score: number): 'high' | 'moderate' | 'low' | 'very low' {
   if (score >= 80) return 'high';
   if (score >= 60) return 'moderate';
@@ -36,33 +34,26 @@ function band(score: number): 'high' | 'moderate' | 'low' | 'very low' {
   return 'very low';
 }
 
-// Phrase fragments for the weakest dimension. Kept short and specific so
-// the sentence reads naturally without resembling a templated form letter.
-function weakestPhrase(scores: CellScores, c: CellBundle): string {
+function methodDelta(c: IndicatorCell): number | null {
+  if (c.pct_le30_osrm == null || c.pct_le30 == null) return null;
+  return Math.abs(c.pct_le30 - c.pct_le30_osrm);
+}
+
+// Phrase fragment for the weakest dimension.
+function weakestPhrase(scores: CellScores, c: IndicatorCell): string {
   switch (scores.weakest) {
     case 'data_completeness': {
-      const pct = scores.data_completeness; // already 0-100
-      return `only ${pct.toFixed(0)}% of the population in this cell has usable travel-time data`;
+      return 'the accessibility value for this cell is incomplete, so the % cannot be fully trusted';
     }
     case 'sample_size': {
-      const n = c.canonical.pop_total;
+      const n = c.pop_total ?? 0;
       return `the population in this cell is small (${n.toLocaleString()} people), so the % can swing on small changes`;
     }
-    case 'friction_agreement': {
-      const delta = c.worldpop_osm
-        ? Math.abs(c.canonical.pct_le30 - c.worldpop_osm.pct_le30).toFixed(0)
-        : null;
-      return delta
-        ? `the MAP and OSM friction surfaces disagree by ${delta} points on the % within 30 min`
-        : 'only one friction surface is available, so we cannot cross-check the travel-time model';
-    }
-    case 'pop_agreement': {
-      const delta = c.census_map
-        ? Math.abs(c.canonical.pct_le30 - c.census_map.pct_le30).toFixed(0)
-        : null;
-      return delta
-        ? `WorldPop and Census disagree by ${delta} points on the underlying population, which moves the %`
-        : 'only one population source is available, so the underlying head-count is not cross-checked';
+    case 'method_agreement': {
+      const delta = methodDelta(c);
+      return delta != null
+        ? `the FMM and OSRM routing methods disagree by ${delta.toFixed(0)} points on the % within 30 min`
+        : 'only one routing method (FMM) is available, so the travel-time estimate cannot be cross-checked';
     }
   }
 }
@@ -80,90 +71,62 @@ function headline(scores: CellScores): string {
   }
 }
 
-// Produce 1-3 specific caveats, ordered by severity (weakest first), but
-// only including dimensions that meaningfully degrade the cell.
-function caveatsFor(c: CellBundle, scores: CellScores): string[] {
-  const items: { dim: keyof CellScores; score: number; text: string }[] = [];
+// Produce 1-3 specific caveats, ordered by severity (weakest first).
+function caveatsFor(c: IndicatorCell, scores: CellScores): string[] {
+  const items: { score: number; text: string }[] = [];
 
   if (scores.data_completeness < 80) {
     items.push({
-      dim: 'data_completeness',
       score: scores.data_completeness,
-      text: `${(100 - scores.data_completeness).toFixed(0)}% of the population lacks travel-time coverage in this scenario`,
+      text: 'the underlying accessibility value is incomplete for this cell',
     });
   }
   if (scores.sample_size < 60) {
     items.push({
-      dim: 'sample_size',
       score: scores.sample_size,
-      text: `sample is small (${c.canonical.pop_total.toLocaleString()} people) — the % is statistically noisy`,
+      text: `sample is small (${(c.pop_total ?? 0).toLocaleString()} people) — the % is statistically noisy`,
     });
   }
-  if (c.worldpop_osm) {
-    const delta = Math.abs(c.canonical.pct_le30 - c.worldpop_osm.pct_le30);
-    if (delta >= 10) {
-      items.push({
-        dim: 'friction_agreement',
-        score: scores.friction_agreement,
-        text: `MAP vs OSM friction surfaces differ by ${delta.toFixed(0)} points — travel-time model is uncertain here`,
-      });
-    }
-  } else {
+  const delta = methodDelta(c);
+  if (delta == null) {
     items.push({
-      dim: 'friction_agreement',
-      score: scores.friction_agreement,
-      text: 'only one friction surface is available — no cross-check on travel-time',
+      score: scores.method_agreement,
+      text: 'only FMM routing is available — no OSRM cross-check on travel time',
     });
-  }
-  if (c.census_map) {
-    const delta = Math.abs(c.canonical.pct_le30 - c.census_map.pct_le30);
-    if (delta >= 10) {
-      items.push({
-        dim: 'pop_agreement',
-        score: scores.pop_agreement,
-        text: `WorldPop vs Census disagree by ${delta.toFixed(0)} points on population — the % shifts with the source`,
-      });
-    }
-  } else {
+  } else if (delta >= 10) {
     items.push({
-      dim: 'pop_agreement',
-      score: scores.pop_agreement,
-      text: 'only one population source is available — no cross-check on head-count',
+      score: scores.method_agreement,
+      text: `FMM and OSRM routing differ by ${delta.toFixed(0)} points — the travel-time estimate is method-sensitive here`,
     });
   }
 
-  // Sort by score ascending (worst first), keep top 3.
   items.sort((a, b) => a.score - b.score);
   return items.slice(0, 3).map((i) => i.text);
 }
 
-function hashInput(c: CellBundle, scores: CellScores): string {
-  // Hash the numeric inputs that drive the explanation. If any input
-  // changes, the hash changes, and downstream cache-invalidation works.
+function hashInput(c: IndicatorCell, scores: CellScores): string {
   const payload = JSON.stringify({
-    cod_dist: c.cod_dist,
-    age_group: c.age_group,
-    transport_mode: c.transport_mode,
-    pct_le30_canonical: c.canonical.pct_le30,
-    pct_le30_osm: c.worldpop_osm?.pct_le30 ?? null,
-    pct_le30_census: c.census_map?.pct_le30 ?? null,
-    pop_total: c.canonical.pop_total,
-    pop_nodata: c.canonical.pop_nodata,
+    country_iso: c.country_iso,
+    admin2_pcode: c.admin2_pcode,
+    education_level: c.education_level,
+    transport_mode: c.mode,
+    pct_le30: c.pct_le30,
+    pct_le30_osrm: c.pct_le30_osrm,
+    pop_total: c.pop_total,
     scores,
     facts_version: FACTS_VERSION,
   });
   return createHash('sha256').update(payload).digest('hex').slice(0, 16);
 }
 
-export function explainCell(c: CellBundle, scores: CellScores): ExplainerOutput {
-  // Special case: pop_total = 0 — the cell has no people at all. The
-  // numeric scores already capture this (everything is 0), but the
+export function explainCell(c: IndicatorCell, scores: CellScores): ExplainerOutput {
+  // No population at all — the numeric scores already capture this; the
   // narrative needs to say so plainly.
-  if (c.canonical.pop_total <= 0) {
+  if ((c.pop_total ?? 0) <= 0) {
     return {
       narrative:
-        'No school-age population is recorded in this cell for this age group, so the accessibility number is not meaningful.',
-      caveats: ['Population is zero in the canonical source — no travel-time computation is informative here'],
+        'No school-age population is recorded in this cell for this education level, so the accessibility number is not meaningful.',
+      caveats: ['Population is zero in the source — no travel-time computation is informative here'],
       input_hash: hashInput(c, scores),
     };
   }

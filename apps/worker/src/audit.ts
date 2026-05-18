@@ -1,119 +1,99 @@
 /**
- * Audit orchestration (v3).
+ * Audit orchestration (v4 — multi-country).
  *
- * v3 pivot: no per-cell LLM call. Every cell gets a *deterministic*
- * narrative + caveats from rule-based templates over the numeric scores.
- * The LLM is reserved for one country audit brief per refresh (see
- * country-brief.ts) — and for the v4 lazy /api/audit-cell route.
+ * No per-cell LLM call. Every cell gets a *deterministic* narrative +
+ * caveats from rule-based templates over the numeric scores. The LLM is
+ * reserved for one country audit brief per refresh (country-brief.ts).
  *
- * Flow:
- *   1. Open an audit_runs row (status=running)
- *   2. Load all 32-scenario indicators in one SELECT
- *   3. Build CellBundle per (district x age_group x transport_mode) — 664 max
- *   4. For each cell:
- *      a. computeScores() — pure SQL-derived, fast
- *      b. explainCell() — pure-function explainer, free, instant
- *      c. accumulate to a batch
- *      d. flush batch to robustness_reports every N cells
- *   5. Run priority scorer (no LLM)
- *   6. Write country audit brief (ONE LLM call, optional via env flag)
- *   7. Mark audit_runs row done
+ * Flow (repeated per country):
+ *   1. Open an audit_runs row (status=running, country_iso set)
+ *   2. Score every cell of that country from v_indicators_adm2
+ *   3. computeScores() + explainCell() — pure functions, free, instant
+ *   4. Flush to robustness_reports every N cells
+ *   5. Run the priority scorer for the country
+ *   6. Write the country audit brief (ONE LLM call, optional via env flag)
+ *   7. Mark the audit_runs row done
+ *
+ * A "cell" is one (country_iso, admin2_pcode, education_level, mode) row
+ * of v_indicators_adm2 — the view already collapses the source slices.
  */
 
 import { sb } from './supabase.js';
 import { explainCell, FACTS_VERSION } from './explainer.js';
 import { writeCountryAuditBrief, PROMPT_VERSION as BRIEF_PROMPT_VERSION } from './country-brief.js';
-import { computeScores, type AgeGroup, type CellBundle, type ScenarioRow, type TransportMode } from './scores.js';
+import { computeScores, type IndicatorCell } from './scores.js';
 import { computeAndWritePriorities } from './priority.js';
 
-const AGE_GROUPS: AgeGroup[] = ['all', 'primary', 'secondary', 'highschool'];
-const TRANSPORT_MODES: TransportMode[] = ['walking', 'motorized'];
-
-const FLUSH_BATCH_SIZE = 100;
+const FLUSH_BATCH_SIZE = 200;
 
 // Bump when the rule-based explainer's text templates change.
-const EXPLAINER_PROMPT_VERSION = 1;
+const EXPLAINER_PROMPT_VERSION = 2;
 
 interface AuditOptions {
-  cellLimit?: number;       // smoke-test: process only N cells
+  cellLimit?: number;       // smoke-test: process only N cells per country
   dryRun?: boolean;         // skip LLM brief and skip writes
   triggerSource?: string;   // 'cron' | 'manual'
   skipCountryBrief?: boolean;
+  country?: string;         // limit the run to one country_iso
 }
 
 // ── data loading ───────────────────────────────────────────────────────────────
 
-async function loadAllScenarios(): Promise<ScenarioRow[]> {
-  const all: ScenarioRow[] = [];
+const num = (v: unknown): number | null => (v == null ? null : Number(v));
+
+async function loadCells(country?: string): Promise<IndicatorCell[]> {
+  const all: IndicatorCell[] = [];
   const PAGE = 1000;
   let from = 0;
   while (true) {
-    const { data, error } = await sb
-      .from('panama_district_indicators')
+    let q = sb
+      .from('v_indicators_adm2')
       .select(
-        'cod_dist, nomb_dist, nomb_prov, age_group, pop_source, friction_source, friction, pop_total, pop_nodata, pct_le30'
+        'country_iso, admin2_pcode, admin2_name, admin1_name, education_level, mode, pct_le15, pct_le30, pct_le60, pop_total, pct_le30_osrm'
       )
+      // Deterministic order — paginating an unordered view with range()
+      // can drop or duplicate rows across pages.
+      .order('country_iso', { ascending: true })
+      .order('admin2_pcode', { ascending: true })
+      .order('education_level', { ascending: true })
+      .order('mode', { ascending: true })
       .range(from, from + PAGE - 1);
+    if (country) q = q.eq('country_iso', country);
+    const { data, error } = await q;
     if (error) throw error;
     if (!data || data.length === 0) break;
-    all.push(...(data as unknown as ScenarioRow[]));
+    for (const r of data) {
+      all.push({
+        country_iso: String(r.country_iso),
+        admin2_pcode: String(r.admin2_pcode),
+        admin2_name: r.admin2_name == null ? null : String(r.admin2_name),
+        admin1_name: r.admin1_name == null ? null : String(r.admin1_name),
+        education_level: r.education_level as IndicatorCell['education_level'],
+        mode: r.mode as IndicatorCell['mode'],
+        pct_le15: num(r.pct_le15),
+        pct_le30: num(r.pct_le30),
+        pct_le60: num(r.pct_le60),
+        pop_total: num(r.pop_total),
+        pct_le30_osrm: num(r.pct_le30_osrm),
+      });
+    }
     if (data.length < PAGE) break;
     from += PAGE;
   }
   return all;
 }
 
-function buildCellBundles(rows: ScenarioRow[]): CellBundle[] {
-  // Group rows by (cod, age, mode), then pick the canonical + the comparison rows.
-  type Key = string;
-  const byKey = new Map<Key, ScenarioRow[]>();
-  for (const r of rows) {
-    const k = `${r.cod_dist}|${r.age_group}|${r.friction}`;
-    if (!byKey.has(k)) byKey.set(k, []);
-    byKey.get(k)!.push(r);
-  }
-
-  const bundles: CellBundle[] = [];
-  for (const [, group] of byKey) {
-    const canonical = group.find(
-      (r) => r.pop_source === 'worldpop' && r.friction_source === 'map'
-    );
-    if (!canonical || canonical.pop_total <= 0) continue; // skip cells with no canonical or no pop
-
-    const worldpop_osm =
-      group.find((r) => r.pop_source === 'worldpop' && r.friction_source === 'osm') ?? null;
-    const census_map =
-      group.find((r) => r.pop_source === 'census' && r.friction_source === 'map') ?? null;
-
-    bundles.push({
-      cod_dist: canonical.cod_dist,
-      nomb_dist: canonical.nomb_dist,
-      nomb_prov: canonical.nomb_prov,
-      age_group: canonical.age_group,
-      transport_mode: canonical.friction,
-      canonical,
-      worldpop_osm,
-      census_map,
-    });
-  }
-
-  // Stable order: cod_dist asc, then age_group, then mode
-  bundles.sort((a, b) => {
-    if (a.cod_dist !== b.cod_dist) return a.cod_dist.localeCompare(b.cod_dist);
-    const aG = AGE_GROUPS.indexOf(a.age_group) - AGE_GROUPS.indexOf(b.age_group);
-    if (aG !== 0) return aG;
-    return TRANSPORT_MODES.indexOf(a.transport_mode) - TRANSPORT_MODES.indexOf(b.transport_mode);
-  });
-
-  return bundles;
-}
-
 // ── audit run lifecycle ────────────────────────────────────────────────────────
 
-async function openRun(triggerSource: string, cellsTotal: number): Promise<string> {
+async function openRun(
+  triggerSource: string,
+  countryIso: string,
+  cellsTotal: number
+): Promise<string> {
   const { data, error } = await sb
     .from('audit_runs')
     .insert({
+      country_iso: countryIso,
       cells_total: cellsTotal,
       cells_done: 0,
       cells_failed: 0,
@@ -127,8 +107,6 @@ async function openRun(triggerSource: string, cellsTotal: number): Promise<strin
 }
 
 async function bumpRun(runId: string, doneDelta: number, failedDelta: number) {
-  // Read-modify-write. Not race-safe across multiple workers, but a single
-  // worker run never has concurrent bumps with itself (we flush sequentially).
   const { data: row } = await sb
     .from('audit_runs')
     .select('cells_done, cells_failed')
@@ -154,13 +132,13 @@ async function closeRun(runId: string, status: 'done' | 'failed') {
 // ── per-cell processing ────────────────────────────────────────────────────────
 
 interface ReportRow {
-  cod_dist: string;
-  age_group: string;
+  country_iso: string;
+  admin2_pcode: string;
+  education_level: string;
   transport_mode: string;
   score_data_completeness: number;
   score_sample_size: number;
-  score_friction_agreement: number;
-  score_pop_agreement: number;
+  score_method_agreement: number;
   score_overall: number;
   weakest_dimension: string;
   narrative: string;
@@ -173,17 +151,17 @@ interface ReportRow {
   audit_run_id: string;
 }
 
-function processCell(bundle: CellBundle, runId: string): ReportRow {
-  const scores = computeScores(bundle);
-  const { narrative, caveats, input_hash } = explainCell(bundle, scores);
+function processCell(cell: IndicatorCell, runId: string): ReportRow {
+  const scores = computeScores(cell);
+  const { narrative, caveats, input_hash } = explainCell(cell, scores);
   return {
-    cod_dist: bundle.cod_dist,
-    age_group: bundle.age_group,
-    transport_mode: bundle.transport_mode,
+    country_iso: cell.country_iso,
+    admin2_pcode: cell.admin2_pcode,
+    education_level: cell.education_level,
+    transport_mode: cell.mode,
     score_data_completeness: scores.data_completeness,
     score_sample_size: scores.sample_size,
-    score_friction_agreement: scores.friction_agreement,
-    score_pop_agreement: scores.pop_agreement,
+    score_method_agreement: scores.method_agreement,
     score_overall: scores.composite,
     weakest_dimension: scores.weakest,
     narrative,
@@ -201,8 +179,89 @@ async function flush(buffer: ReportRow[]) {
   if (buffer.length === 0) return;
   const { error } = await sb
     .from('robustness_reports')
-    .upsert(buffer, { onConflict: 'cod_dist,age_group,transport_mode' });
+    .upsert(buffer, {
+      onConflict: 'country_iso,admin2_pcode,education_level,transport_mode',
+    });
   if (error) throw error;
+}
+
+// ── per-country audit ──────────────────────────────────────────────────────────
+
+interface CountryResult {
+  countryIso: string;
+  runId: string;
+  doneCount: number;
+  failedCount: number;
+}
+
+async function auditCountry(
+  countryIso: string,
+  cells: IndicatorCell[],
+  opts: { triggerSource: string; dryRun: boolean; skipCountryBrief: boolean }
+): Promise<CountryResult> {
+  const runId = await openRun(opts.triggerSource, countryIso, cells.length);
+  console.log(`[audit] ${countryIso}: run id=${runId}, ${cells.length} cells`);
+
+  const buffer: ReportRow[] = [];
+  let doneCount = 0;
+  let failedCount = 0;
+
+  try {
+    for (let idx = 0; idx < cells.length; idx++) {
+      const cell = cells[idx];
+      try {
+        buffer.push(processCell(cell, runId));
+        doneCount++;
+      } catch (err) {
+        failedCount++;
+        console.error(
+          `[audit] cell failed: ${cell.admin2_pcode} ${cell.education_level} ${cell.mode}:`,
+          (err as Error).message
+        );
+      }
+      if (buffer.length >= FLUSH_BATCH_SIZE && !opts.dryRun) {
+        const toFlush = buffer.splice(0, buffer.length);
+        await flush(toFlush);
+        await bumpRun(runId, toFlush.length, 0);
+        console.log(`[audit] ${countryIso}: flushed ${toFlush.length} (${idx + 1}/${cells.length})`);
+      }
+    }
+
+    if (buffer.length > 0 && !opts.dryRun) {
+      const finalCount = buffer.length;
+      await flush(buffer);
+      await bumpRun(runId, finalCount, failedCount);
+    }
+
+    if (!opts.dryRun) {
+      const priorityCount = await computeAndWritePriorities(runId, countryIso);
+      console.log(`[audit] ${countryIso}: wrote ${priorityCount} priority rows`);
+
+      if (!opts.skipCountryBrief) {
+        try {
+          await writeCountryAuditBrief({
+            countryIso,
+            auditRunId: runId,
+            factsVersion: FACTS_VERSION,
+            promptVersion: BRIEF_PROMPT_VERSION,
+          });
+          console.log(`[audit] ${countryIso}: country audit brief written`);
+        } catch (err) {
+          // Brief failure must NOT fail the run — deterministic text is
+          // already in robustness_reports and the brief is best-effort.
+          console.error(`[audit] ${countryIso}: brief failed (continuing):`, (err as Error).message);
+        }
+      }
+    }
+
+    await closeRun(runId, 'done');
+  } catch (err) {
+    console.error(`[audit] ${countryIso}: run failed:`, err);
+    await closeRun(runId, 'failed');
+    throw err;
+  }
+
+  return { countryIso, runId, doneCount, failedCount };
 }
 
 // ── public entry ───────────────────────────────────────────────────────────────
@@ -213,94 +272,46 @@ export async function runFullAudit(opts: AuditOptions = {}) {
     opts.cellLimit ??
     (process.env.AUDIT_CELL_LIMIT ? Number(process.env.AUDIT_CELL_LIMIT) : undefined);
   const dryRun = opts.dryRun ?? process.env.AUDIT_DRY_RUN === 'true';
-  const skipCountryBrief =
-    opts.skipCountryBrief ?? process.env.AUDIT_SKIP_BRIEF === 'true';
+  const skipCountryBrief = opts.skipCountryBrief ?? process.env.AUDIT_SKIP_BRIEF === 'true';
+  const country = opts.country ?? process.env.AUDIT_COUNTRY ?? undefined;
 
   console.log(
     `[audit] starting run: trigger=${triggerSource} dryRun=${dryRun}` +
-      (cellLimit ? ` limit=${cellLimit}` : '') +
+      (country ? ` country=${country}` : '') +
+      (cellLimit ? ` limit=${cellLimit}/country` : '') +
       (skipCountryBrief ? ' skipBrief=true' : '')
   );
 
   const t0 = Date.now();
-  const rows = await loadAllScenarios();
-  console.log(`[audit] loaded ${rows.length} scenario rows`);
-  const bundles = buildCellBundles(rows);
-  const cells = cellLimit ? bundles.slice(0, cellLimit) : bundles;
-  console.log(`[audit] ${bundles.length} cells available; processing ${cells.length}`);
+  const allCells = await loadCells(country);
+  console.log(`[audit] loaded ${allCells.length} cells from v_indicators_adm2`);
 
-  const runId = await openRun(triggerSource, cells.length);
-  console.log(`[audit] audit_run id=${runId}`);
+  // Group cells by country, stable order within each.
+  const byCountry = new Map<string, IndicatorCell[]>();
+  for (const c of allCells) {
+    if (!byCountry.has(c.country_iso)) byCountry.set(c.country_iso, []);
+    byCountry.get(c.country_iso)!.push(c);
+  }
 
-  const buffer: ReportRow[] = [];
-  let doneCount = 0;
-  let failedCount = 0;
-
-  try {
-    // Deterministic explainer: synchronous, in-process. No need for
-    // concurrency or retry — just iterate and batch-flush.
-    for (let idx = 0; idx < cells.length; idx++) {
-      const bundle = cells[idx];
-      try {
-        const report = processCell(bundle, runId);
-        buffer.push(report);
-        doneCount++;
-      } catch (err) {
-        failedCount++;
-        console.error(
-          `[audit] cell failed: ${bundle.cod_dist} ${bundle.age_group} ${bundle.transport_mode}:`,
-          (err as Error).message
-        );
-      }
-
-      if (buffer.length >= FLUSH_BATCH_SIZE && !dryRun) {
-        const toFlush = buffer.splice(0, buffer.length);
-        await flush(toFlush);
-        await bumpRun(runId, toFlush.length, 0);
-        console.log(`[audit] flushed ${toFlush.length} cells (${idx + 1}/${cells.length})`);
-      }
-    }
-
-    if (buffer.length > 0 && !dryRun) {
-      const finalCount = buffer.length;
-      await flush(buffer);
-      await bumpRun(runId, finalCount, failedCount);
-      console.log(`[audit] flushed final ${finalCount} cells`);
-    }
-
-    if (!dryRun) {
-      console.log('[audit] computing priority scores…');
-      const priorityCount = await computeAndWritePriorities(runId);
-      console.log(`[audit] wrote ${priorityCount} priority rows`);
-
-      if (!skipCountryBrief) {
-        try {
-          console.log('[audit] writing country audit brief…');
-          await writeCountryAuditBrief({
-            countryIso: 'PAN',
-            auditRunId: runId,
-            factsVersion: FACTS_VERSION,
-            promptVersion: BRIEF_PROMPT_VERSION,
-          });
-          console.log('[audit] country audit brief written');
-        } catch (err) {
-          // Brief failure must NOT fail the run — deterministic text is
-          // already in robustness_reports and the brief is best-effort.
-          console.error('[audit] country brief failed (continuing):', (err as Error).message);
-        }
-      }
-    }
-
-    await closeRun(runId, 'done');
-  } catch (err) {
-    console.error('[audit] run failed:', err);
-    await closeRun(runId, 'failed');
-    throw err;
+  const results: CountryResult[] = [];
+  for (const [countryIso, cells] of byCountry) {
+    cells.sort(
+      (a, b) =>
+        a.admin2_pcode.localeCompare(b.admin2_pcode) ||
+        a.education_level.localeCompare(b.education_level) ||
+        a.mode.localeCompare(b.mode)
+    );
+    const selected = cellLimit ? cells.slice(0, cellLimit) : cells;
+    results.push(
+      await auditCountry(countryIso, selected, { triggerSource, dryRun, skipCountryBrief })
+    );
   }
 
   const dt = ((Date.now() - t0) / 1000).toFixed(1);
+  const done = results.reduce((s, r) => s + r.doneCount, 0);
+  const failed = results.reduce((s, r) => s + r.failedCount, 0);
   console.log(
-    `[audit] done in ${dt}s — ${doneCount} cells written, ${failedCount} failed, run=${runId}`
+    `[audit] done in ${dt}s — ${results.length} countries, ${done} cells written, ${failed} failed`
   );
-  return { runId, doneCount, failedCount };
+  return { countries: results, doneCount: done, failedCount: failed };
 }

@@ -4,23 +4,21 @@
  * SimulationPanel — side-panel UI for the inequality-in-motion simulation.
  *
  * Two synchronized views: the choropleth on the main map (handled by
- * PanamaMap) and three "kid tracks" rendered here. Same simulated clock
+ * CountryMap) and three "kid tracks" rendered here. Same simulated clock
  * drives both. Tracks let a viewer feel three districts at once:
  * the worst, the median, and the best by pct_le30.
  *
  * Each kid's position along the track at simMin t is the district's
- * cumulative "% reached at t" — interpolated linearly through 0, 15, 30,
- * 60. By design, at simMin=30 the kid position equals the static
- * pct_le30 number shown elsewhere on the platform.
+ * cumulative "% reached at t" — interpolated linearly through 0, 15, 30, 60.
  */
 
 import { useMemo } from 'react';
-import type { AgeGroup, IndicatorRow, IndicatorsByDist, TransportMode } from '@/lib/types';
-import { AGE_GROUP_NARRATIVE, TRANSPORT_LABELS } from '@/lib/types';
+import type { EducationLevel, IndicatorRow, IndicatorsByDist, TransportMode } from '@/lib/types';
+import { EDUCATION_LEVEL_NARRATIVE, TRANSPORT_LABELS } from '@/lib/types';
 
 interface Props {
   indicators: IndicatorsByDist;
-  ageGroup: AgeGroup;
+  level: EducationLevel;
   transport: TransportMode;
   simMin: number;            // 0-60
   isPlaying: boolean;
@@ -30,8 +28,6 @@ interface Props {
   onReplay: () => void;
 }
 
-const SIM_MINUTES = 60;
-
 function formatClock(simMin: number): string {
   const whole = Math.floor(simMin);
   const frac = simMin - whole;
@@ -40,34 +36,35 @@ function formatClock(simMin: number): string {
 }
 
 function pctArrivedAt(t: number, r: IndicatorRow): number {
+  const le15 = r.pct_le15 ?? 0;
+  const le30 = r.pct_le30 ?? 0;
+  const le60 = r.pct_le60 ?? 0;
   if (t <= 0) return 0;
-  if (t <= 15) return (t / 15) * r.pct_le15;
-  if (t <= 30) return r.pct_le15 + ((t - 15) / 15) * (r.pct_le30 - r.pct_le15);
-  if (t <= 60) return r.pct_le30 + ((t - 30) / 30) * (r.pct_le60 - r.pct_le30);
-  return r.pct_le60;
+  if (t <= 15) return (t / 15) * le15;
+  if (t <= 30) return le15 + ((t - 15) / 15) * (le30 - le15);
+  if (t <= 60) return le30 + ((t - 30) / 30) * (le60 - le30);
+  return le60;
 }
 
 interface Representative {
   row: IndicatorRow;
-  label: string;          // descriptive header ("Hardest", "Typical", "Easiest")
+  label: string;
 }
 
 function pickRepresentatives(
   indicators: IndicatorsByDist,
-  ageGroup: AgeGroup
+  level: EducationLevel
 ): Representative[] {
   const rows: IndicatorRow[] = [];
-  for (const byAge of Object.values(indicators)) {
-    const r = byAge[ageGroup];
-    if (r && r.data_completeness_pct > 0) rows.push(r);
+  for (const byLevel of Object.values(indicators)) {
+    const r = byLevel[level];
+    if (r && r.pop_total > 0) rows.push(r);
   }
   if (rows.length < 3) return [];
-  rows.sort((a, b) => a.pct_le30 - b.pct_le30);
+  rows.sort((a, b) => (a.pct_le30 ?? 0) - (b.pct_le30 ?? 0));
 
-  // Worst — pick a non-zero, sub-30% district so the demo opens with a
-  // track that actually has visible motion. Fall back to the first row.
   const worst =
-    rows.find((r) => r.pct_le30 > 0 && r.pct_le30 < 30) ?? rows[0];
+    rows.find((r) => (r.pct_le30 ?? 0) > 0 && (r.pct_le30 ?? 0) < 30) ?? rows[0];
   const best = rows[rows.length - 1];
   const median = rows[Math.floor(rows.length / 2)];
 
@@ -88,21 +85,10 @@ function KidTrack({
   isFinished: boolean;
 }) {
   const pct = pctArrivedAt(simMin, rep.row);
-  // "Reached" when the cumulative arrival hits 99+% — the kid is at the
-  // school. "Stuck" only when the clock has finished AND the district's
-  // ceiling (pct_le60) never reaches the school.
   const reached = pct >= 99;
-  const stuck = isFinished && rep.row.pct_le60 < 99 && !reached;
-  const kidColor = reached
-    ? 'bg-emerald-600'
-    : stuck
-    ? 'bg-red-500'
-    : 'bg-amber-500';
-  const fillColor = reached
-    ? 'bg-emerald-500'
-    : stuck
-    ? 'bg-red-300'
-    : 'bg-amber-300';
+  const stuck = isFinished && (rep.row.pct_le60 ?? 0) < 99 && !reached;
+  const kidColor = reached ? 'bg-emerald-600' : stuck ? 'bg-red-500' : 'bg-amber-500';
+  const fillColor = reached ? 'bg-emerald-500' : stuck ? 'bg-red-300' : 'bg-amber-300';
 
   return (
     <div>
@@ -112,9 +98,9 @@ function KidTrack({
             {rep.label}
           </span>
           <span className="ml-1.5 text-xs font-medium text-neutral-800">
-            {rep.row.nomb_dist}
+            {rep.row.admin2_name}
           </span>
-          <span className="ml-1 text-[10px] text-neutral-400">{rep.row.nomb_prov}</span>
+          <span className="ml-1 text-[10px] text-neutral-400">{rep.row.admin1_name}</span>
         </div>
         <span className="shrink-0 font-mono text-xs tabular-nums text-neutral-700">
           {Math.round(pct)}%
@@ -122,21 +108,17 @@ function KidTrack({
       </div>
 
       <div className="relative flex items-center">
-        {/* Track line */}
         <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-neutral-100">
-          {/* Filled portion — no CSS transition; the React state updates per frame */}
           <div
             className={`absolute top-0 bottom-0 left-0 ${fillColor}`}
             style={{ width: `${pct}%` }}
           />
-          {/* Kid marker */}
           <div
             className={`absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow ${kidColor}`}
             style={{ left: `${pct}%` }}
             aria-hidden
           />
         </div>
-        {/* School icon */}
         <span
           className="ml-2 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-sm bg-neutral-700 text-[10px] font-bold text-white"
           aria-hidden
@@ -150,7 +132,7 @@ function KidTrack({
 
 export default function SimulationPanel({
   indicators,
-  ageGroup,
+  level,
   transport,
   simMin,
   isPlaying,
@@ -159,22 +141,21 @@ export default function SimulationPanel({
   onPause,
   onReplay,
 }: Props) {
-  const narrative = AGE_GROUP_NARRATIVE[ageGroup];
+  const narrative = EDUCATION_LEVEL_NARRATIVE[level];
   const mode = TRANSPORT_LABELS[transport].toLowerCase();
   const clock = formatClock(simMin);
 
   const representatives = useMemo(
-    () => pickRepresentatives(indicators, ageGroup),
-    [indicators, ageGroup]
+    () => pickRepresentatives(indicators, level),
+    [indicators, level]
   );
 
-  // Aggregate stats across all districts with data, at current simMin
   const aggregate = useMemo(() => {
     let totalPop = 0;
     let arrived = 0;
-    for (const byAge of Object.values(indicators)) {
-      const r = byAge[ageGroup];
-      if (!r || r.data_completeness_pct === 0) continue;
+    for (const byLevel of Object.values(indicators)) {
+      const r = byLevel[level];
+      if (!r || r.pop_total <= 0) continue;
       totalPop += r.pop_total;
       arrived += (pctArrivedAt(simMin, r) / 100) * r.pop_total;
     }
@@ -182,7 +163,7 @@ export default function SimulationPanel({
       arrivedPct: totalPop > 0 ? Math.round((arrived / totalPop) * 100) : 0,
       remainingCount: Math.max(0, Math.round(totalPop - arrived)),
     };
-  }, [indicators, ageGroup, simMin]);
+  }, [indicators, level, simMin]);
 
   const statusLabel = isFinished ? 'finished' : isPlaying ? 'running' : 'paused';
 
@@ -197,8 +178,6 @@ export default function SimulationPanel({
         </p>
       </div>
 
-      {/* Compact HUD: clock + transport controls in a single row so they
-          stay visible together without scrolling. */}
       <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
@@ -256,7 +235,6 @@ export default function SimulationPanel({
         </div>
       </div>
 
-      {/* Kid tracks */}
       {representatives.length === 3 && (
         <div>
           <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
@@ -271,7 +249,7 @@ export default function SimulationPanel({
           <div className="flex flex-col gap-3 rounded-md border border-neutral-200 bg-white p-3">
             {representatives.map((rep) => (
               <KidTrack
-                key={rep.row.cod_dist}
+                key={rep.row.admin2_pcode}
                 rep={rep}
                 simMin={simMin}
                 isFinished={isFinished}
@@ -281,7 +259,6 @@ export default function SimulationPanel({
         </div>
       )}
 
-      {/* Aggregate counter */}
       <div className="grid grid-cols-2 gap-2">
         <div className="rounded-md bg-emerald-50 p-3">
           <p className="text-[11px] text-emerald-700">Reached a school</p>
