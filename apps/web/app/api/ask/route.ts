@@ -56,18 +56,26 @@ function normalizeName(s: string): string {
 
 /**
  * Resolve an LLM-supplied district reference (a name, or already a code) to a
- * real admin2_pcode for the country. Returns null when there is no match.
+ * real admin2_pcode for the country. Returns null when there is no match OR
+ * when a bare name is ambiguous (district names repeat across provinces — e.g.
+ * Colombia has 68 duplicated names). An optional `admin1` (province) hint
+ * disambiguates. Ambiguous → null so the route falls back to out_of_scope
+ * rather than silently focusing the wrong district.
  *
  * The full roster is NOT sent to the LLM — embedding ~1,100 Colombian
  * districts blew past Groq's per-minute token limit. The LLM returns the
  * district name the user gave; resolution happens here.
  */
-function resolveDistrict(country: CountryIso, ref: string): string | null {
+function resolveDistrict(country: CountryIso, ref: string, admin1?: string): string | null {
   const roster = districtsFor(country);
   if (roster.some((d) => d.admin2_pcode === ref)) return ref;
   const key = normalizeName(ref);
-  const hit = roster.find((d) => normalizeName(d.admin2_name) === key);
-  return hit ? hit.admin2_pcode : null;
+  let matches = roster.filter((d) => normalizeName(d.admin2_name) === key);
+  if (matches.length > 1 && admin1) {
+    const a1 = normalizeName(admin1);
+    matches = matches.filter((d) => normalizeName(d.admin1_name) === a1);
+  }
+  return matches.length === 1 ? matches[0].admin2_pcode : null;
 }
 
 // ── response cache ──────────────────────────────────────────────────────────────
@@ -170,15 +178,16 @@ Use this kind when the user wants to interact with the UI without computing
 anything new. The frontend executes each action in order.
 
 Action shapes (must match exactly — never invent fields):
-  { "type":"set_country", "country":"PAN"|"COL" }
-  { "type":"select_district", "district":"<district name the user gave>" }
+  { "type":"set_country", "country":"PAN"|"COL"|"CRI"|"ECU"|"PER" }
+  { "type":"select_district", "district":"<district name>", "admin1":"<province, optional>" }
   { "type":"set_transport_mode", "mode":"walking"|"motorized" }
   { "type":"set_education_level", "level":"primaria"|"secbaja"|"secalta" }
   { "type":"focus_panel_tab", "tab":"insight"|"ask" }
 
 For select_district, return the district name exactly as the user said it — the
-server resolves it to a code. If the user names a place that is not a district
-of ${countryName}, return out_of_scope instead.
+server resolves it to a code. District names repeat across provinces, so when
+the user names a province (e.g. "Buenavista, Sucre") put it in "admin1". If the
+user names a place that is not a district of ${countryName}, return out_of_scope.
 
 When focusing a district, also append a focus_panel_tab→insight action so the
 panel shows the district detail.
@@ -264,9 +273,10 @@ function validateActions(raw: unknown, country: CountryIso): ActionValidation {
         if (typeof ref !== 'string' || !ref.trim()) {
           return { ok: false, reason: 'select_district needs a district name' };
         }
-        const code = resolveDistrict(country, ref);
+        const admin1 = typeof a.admin1 === 'string' ? a.admin1 : undefined;
+        const code = resolveDistrict(country, ref, admin1);
         if (!code) {
-          return { ok: false, reason: `unknown district: ${ref}` };
+          return { ok: false, reason: `unknown or ambiguous district: ${ref}` };
         }
         validated.push({ type: 'select_district', admin2_pcode: code });
         break;
@@ -512,9 +522,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Hard-scope the data source to the active country: replace the view with a
+  // country-filtered subquery. The query then cannot read other countries'
+  // rows no matter what WHERE clause the LLM wrote — defence in depth around
+  // checkCountryFilter. `country` is a validated enum, safe to interpolate.
+  const scopedSql = sql.replace(
+    /\bFROM\s+v_indicators_adm2\b/i,
+    `FROM (SELECT * FROM v_indicators_adm2 WHERE country_iso = '${country}') v_indicators_adm2`
+  );
+
   // Execute via the run_sql Postgres function (service_role only)
   const supabase = createClient(supaUrl, supaKey);
-  const { data, error: dbError } = await supabase.rpc('run_sql', { query: sql });
+  const { data, error: dbError } = await supabase.rpc('run_sql', { query: scopedSql });
   if (dbError) {
     console.error('[ask] DB error:', dbError);
     return NextResponse.json({ error: 'Query execution failed.', sql }, { status: 422 });

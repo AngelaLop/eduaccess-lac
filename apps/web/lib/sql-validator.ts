@@ -97,6 +97,23 @@ export function checkNoSemicolon(sql: string): ValidationResult {
   return { ok: true };
 }
 
+/**
+ * No subqueries / CTEs / LATERAL. checkAllowedView strips parenthesised text
+ * before validating relations, so a nested SELECT could otherwise hide a
+ * `FROM other_table` from it. Forbidding nesting keeps the single-view
+ * guarantee airtight — the query is always one flat SELECT on the view.
+ */
+export function checkNoSubqueries(sql: string): ValidationResult {
+  const selectCount = (sql.match(/\bSELECT\b/gi) ?? []).length;
+  if (selectCount > 1) {
+    return { ok: false, reason: 'Subqueries and CTEs are not allowed — use a single SELECT.' };
+  }
+  if (/\b(LATERAL|WITH)\b/i.test(sql)) {
+    return { ok: false, reason: 'WITH / LATERAL are not allowed.' };
+  }
+  return { ok: true };
+}
+
 export function checkAllowedView(sql: string): ValidationResult {
   // Block double-quoted identifiers — could mask relation names
   if (/"[^"]+"/.test(sql)) {
@@ -190,20 +207,28 @@ export function checkNoDangerousFunctions(sql: string): ValidationResult {
 }
 
 /**
- * Multi-country guard: the query MUST pin country_iso to the active country.
- * Without this the LLM could read another country's rows, or mix countries
- * in one result. The check is exact-match on a literal `country_iso = 'XXX'`.
+ * Multi-country guard: the query must pin country_iso to the active country.
+ * Every `country_iso = 'XXX'` literal must equal the active country, and
+ * `country_iso` may not be used with IN / != / <> (which could widen the
+ * scope). This is the pre-check; /api/ask additionally wraps the view in a
+ * server-side country-scoped subquery so the data source is hard-locked
+ * regardless of the WHERE clause.
  */
 export function checkCountryFilter(sql: string, country: string): ValidationResult {
-  const match = sql.match(/\bcountry_iso\s*=\s*'([A-Za-z]{3})'/i);
-  if (!match) {
+  if (/\bcountry_iso\s*(?:\bin\b|!=|<>)/i.test(sql)) {
+    return { ok: false, reason: "country_iso must be a single = '<country>' filter." };
+  }
+  const matches = [...sql.matchAll(/\bcountry_iso\s*=\s*'([A-Za-z]{3})'/gi)];
+  if (matches.length === 0) {
     return { ok: false, reason: `Query must filter country_iso = '${country}'.` };
   }
-  if (match[1].toUpperCase() !== country.toUpperCase()) {
-    return {
-      ok: false,
-      reason: `Query filters country_iso = '${match[1]}' but the active country is '${country}'.`,
-    };
+  for (const m of matches) {
+    if (m[1].toUpperCase() !== country.toUpperCase()) {
+      return {
+        ok: false,
+        reason: `Query filters country_iso = '${m[1]}' but the active country is '${country}'.`,
+      };
+    }
   }
   return { ok: true };
 }
@@ -226,6 +251,7 @@ export function validateSQL(rawSql: string, country: string): ValidationResult {
   const checks = [
     checkNoSemicolon(sql),
     checkStartsWithSelect(sql),
+    checkNoSubqueries(sql),
     checkAllowedView(sql),
     checkCountryFilter(sql, country),
     checkHasLimit(sql),

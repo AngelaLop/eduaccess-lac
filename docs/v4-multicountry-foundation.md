@@ -8,8 +8,8 @@
 > Reviewer: Codex — second-pass review requested.
 > Status: web app `pnpm typecheck` + `pnpm build` clean; worker `pnpm typecheck`
 > clean. All **five** countries the IDB pipeline covers (Panama, Colombia, Costa
-> Rica, Ecuador, Peru) are wired up. Panama + Colombia verified end-to-end in the
-> browser; CRI/ECU/PER pending their data load + worker run (§11).
+> Rica, Ecuador, Peru) are wired up and load in the browser. A second-pass Codex
+> review ran end-to-end; all 7 findings are fixed — see §13.
 
 ---
 
@@ -308,3 +308,27 @@ switcher, choropleth, Ask).
 10. **Paginated reads of `v_indicators_adm2`** in both `AppShell` and the worker
     `loadCells` (§10) — confirm the explicit `ORDER BY` + sequential `.range()`
     loop reads every row exactly once.
+
+---
+
+## 13. Codex review — findings & resolutions
+
+A second-pass Codex review of commit `b5d3ff0` ran end-to-end (schema →
+loaders → worker → API → frontend). All seven findings are fixed:
+
+| # | Sev | Finding | Fix |
+|---|---|---|---|
+| 1 | critical | `checkAllowedView` strips parenthesised text before validating relations — a subquery could hide `FROM other_table` from the single-view check (and `run_sql` is service-role) | New **`checkNoSubqueries`** — rejects >1 `SELECT`, `WITH`, `LATERAL`. The query is now always one flat SELECT on the view, so the paren-stripping check is sound. |
+| 2 | high | `checkCountryFilter` matched only the *first* `country_iso='X'` literal — `OR country_iso='COL'` slipped through | `/api/ask` now wraps the view in a **server-side country-scoped subquery** (`FROM (SELECT * FROM v_indicators_adm2 WHERE country_iso='<active>') …`) — the data source is hard-locked regardless of the WHERE clause. `checkCountryFilter` also tightened: every literal must match, `IN`/`!=`/`<>` rejected. |
+| 3 | high | `AppShell` paginator ordered only by `admin2_pcode`; 6 rows/district left ties → offset paging could drop/duplicate at page edges | Total order added — `admin2_pcode, education_level, mode`. |
+| 4 | high | Worker per-country failures not isolated — one country erroring aborted the rest | `runFullAudit` wraps each `auditCountry` in try/catch, logs the failure, continues. |
+| 5 | medium | `resolveDistrict` first-match, ignored `admin1` — 68 duplicated district names in Colombia could focus the wrong one | Returns `null` on ambiguity; accepts an optional `admin1` hint; the `select_district` action + prompt gain optional `admin1`. |
+| 6 | medium | Cross-country re-ask `isAsking` race — the outer `finally` cleared it mid-flight | The re-ask is now `await`ed; `isAsking` clears once, after it completes. |
+| 7 | medium | Two-country remnants — the `set_country` prompt line and the `?country=` URL bootstrap hardcoded `PAN`/`COL` | Both now cover all five ISOs via `COUNTRIES`. |
+
+Codex's "looks good" list confirmed: `v_indicators_adm2` yields one row per
+key with no fan-out; the schema re-keying + indexes are coherent; the loaders
+are sound; the worker paginator is correctly ordered; the feature-state map
+rewrite is solid; no stale `cod_dist`/`age_group`/`v_panama_indicators`
+references remain. Both apps `pnpm typecheck` and the web `pnpm build` pass
+after the fixes.

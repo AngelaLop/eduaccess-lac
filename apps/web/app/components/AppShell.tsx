@@ -118,7 +118,7 @@ export default function AppShell() {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
     const ctry = params.get('country');
-    if (ctry === 'PAN' || ctry === 'COL') setCountry(ctry);
+    if (ctry && ctry in COUNTRIES) setCountry(ctry as CountryIso);
     const tab = params.get('tab');
     const askParam = params.get('ask');
     if (askParam) {
@@ -150,7 +150,12 @@ export default function AppShell() {
           .from('v_indicators_adm2')
           .select(VIEW_COLS)
           .eq('country_iso', country)
+          // Total order over the full key — v_indicators_adm2 has 6 rows per
+          // district (3 levels × 2 modes); ordering by admin2_pcode alone
+          // leaves ties, which makes offset paging drop/duplicate rows.
           .order('admin2_pcode', { ascending: true })
+          .order('education_level', { ascending: true })
+          .order('mode', { ascending: true })
           .range(from, from + PAGE - 1);
         if (cancelled) return;
         if (error) {
@@ -267,7 +272,9 @@ export default function AppShell() {
       const switchAction = actions.find((a) => a.type === 'set_country');
       if (switchAction?.type === 'set_country' && !opts.reask) {
         setCountry(switchAction.country);
-        void ask(q, { country: switchAction.country, reask: true });
+        // Await the re-ask so `isAsking` is cleared once, by the inner call's
+        // finally — not mid-flight by this outer call's finally.
+        await ask(q, { country: switchAction.country, reask: true });
         return;
       }
 

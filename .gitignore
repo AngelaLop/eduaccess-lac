@@ -68,3 +68,5 @@ keys*.png
 
 # Local debugging screenshots dropped at the project root
 LLM*.png
+# Any PNG at the repo root is a screenshot — never commit (subdir PNGs are fine)
+/*.png

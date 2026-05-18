@@ -302,9 +302,15 @@ export async function runFullAudit(opts: AuditOptions = {}) {
         a.mode.localeCompare(b.mode)
     );
     const selected = cellLimit ? cells.slice(0, cellLimit) : cells;
-    results.push(
-      await auditCountry(countryIso, selected, { triggerSource, dryRun, skipCountryBrief })
-    );
+    // Isolate per-country failures — one country erroring must not abort the
+    // remaining countries. auditCountry already marks its own run failed.
+    try {
+      results.push(
+        await auditCountry(countryIso, selected, { triggerSource, dryRun, skipCountryBrief })
+      );
+    } catch (err) {
+      console.error(`[audit] ${countryIso}: aborted, continuing —`, (err as Error).message);
+    }
   }
 
   const dt = ((Date.now() - t0) / 1000).toFixed(1);
