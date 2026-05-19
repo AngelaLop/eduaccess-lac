@@ -29,6 +29,12 @@
   border-radius: 0 !important;
 }
 
+/* Opt the landing search bar back into rounded corners — the global square-off
+   above uses !important, so re-rounding needs a higher-specificity !important. */
+.rounded-pill {
+  border-radius: 9999px !important;
+}
+
 html {
   min-height: 100%;
   background: linear-gradient(180deg, #fafcf9 0%, #f6f9f6 100%);
@@ -81,6 +87,12 @@ a {
 
 .section-divider {
   border-top: 1px solid var(--line);
+}
+
+/* White labels riding the ranking bars — a tight dark halo keeps them legible
+   whether they sit on the dark fill or the light unfilled track. */
+.bar-label {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
 }
 
 .animate-fade-up {

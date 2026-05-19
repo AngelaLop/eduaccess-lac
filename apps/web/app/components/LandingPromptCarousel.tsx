@@ -60,13 +60,13 @@ export default function LandingPromptCarousel({ prompts }: Props) {
 
   return (
     <div className="mx-auto w-full">
-      <div className="flex items-center gap-3 rounded-full bg-white px-4 py-3 shadow-[0_22px_54px_rgba(16,33,28,0.055)] sm:gap-4 sm:px-5 sm:py-3.5">
+      <div className="flex items-center gap-3 rounded-pill bg-white px-4 py-3 shadow-[0_22px_54px_rgba(16,33,28,0.055)] sm:gap-4 sm:px-5 sm:py-3.5">
         <Link
           href={`/platform?country=${current.country}&tab=ask`}
-          className="flex min-w-0 flex-1 items-center gap-3 rounded-full transition-colors hover:bg-neutral-50 sm:gap-4"
+          className="flex min-w-0 flex-1 items-center gap-3 rounded-pill transition-colors hover:bg-neutral-50 sm:gap-4"
           aria-label="Open the Ask tab"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f2f7f4] text-emerald-700 sm:h-11 sm:w-11">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-pill bg-[#f2f7f4] text-emerald-700 sm:h-11 sm:w-11">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -95,7 +95,7 @@ export default function LandingPromptCarousel({ prompts }: Props) {
 
         <Link
           href={`/platform?country=${current.country}&ask=${encodeURIComponent(current.text)}`}
-          className="shrink-0 rounded-full bg-emerald-700 px-[18px] py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800 sm:px-5"
+          className="shrink-0 rounded-pill bg-emerald-700 px-[18px] py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800 sm:px-5"
           aria-label={`Ask: ${current.text}`}
         >
           Ask

@@ -117,7 +117,7 @@ function DistrictDetail({
             {row.pct_le30_osrm != null && (
               <p className="text-[11px] leading-snug text-neutral-500">
                 OSRM routing puts 30-min access at{' '}
-                <strong>{row.pct_le30_osrm.toFixed(1)}%</strong> — a{' '}
+                <strong>{row.pct_le30_osrm.toFixed(1)}%</strong>, a{' '}
                 {Math.abs((row.pct_le30 ?? 0) - row.pct_le30_osrm).toFixed(0)}-point gap from the FMM
                 estimate above. The robustness score reflects this.
               </p>
@@ -249,7 +249,7 @@ function InsightLanding({
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
               Districts with the most {narrative} underserved
             </p>
-            <ol className="space-y-1.5">
+            <ol className="space-y-1">
               {stats.topUnderserved.map((entry, i) => {
                 const widthPct =
                   maxUnderserved > 0 ? (entry.underserved / maxUnderserved) * 100 : 0;
@@ -257,11 +257,13 @@ function InsightLanding({
                   <li key={entry.row.admin2_pcode}>
                     <button
                       onClick={() => onSelectDist(entry.row.admin2_pcode)}
-                      className="block w-full rounded-md border border-neutral-100 px-3 py-2 text-left transition-colors hover:bg-neutral-50"
+                      className="block w-full px-3 py-2 text-left transition-colors hover:bg-neutral-900/5"
                     >
-                      <div className="mb-1 flex items-baseline justify-between gap-2">
+                      <div className="flex items-baseline justify-between gap-2">
                         <div className="min-w-0 truncate">
-                          <span className="mr-1.5 text-xs text-neutral-400">{i + 1}.</span>
+                          <span className="mr-1.5 text-xs tabular-nums text-neutral-400">
+                            {i + 1}
+                          </span>
                           <span className="text-sm font-medium text-neutral-800">
                             {entry.row.admin2_name}
                           </span>
@@ -269,13 +271,13 @@ function InsightLanding({
                             {entry.row.admin1_name}
                           </span>
                         </div>
-                        <span className="shrink-0 text-sm font-bold text-neutral-900">
+                        <span className="shrink-0 text-sm font-bold tabular-nums text-neutral-900">
                           {entry.underserved.toLocaleString()}
                         </span>
                       </div>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+                      <div className="mt-1.5 h-1 w-full overflow-hidden bg-neutral-100">
                         <div
-                          className="h-full rounded-full bg-emerald-600"
+                          className="h-full bg-neutral-500"
                           style={{ width: `${Math.max(widthPct, 2)}%` }}
                         />
                       </div>

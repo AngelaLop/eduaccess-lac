@@ -24,7 +24,7 @@ const DIMENSION_LABELS: Record<RobustnessDimension, string> = {
 
 const DIMENSION_HELP: Record<RobustnessDimension, string> = {
   data_completeness: 'is the accessibility value present and valid for this cell?',
-  sample_size: 'how many people in this education level — small is noisy',
+  sample_size: 'how many people in this education level, small is noisy',
   method_agreement: 'do the FMM and OSRM routing methods agree on % within 30 min?',
 };
 

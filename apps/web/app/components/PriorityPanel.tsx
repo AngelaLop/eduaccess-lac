@@ -27,7 +27,7 @@ function interpret(row: PriorityRow, peers: PriorityRow[], narrative: string): s
   const isHighConfidence = row.robustness >= 80;
 
   if (isSevereAccess && isHighConfidence) {
-    return `Only ${row.pct_le30}% reach a school within 30 min — severe access gap, high confidence in the number.`;
+    return `Only ${row.pct_le30}% reach a school within 30 min, a severe access gap with high confidence in the number.`;
   }
   if (isLargestStakes && isHighConfidence) {
     return `Largest underserved population in this list (${row.children_underserved.toLocaleString()} ${narrative}), with high confidence in the data.`;
@@ -36,10 +36,10 @@ function interpret(row: PriorityRow, peers: PriorityRow[], narrative: string): s
     return `Largest stakes here (${row.children_underserved.toLocaleString()} ${narrative}); confidence is moderate (${Math.round(row.robustness)}/100).`;
   }
   if (isLowConfidence) {
-    return `${row.children_underserved.toLocaleString()} ${narrative} in a high-gap district, but the number is uncertain — verify before acting.`;
+    return `${row.children_underserved.toLocaleString()} ${narrative} in a high-gap district, but the number is uncertain, so verify before acting.`;
   }
   if (isSevereAccess) {
-    return `Only ${row.pct_le30}% within 30 min — wide access gap drives the score.`;
+    return `Only ${row.pct_le30}% within 30 min, the wide access gap drives the score.`;
   }
   return `Combined ${row.children_underserved.toLocaleString()} ${narrative} underserved with a ${Math.round(100 - row.pct_le30)}-point access gap.`;
 }
@@ -72,11 +72,11 @@ export default function PriorityPanel({
             <li key={entry.admin2_pcode}>
               <button
                 onClick={() => onSelectDist(entry.admin2_pcode)}
-                className="block w-full rounded-md border border-neutral-100 px-3 py-2 text-left transition-colors hover:bg-neutral-50"
+                className="block w-full px-3 py-2 text-left transition-colors hover:bg-neutral-900/5"
               >
-                <div className="mb-1 flex items-baseline justify-between gap-2">
+                <div className="flex items-baseline justify-between gap-2">
                   <div className="min-w-0 truncate">
-                    <span className="mr-1.5 text-xs text-neutral-400">{i + 1}.</span>
+                    <span className="mr-1.5 text-xs tabular-nums text-neutral-400">{i + 1}</span>
                     <span className="text-sm font-medium text-neutral-800">
                       {m?.admin2_name ?? entry.admin2_pcode}
                     </span>
@@ -84,17 +84,17 @@ export default function PriorityPanel({
                       <span className="ml-1 text-xs text-neutral-400">{m.admin1_name}</span>
                     )}
                   </div>
-                  <span className="shrink-0 text-sm font-bold text-emerald-700">
+                  <span className="shrink-0 text-sm font-bold tabular-nums text-neutral-900">
                     {Math.round(entry.score)}
                   </span>
                 </div>
-                <div className="mb-1.5 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+                <div className="mt-1.5 h-1 w-full overflow-hidden bg-neutral-100">
                   <div
-                    className="h-full rounded-full bg-emerald-600"
+                    className="h-full bg-neutral-500"
                     style={{ width: `${Math.max(entry.score, 2)}%` }}
                   />
                 </div>
-                <p className="text-[11px] leading-snug text-neutral-700">{why}</p>
+                <p className="mt-1.5 text-[11px] leading-snug text-neutral-700">{why}</p>
                 <p className="mt-0.5 text-[10px] text-neutral-400">
                   {entry.children_underserved.toLocaleString()} underserved · {entry.pct_le30}%
                   within 30 min by {mode} · confidence {Math.round(entry.robustness)}/100

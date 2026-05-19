@@ -53,6 +53,23 @@ function rampFill(min: number, max: number, ramp: string[]): maplibregl.Expressi
   ] as unknown as maplibregl.ExpressionSpecification;
 }
 
+// JS twin of rampFill's interpolation — the exact colour a value lands on in
+// the choropleth, so a ranking value can be tinted to match its map country.
+function rampColor(value: number, min: number, max: number, ramp: string[]): string {
+  const span = max - min || 1;
+  const t = Math.min(1, Math.max(0, (value - min) / span));
+  const seg = t * (ramp.length - 1);
+  const i = Math.min(ramp.length - 2, Math.floor(seg));
+  const f = seg - i;
+  const channel = (hex: string, k: number) =>
+    parseInt(hex.slice(1 + k * 2, 3 + k * 2), 16);
+  const mix = (k: number) =>
+    Math.round(
+      channel(ramp[i], k) + (channel(ramp[i + 1], k) - channel(ramp[i], k)) * f
+    );
+  return `rgb(${mix(0)}, ${mix(1)}, ${mix(2)})`;
+}
+
 // Countries without data render faint — they recede so the five covered
 // countries read as the active layer.
 const fillOpacityExpr: maplibregl.ExpressionSpecification = [
@@ -288,7 +305,7 @@ export default function LacOverview({ onSelectCountry }: Props) {
         line = `<strong>${v.toFixed(1)}%</strong> within 30 min`;
       } else {
         line = `<strong>${v.toFixed(0)} pts</strong> ${
-          m === 'area_gap' ? 'urban–rural' : 'wealth'
+          m === 'area_gap' ? 'urban-rural' : 'wealth'
         } gap`;
       }
       popup
@@ -399,7 +416,7 @@ export default function LacOverview({ onSelectCountry }: Props) {
   const narrative = EDUCATION_LEVEL_NARRATIVE[level];
   const mode = TRANSPORT_LABELS[transport].toLowerCase();
   const isGap = metric !== 'access';
-  const gapLabel = metric === 'area_gap' ? 'urban–rural' : 'wealth';
+  const gapLabel = metric === 'area_gap' ? 'urban-rural' : 'wealth';
   const legendRamp = isGap ? GAP_RAMP : ACCESS_RAMP;
   const fmtLegend = (v: number) =>
     metric === 'access' ? `${Math.round(v)}%` : `${Math.round(v)} pts`;
@@ -565,39 +582,51 @@ export default function LacOverview({ onSelectCountry }: Props) {
               <div>
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
                   {metric === 'access'
-                    ? 'Countries by school access — weakest first'
-                    : `Countries by ${gapLabel} gap — widest first`}
+                    ? 'Countries by school access, weakest first'
+                    : `Countries by ${gapLabel} gap, widest first`}
                 </p>
-                <ol className="space-y-1.5">
+                <ol className="space-y-1">
                   {summary.ranking.map((r, i) => {
                     const barPct =
                       metric === 'access'
                         ? Math.max(r.value, 2)
                         : Math.max((r.value / summary.maxValue) * 100, 2);
+                    const valueColor = rampColor(
+                      r.value,
+                      summary.domain[0],
+                      summary.domain[1],
+                      legendRamp
+                    );
                     return (
                       <li key={r.iso}>
                         <button
                           onClick={() => onSelectCountry(r.iso)}
-                          className="block w-full rounded-md border border-neutral-100 px-3 py-2 text-left transition-colors hover:border-neutral-300 hover:bg-neutral-900/5"
+                          className="group flex w-full items-stretch text-left"
                         >
-                          <div className="mb-1 flex items-baseline justify-between gap-2">
-                            <div className="min-w-0 truncate">
-                              <span className="mr-1.5 text-xs text-neutral-400">{i + 1}.</span>
-                              <span className="text-sm font-medium text-neutral-800">
+                          <div className="relative flex-1 overflow-hidden bg-neutral-50 px-3 py-1 transition-colors group-hover:bg-neutral-100">
+                            <div
+                              className="absolute inset-y-0 left-0 bg-neutral-600 transition-colors group-hover:bg-neutral-700"
+                              style={{ width: `${barPct}%` }}
+                              aria-hidden="true"
+                            />
+                            <div className="bar-label relative truncate">
+                              <span className="mr-1.5 text-xs tabular-nums text-white/70">
+                                {i + 1}
+                              </span>
+                              <span className="text-xs font-medium text-white">
                                 {COUNTRIES[r.iso].name}
                               </span>
                             </div>
-                            <span className="shrink-0 text-sm font-bold text-neutral-900">
+                          </div>
+                          <div className="flex shrink-0 items-center bg-neutral-50 px-3 transition-colors group-hover:bg-neutral-100">
+                            <span
+                              className="text-xs font-bold tabular-nums"
+                              style={{ color: valueColor }}
+                            >
                               {metric === 'access'
                                 ? `${r.value.toFixed(1)}%`
                                 : `${r.value.toFixed(0)} pts`}
                             </span>
-                          </div>
-                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
-                            <div
-                              className="h-full rounded-full bg-emerald-600"
-                              style={{ width: `${barPct}%` }}
-                            />
                           </div>
                         </button>
                       </li>
@@ -608,13 +637,13 @@ export default function LacOverview({ onSelectCountry }: Props) {
 
               {metric === 'wealth_gap' && (
                 <p className="text-xs text-neutral-400">
-                  Wealth quintiles are country-relative — each country&apos;s own poorest vs
-                  wealthiest fifth. Peru&apos;s quintile data is not yet available.
+                  Wealth quintiles are country-relative (each country&apos;s own poorest vs
+                  wealthiest fifth). Peru&apos;s quintile data is not yet available.
                 </p>
               )}
 
               <p className="text-xs text-neutral-400">
-                16 more Latin American countries — data coming soon.
+                16 more Latin American countries, data coming soon.
               </p>
             </div>
           )}
@@ -623,7 +652,18 @@ export default function LacOverview({ onSelectCountry }: Props) {
         {/* Footer */}
         <div className="shrink-0 border-t border-neutral-100 px-5 py-2">
           <p className="text-xs text-neutral-400">
-            Data: IDB Accessibility Platform · FMM + OSRM routing · 2026
+            Data: IDB Accessibility Platform · FMM + OSRM routing
+          </p>
+          <p className="mt-0.5 text-xs text-neutral-400">
+            May 2026 ·{' '}
+            <a
+              href="https://github.com/AngelaLop"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline-offset-2 transition-colors hover:text-neutral-600 hover:underline"
+            >
+              github.com/AngelaLop
+            </a>
           </p>
         </div>
       </aside>
