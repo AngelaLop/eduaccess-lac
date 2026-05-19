@@ -652,18 +652,7 @@ export default function LacOverview({ onSelectCountry }: Props) {
         {/* Footer */}
         <div className="shrink-0 border-t border-neutral-100 px-5 py-2">
           <p className="text-xs text-neutral-400">
-            Data: IDB Accessibility Platform · FMM + OSRM routing
-          </p>
-          <p className="mt-0.5 text-xs text-neutral-400">
-            May 2026 ·{' '}
-            <a
-              href="https://github.com/AngelaLop"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline-offset-2 transition-colors hover:text-neutral-600 hover:underline"
-            >
-              github.com/AngelaLop
-            </a>
+            Data: IDB Accessibility Platform · FMM + OSRM routing · 2026
           </p>
         </div>
       </aside>
