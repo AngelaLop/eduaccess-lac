@@ -1,7 +1,21 @@
 # Architecture — EduAccess LAC
 
-> How the app fits together: a Next.js frontend, a constrained AI chat, a Supabase
-> database, and a Railway cron worker. This is the v3 picture (Panama-only).
+> v4. How the app fits together: a Next.js frontend, a two-tier constrained AI
+> chat, a Supabase Postgres database, and a Railway worker. Multi-country —
+> Panama and Colombia are live; the schema is built to absorb Costa Rica,
+> Ecuador and Peru as their data lands.
+
+## The three deployables
+
+| Piece | Host | Responsibility |
+|---|---|---|
+| `apps/web` | Vercel | Next.js 16 frontend + the `/api/ask` route |
+| `apps/worker` | Railway (cron) | Rebuilds the robustness + priority layer, one run per country |
+| Postgres | Supabase | Shared database, curated LLM-visible views, `run_sql` function |
+
+The browser holds only the **anon key** (read-only, RLS-enforced). The
+**service-role key** lives only on Vercel server functions and the Railway
+worker — it is never shipped to the browser.
 
 ## System overview
 
@@ -10,182 +24,208 @@ graph TD
     User([Minister / classmate])
 
     subgraph Vercel["Vercel — apps/web (Next.js 16)"]
-        Landing[Landing page<br/>hero + seeded prompts]
-        Shell[AppShell<br/>client state hub]
-        Map[PanamaMap<br/>MapLibre choropleth]
-        Panel[IndicatorPanel +<br/>RobustnessCard]
-        Ask["/api/ask route<br/>LLM router + SQL executor"]
+        Landing[Landing page<br/>typewriter prompts]
+        LAC[LacOverview<br/>regional choropleth]
+        Shell[AppShell<br/>per-country state hub]
+        Map[CountryMap<br/>MapLibre choropleth]
+        Panels[Insight / Ask / Simulate<br/>panels]
+        Ask["/api/ask route<br/>two-tier LLM cascade"]
     end
 
     subgraph Railway["Railway — apps/worker (cron)"]
-        Audit[audit.ts<br/>orchestrator]
-        Scores[scores.ts<br/>4 numeric scorers]
+        Audit[audit.ts<br/>per-country orchestrator]
+        Scores[scores.ts<br/>numeric scorers]
         Explain[explainer.ts<br/>deterministic narrative]
         Priority[priority.ts<br/>investment ranking]
-        Brief[country-brief.ts<br/>1 LLM call / refresh]
+        Brief[country-brief.ts<br/>1 LLM call / country / refresh]
     end
 
     subgraph Supabase["Supabase (Postgres + RLS)"]
-        Indic[(panama_district_indicators<br/>+ geometries)]
-        View[[v_panama_indicators<br/>LLM-visible view]]
+        Indic[(accessibility_indicators<br/>FMM + OSRM, all slices)]
+        Geo[(district_geometries)]
+        ViewD[[v_indicators_adm2<br/>per-district, LLM-visible]]
+        ViewE[[v_equity<br/>area + wealth breakdown]]
         Robust[(robustness_reports)]
         Prio[(priority_scores)]
         Cbrief[(country_audit_briefs)]
         RPC{{run_sql function}}
     end
 
-    Groq[[Groq LLM<br/>llama-3.3-70b-versatile]]
+    Groq[[Groq — llama-3.1-8b + llama-3.3-70b]]
 
-    User --> Landing --> Shell
+    User --> Landing --> LAC --> Shell
     Shell <--> Map
-    Shell <--> Panel
+    Shell <--> Panels
     Shell -- question --> Ask
 
     Ask -- classify + write SQL --> Groq
     Ask -- validated SQL --> RPC
-    RPC --> View
-    View --> Indic
+    RPC --> ViewD
+    RPC --> ViewE
+    ViewD --> Indic
+    ViewE --> Indic
 
-    Panel -- read --> Robust
-    Panel -- read --> Cbrief
-    Map -- read geometries --> Indic
+    Panels -- read --> Robust
+    Panels -- read --> Prio
+    Panels -- read --> Cbrief
+    Panels -- read --> ViewE
+    Map -- read --> Geo
+    LAC -- read --> Indic
 
+    Audit -- read --> Indic
     Audit --> Scores --> Explain
     Audit --> Priority
     Audit --> Brief
     Brief -- 1 call --> Groq
-    Audit -- read scenarios --> Indic
     Explain -- upsert --> Robust
     Priority -- upsert --> Prio
     Brief -- insert --> Cbrief
 ```
 
-The frontend uses the **anon key** (read-only, RLS-enforced). Only `/api/ask` and the
-worker hold the **service-role key** — never shipped to the browser.
+## Frontend (`apps/web`)
 
-## The chat request flow (`/api/ask`)
+Next.js 16 (App Router), TypeScript, Tailwind v4, MapLibre GL JS v5.
 
-A user question becomes a map highlight without the LLM ever touching raw tables or
-running arbitrary SQL.
+- **`/`** — marketing landing: a typewriter prompt carousel that deep-links
+  into the platform.
+- **`/platform`** — `PlatformEntry` decides the first view:
+  - No country chosen → **`LacOverview`**, the regional map of Latin America.
+    Its **Map view** toggle compares all five countries by `Access`,
+    `Area gap` (urban − rural) or `Wealth gap` (top − bottom income quintile),
+    on a data-relative colour gradient.
+  - A country chosen → **`AppShell`**, the per-country workspace: a
+    `CountryMap` choropleth plus a side panel with three tabs.
+
+| Panel | Component(s) | Role |
+|---|---|---|
+| Insight | `IndicatorPanel`, `RobustnessCard`, `PriorityPanel`, `EquityGapCard`, `CountryAuditBrief` | District detail + national priority ranking + equity gaps + data-trust brief |
+| Ask | chat UI in `AppShell` | Natural-language questions → `/api/ask` |
+| Simulate | `SimulationPanel` | "Inequality in motion" — the map heats up over 60 simulated minutes |
+
+`AppShell` is the client state hub: active country, education level, transport
+mode, selected district, chat messages, and simulation clock. Map highlights,
+panel content and chat all read from it.
+
+## The chat request flow — two-tier Ask (`/api/ask`)
+
+A question becomes a map highlight (or a UI action) without the LLM ever
+touching raw tables or running arbitrary SQL. Two models, by cost:
+
+- **Stage 1 — `llama-3.1-8b-instant`**: a cheap classifier + prompt-injection
+  guard. Sorts the question into `data` / `navigation` / `explainer` /
+  `out_of_scope`. Navigation, explainer and out-of-scope are answered here —
+  the big model is never hit.
+- **Stage 2 — `llama-3.3-70b`**: SQL synthesis, for `data` questions only. A
+  `topic` tag splits these into `district` (→ `v_indicators_adm2`) and
+  `equity` (→ `v_equity`); each has its own SQL-only prompt.
 
 ```mermaid
 sequenceDiagram
     participant U as Browser (AppShell)
     participant A as /api/ask route
-    participant L as Groq LLM
+    participant G as Groq 8b — classifier/guard
+    participant B as Groq 70b — SQL synthesis
     participant V as sql-validator.ts
     participant S as Supabase (run_sql)
 
-    U->>A: POST { question }
-    A->>A: Rate limit (30 / 15min per IP)
-    A->>A: Response cache lookup
-    alt cache hit
-        A-->>U: cached AskResponse
-    else cache miss
-        A->>L: classify → data | navigation | out_of_scope
-        L-->>A: { kind, sql?, narrative }
-        opt kind == data
-            A->>V: validate SQL
-            alt invalid
-                A->>L: retry with failure reason
-                L-->>A: corrected SQL
-                A->>V: re-validate
-            end
-            A->>S: run_sql(validated SELECT)
-            S-->>A: rows as JSON
+    U->>A: POST { question, country, level, transport }
+    A->>A: Rate limit (30 / 15 min per IP) + response cache
+    A->>G: classify question
+    G-->>A: data | navigation | explainer | out_of_scope
+    alt navigation / explainer / out_of_scope
+        A-->>U: AskResponse (handled by Stage 1)
+    else data
+        A->>B: write SQL for the topic's view
+        B-->>A: { sql, narrative, resultShape }
+        A->>V: validate SQL (against v_indicators_adm2 or v_equity)
+        alt invalid
+            A->>B: retry with the failure reason
+            B-->>A: corrected SQL
+            A->>V: re-validate
         end
-        A-->>U: AskResponse (rows + highlightCodDist + narrative)
+        A->>A: wrap view in a country-scoped subquery
+        A->>S: run_sql(validated SELECT)
+        S-->>A: rows as JSON
+        A-->>U: AskResponse (rows + highlightAdm2 + narrative)
     end
-    U->>U: highlight polygons, append chat message
 ```
 
-**SQL validator gates** (`apps/web/lib/sql-validator.ts`): no semicolons, must start
-with `SELECT`, references only `v_panama_indicators`, `LIMIT ≤ 50` (or a single-row
-aggregate), no `pg_*` / `information_schema` / DDL / DML, and only allowlisted
-functions. The view itself pins one canonical scenario (WorldPop + MAP + walking).
+**SQL validator gates** (`apps/web/lib/sql-validator.ts`, a Codex review
+target): must start with `SELECT`, no semicolons, references only the one
+allowed view, `LIMIT ≤ 50` (or a single-row aggregate), no `pg_*` /
+`information_schema` / DDL / DML, allowlisted functions only, and a
+`country_iso` filter pinned to the active country. As defence in depth,
+`/api/ask` then wraps the view in a country-scoped subquery before execution,
+so a query can never read another country's rows regardless of its `WHERE`.
 
-## The worker audit flow (Railway cron)
+## Database (Supabase Postgres)
 
-Each run rebuilds the robustness layer for all 664 cells (83 districts × 4 age groups
-× 2 transport modes).
+```mermaid
+graph LR
+    IDB[IDB Accessibility Platform<br/>accessibility_fmm_scl.csv<br/>accessibility_osrm_scl.csv] --> Loader[data/seed<br/>load_accessibility.py]
+    Loader --> AI[(accessibility_indicators)]
+    AI --> VD[[v_indicators_adm2]]
+    AI --> VE[[v_equity]]
+    AI --> Worker[apps/worker]
+    Worker --> RR[(robustness_reports)]
+    Worker --> PS[(priority_scores)]
+    Worker --> CB[(country_audit_briefs)]
+```
+
+| Object | Kind | Role |
+|---|---|---|
+| `accessibility_indicators` | table | Unified long/tidy table — one row per slice (country × admin level × level × mode × sector × area × quintile × time band × method). Fed by the IDB pipeline; the live source. |
+| `district_geometries` | table | Multi-country district polygons, keyed `admin2_pcode`. |
+| `robustness_reports` | table | Worker-derived: per-cell trust scores + narrative. |
+| `priority_scores` | table | Worker-derived: per-district investment ranking. |
+| `country_audit_briefs` | table | Worker-derived: one data-trust paragraph per country. |
+| `audit_runs` | table | One row per worker run per country (provenance). |
+| `v_indicators_adm2` | view | **LLM-visible.** One row per district × level × mode, pinned to the canonical slice (sector/area/quintile = Total), FMM with OSRM surfaced for comparison. |
+| `v_equity` | view | **LLM-visible.** Province + country grain; urban/rural and income-quintile breakdowns. Powers the equity card and equity Ask questions. |
+| `districts_adm2` | view | One row per district — the worker iterates this. |
+| `run_sql(query)` | function | Executes a validated `SELECT`; service-role only. |
+
+RLS: `anon` reads everything, only `service_role` writes. The LLM never sees a
+raw table — only the two curated views, each column documented in its prompt.
+
+## The worker (`apps/worker`, Railway cron)
+
+Each run rebuilds the robustness + priority layer for **one country**.
 
 ```mermaid
 graph LR
     Start([Cron trigger]) --> Open[Open audit_runs row]
-    Open --> Load[Load 32 scenarios<br/>~2,656 rows]
-    Load --> Bundle[Group into 664 cells<br/>canonical + comparison variants]
-    Bundle --> Loop{For each cell}
-    Loop --> Sc[computeScores<br/>completeness, sample,<br/>friction, pop agreement]
-    Sc --> Ex[explainCell<br/>headline + 1-3 caveats<br/>NO LLM]
-    Ex --> Buf[Buffer row]
-    Buf -->|every 100| Up[(upsert robustness_reports)]
-    Loop -->|done| Pr[computeAndWritePriorities]
-    Pr --> Prw[(upsert priority_scores)]
-    Prw --> Cb[writeCountryAuditBrief<br/>1 LLM call → 120-word brief]
-    Cb --> Cbw[(insert country_audit_briefs)]
-    Cbw --> Close([Close run: done / failed])
+    Open --> Load[Load the country's<br/>canonical + comparison slices]
+    Load --> Loop{For each cell<br/>district x level x mode}
+    Loop --> Sc[scores.ts<br/>completeness, sample, method agreement]
+    Sc --> Ex[explainer.ts<br/>headline + caveats — NO LLM]
+    Ex --> Up[(upsert robustness_reports)]
+    Loop -->|done| Pr[priority.ts → upsert priority_scores]
+    Pr --> Cb[country-brief.ts<br/>1 LLM call → data-trust brief]
+    Cb --> Close([Close run: done / failed])
 ```
 
-The per-cell explainer is **deterministic** — same scores always produce the same
-sentence, zero tokens, zero retries. The only LLM call in the worker is the single
-country audit brief per refresh.
+The per-cell explainer is **deterministic** — the same scores always produce
+the same sentence, zero tokens, zero retries. The only LLM call in the worker
+is the single country audit brief per refresh (`llm.ts`).
 
 ## Robustness scoring
 
-Every number on screen answers "how much do we trust this?" via four scores combined
-into a composite:
+Every number on screen answers "how much do we trust this?" via three scores
+(v4 model) combined into a composite:
 
-| Dimension | Meaning | Weight |
-|---|---|---|
-| `data_completeness` | % of population with usable travel-time data | 0.30 |
-| `sample_size` | population magnitude — small N swings wildly | 0.20 |
-| `friction_agreement` | do MAP and OSM friction surfaces agree? | 0.30 |
-| `pop_agreement` | do WorldPop and Census populations agree? | 0.20 |
+| Dimension | Meaning |
+|---|---|
+| `data_completeness` | share of population with usable travel-time data |
+| `sample_size` | population magnitude — small N swings wildly |
+| `method_agreement` | how closely FMM and OSRM routing agree |
 
 The weakest dimension drives which caveats the explainer emits.
 
-## Data flow end to end
-
-```mermaid
-graph TD
-    IDB[IDB Accessibility Platform<br/>pre-computed travel times] --> Seed[data/seed/panama<br/>parquet + GeoJSON]
-    Seed --> Indic[(panama_district_indicators<br/>32 scenarios)]
-    Seed --> Geo[(panama_district_geometries)]
-    Indic --> View[[v_panama_indicators]]
-    Indic --> Worker[Worker audit]
-    Worker --> Robust[(robustness_reports)]
-    Worker --> Brief[(country_audit_briefs)]
-    View --> Chat[Chat answer]
-    Geo --> MapColor[Map choropleth]
-    Robust --> Card[Robustness card]
-    Chat --> Screen([What the user sees])
-    MapColor --> Screen
-    Card --> Screen
-    Brief --> Screen
-```
-
-## Components & responsibilities
-
-| Layer | File | Role |
-|---|---|---|
-| Frontend | `apps/web/app/page.tsx` | Landing page — hero + seeded prompts |
-| Frontend | `apps/web/.../AppShell.tsx` | Client state hub: indicators, chat, selection |
-| Frontend | `apps/web/.../PanamaMap.tsx` | MapLibre choropleth + polygon highlight |
-| Frontend | `apps/web/.../RobustnessCard.tsx` | 4-dimension trust scores + narrative |
-| API | `apps/web/app/api/ask/route.ts` | LLM router, SQL validation, query execution |
-| API | `apps/web/lib/sql-validator.ts` | Whitelist validator for LLM-generated SQL |
-| API | `apps/web/lib/rate-limit.ts` | Per-IP sliding-window throttle |
-| Worker | `apps/worker/src/audit.ts` | Run orchestration + batch writes |
-| Worker | `apps/worker/src/scores.ts` | Four deterministic numeric scorers |
-| Worker | `apps/worker/src/explainer.ts` | Rule-based narrative + caveats |
-| Worker | `apps/worker/src/priority.ts` | Investment-priority ranking |
-| Worker | `apps/worker/src/country-brief.ts` | Single LLM call → country audit brief |
-| Data | `data/seed/panama/*.sql` | Schema, views, RLS, `run_sql` function |
-
 ## Deployment
 
-- **Vercel** hosts `apps/web` — push to GitHub triggers `next build`.
+- **Vercel** hosts `apps/web`; a push to `main` triggers `next build` + deploy.
 - **Railway** runs `apps/worker` on a cron schedule (Nixpacks build,
-  `restartPolicyType = NEVER` so it exits cleanly after each audit).
-- **Supabase** is the shared Postgres database; the service-role key lives only on
-  Vercel server functions and Railway, never in the browser bundle.
+  `restartPolicyType = NEVER` — it exits cleanly after each audit).
+- **Supabase** is the shared Postgres database. SQL migrations in `data/seed`
+  are applied by hand in the SQL editor; deploys ship code, not schema.
