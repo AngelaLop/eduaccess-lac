@@ -38,6 +38,19 @@ export interface RankedHighlight {
   rank: number;
 }
 
+// A simulation representative district, surfaced once the run finishes.
+export interface SimHighlight {
+  admin2_pcode: string;
+  /** 'Hardest' | 'Typical' | 'Easiest' — the race-track label */
+  label: string;
+  /** admin2_name */
+  name: string;
+  /** hex colour matching the race bar (emerald = reached, red = stuck) */
+  color: string;
+  /** % reached by simulated minute 60 */
+  pct: number;
+}
+
 interface Props {
   country: CountryIso;
   indicators: IndicatorsByDist;
@@ -50,8 +63,8 @@ interface Props {
   onResetView: () => void;
   simulationActive: boolean;
   simulationSimMin: number;
-  // districts to outline once the simulation finishes (the kid-track samples)
-  simHighlights: string[];
+  // districts to spotlight once the simulation finishes (the kid-track samples)
+  simHighlights: SimHighlight[];
 }
 
 // bbox of any GeoJSON geometry → [minX, minY, maxX, maxY]
@@ -105,6 +118,22 @@ function simulationFillExpression(simMin: number): maplibregl.ExpressionSpecific
   ] as unknown as maplibregl.ExpressionSpecification;
 }
 
+// At sim finish, recolour the three representative districts to match their
+// race-bar colour; every other district keeps the final simulation choropleth.
+function simRepFill(
+  reps: SimHighlight[],
+  simMin: number
+): maplibregl.ExpressionSpecification {
+  const base = simulationFillExpression(simMin);
+  if (reps.length === 0) return base;
+  const expr: unknown[] = ['case'];
+  for (const r of reps) {
+    expr.push(['==', ['get', 'admin2_pcode'], r.admin2_pcode], r.color);
+  }
+  expr.push(base);
+  return expr as unknown as maplibregl.ExpressionSpecification;
+}
+
 export default function CountryMap({
   country,
   indicators,
@@ -123,6 +152,8 @@ export default function CountryMap({
   const mapRef = useRef<maplibregl.Map | null>(null);
   const geojsonRef = useRef<GeoJSON.FeatureCollection | null>(null);
   const popupRef = useRef<maplibregl.Popup | null>(null);
+  // Pinned labels on the simulation representative districts.
+  const simPopupsRef = useRef<maplibregl.Popup[]>([]);
   const lastSimPaintRef = useRef(0);
   const [mapReady, setMapReady] = useState(false);
 
@@ -130,10 +161,12 @@ export default function CountryMap({
   const levelRef = useRef<EducationLevel>(activeLevel);
   const highlightedRef = useRef<string[]>(highlightedDists);
   const selectedRef = useRef<string | null>(selectedDist);
+  const simHighlightsRef = useRef<SimHighlight[]>(simHighlights);
   indicatorsRef.current = indicators;
   levelRef.current = activeLevel;
   highlightedRef.current = highlightedDists;
   selectedRef.current = selectedDist;
+  simHighlightsRef.current = simHighlights;
   void activeTransport;
 
   // ── feature-state: push the data values for the active level ──────────────
@@ -188,6 +221,23 @@ export default function CountryMap({
         geometry: { type: 'Point' as const, coordinates: center },
       })),
     };
+  }
+
+  // Centroid (largest-bbox part) of a district — anchors the sim rep popups.
+  function centroidOf(code: string): [number, number] | null {
+    const gj = geojsonRef.current;
+    if (!gj) return null;
+    let best: { area: number; center: [number, number] } | null = null;
+    for (const f of gj.features) {
+      if (f.properties?.admin2_pcode !== code) continue;
+      const [minX, minY, maxX, maxY] = geometryBbox(f.geometry);
+      if (!Number.isFinite(minX)) continue;
+      const area = (maxX - minX) * (maxY - minY);
+      if (!best || area > best.area) {
+        best = { area, center: [(minX + maxX) / 2, (minY + maxY) / 2] };
+      }
+    }
+    return best ? best.center : null;
   }
 
   function applyFillOpacity(map: maplibregl.Map, sel: string | null, highlights: string[]) {
@@ -367,16 +417,60 @@ export default function CountryMap({
   }, [rankedHighlights, mapReady]);
 
   // ── simulation finished → spotlight the sampled districts ─────────────────
-  // Same treatment as a ranking result: the sampled districts stay bright, the
-  // rest dim. Only meaningful while the Simulate tab is active.
+  // The three sampled districts stay bright, are recoloured to match their
+  // race-bar colour, and get a pinned label so they stay findable on a large
+  // map (e.g. Colombia). The rest of the map dims.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady || !simulationActive || !map.getLayer('districts-fill')) return;
+
+    // Drop any popups from a previous finish / replay.
+    for (const p of simPopupsRef.current) p.remove();
+    simPopupsRef.current = [];
+
     if (simHighlights.length > 0) {
-      applyFillOpacity(map, null, simHighlights);
+      applyFillOpacity(map, null, simHighlights.map((h) => h.admin2_pcode));
+      map.setPaintProperty(
+        'districts-fill',
+        'fill-color',
+        simRepFill(simHighlights, simulationSimMin)
+      );
+      for (const h of simHighlights) {
+        const center = centroidOf(h.admin2_pcode);
+        if (!center) continue;
+        const popup = new maplibregl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          offset: 8,
+          className: 'eduaccess-popup',
+        })
+          .setLngLat(center)
+          .setHTML(
+            `<div style="font: 12px ui-sans-serif, system-ui; line-height: 1.35;">
+               <div style="display:flex; align-items:center; gap:5px;">
+                 <span style="width:8px; height:8px; border-radius:9999px; background:${h.color}; flex:none;"></span>
+                 <span style="font-weight:600; color:#171717;">${h.label}</span>
+               </div>
+               <div style="color:#404040;">${h.name}</div>
+               <div style="color:#737373; font-size:11px;">${Math.round(h.pct)}% reached in 60 min</div>
+             </div>`
+          )
+          .addTo(map);
+        simPopupsRef.current.push(popup);
+      }
     } else {
       map.setPaintProperty('districts-fill', 'fill-opacity', 0.88);
+      map.setPaintProperty(
+        'districts-fill',
+        'fill-color',
+        simulationFillExpression(simulationSimMin)
+      );
     }
+
+    return () => {
+      for (const p of simPopupsRef.current) p.remove();
+      simPopupsRef.current = [];
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [simHighlights, simulationActive, mapReady]);
 
@@ -432,6 +526,8 @@ export default function CountryMap({
     if (!simulationActive) return;
     const map = mapRef.current;
     if (!map || !mapReady || !map.getLayer('districts-fill')) return;
+    // Once finished, the rep-coloured fill owns the layer — don't overwrite it.
+    if (simHighlightsRef.current.length > 0) return;
     // Throttle to ~11 fps — a fill-color expression swap is cheap, but not free
     // across a large viewport. The 0 and 60 edges always paint.
     const isEdge = simulationSimMin <= 0 || simulationSimMin >= 60;

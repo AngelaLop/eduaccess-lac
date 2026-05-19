@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import IndicatorPanel from './IndicatorPanel';
 import ScopeCard from './ScopeCard';
-import type { RankedHighlight } from './CountryMap';
+import type { RankedHighlight, SimHighlight } from './CountryMap';
 import type {
   AskAction,
   AskResponseKind,
@@ -256,14 +256,22 @@ export default function AppShell({
   const distIndicators = selectedDist ? (indicators[selectedDist] ?? null) : null;
 
   // When the simulation finishes, surface the three sampled districts (the kid
-  // tracks) on the map so the user can place them geographically.
-  const simHighlights = useMemo(
-    () =>
-      simulationActive && simIsFinished
-        ? pickRepresentatives(indicators, selectedLevel).map((r) => r.row.admin2_pcode)
-        : [],
-    [simulationActive, simIsFinished, indicators, selectedLevel]
-  );
+  // tracks) on the map — recoloured and labelled to match their race bars.
+  const simHighlights = useMemo<SimHighlight[]>(() => {
+    if (!simulationActive || !simIsFinished) return [];
+    return pickRepresentatives(indicators, selectedLevel).map((rep) => {
+      const finalPct = rep.row.pct_le60 ?? 0;
+      // matches KidTrack at finish: emerald-600 if reached, red-500 if stuck.
+      const reached = finalPct >= 99;
+      return {
+        admin2_pcode: rep.row.admin2_pcode,
+        label: rep.label,
+        name: rep.row.admin2_name,
+        color: reached ? '#16a34a' : '#ef4444',
+        pct: finalPct,
+      };
+    });
+  }, [simulationActive, simIsFinished, indicators, selectedLevel]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
