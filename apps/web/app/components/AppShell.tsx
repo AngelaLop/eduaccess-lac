@@ -256,7 +256,12 @@ export default function AppShell() {
       const res = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: q, country: askCountry }),
+        body: JSON.stringify({
+          question: q,
+          country: askCountry,
+          level: selectedLevel,
+          transport: selectedTransport,
+        }),
       });
       const data = await res.json();
 
