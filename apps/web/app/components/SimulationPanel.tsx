@@ -75,6 +75,46 @@ export function pickRepresentatives(
   ];
 }
 
+// Plain SVG controls — Unicode glyphs (▶ ❚❚ ↻ 🏫) render as colour emoji on
+// mobile; these stay identical on every platform.
+function PlayIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-3 w-3" aria-hidden="true">
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  );
+}
+
+function PauseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-3 w-3" aria-hidden="true">
+      <rect x="6" y="5" width="4" height="14" rx="1" />
+      <rect x="14" y="5" width="4" height="14" rx="1" />
+    </svg>
+  );
+}
+
+function ReplayIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+      strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true">
+      <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+      <polyline points="21 3 21 9 15 9" />
+    </svg>
+  );
+}
+
+function SchoolIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+      <path d="M3 21h18" />
+      <path d="M6 21V9l6-4 6 4v12" />
+      <path d="M10 21v-4h4v4" />
+    </svg>
+  );
+}
+
 function KidTrack({
   rep,
   simMin,
@@ -120,10 +160,10 @@ function KidTrack({
           />
         </div>
         <span
-          className="ml-2 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-sm bg-neutral-700 text-[10px] font-bold text-white"
+          className="ml-2 inline-flex h-5 w-5 shrink-0 items-center justify-center text-neutral-700"
           aria-hidden
         >
-          🏫
+          <SchoolIcon />
         </span>
       </div>
     </div>
@@ -178,7 +218,7 @@ export default function SimulationPanel({
         </p>
       </div>
 
-      <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+      <div className="rounded-lg bg-neutral-50 p-3">
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
@@ -197,38 +237,38 @@ export default function SimulationPanel({
             {!isPlaying && !isFinished && (
               <button
                 onClick={onPlay}
-                className="rounded-md bg-emerald-700 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-emerald-800"
+                className="inline-flex items-center gap-1.5 rounded-md bg-emerald-700 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-emerald-800"
                 aria-label="Play simulation"
               >
-                ▶ Play
+                <PlayIcon /> Play
               </button>
             )}
             {isPlaying && (
               <button
                 onClick={onPause}
-                className="rounded-md bg-neutral-200 px-3 py-2 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-300"
+                className="inline-flex items-center gap-1.5 rounded-md bg-neutral-200 px-3 py-2 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-300"
                 aria-label="Pause simulation"
               >
-                ❚❚ Pause
+                <PauseIcon /> Pause
               </button>
             )}
             {isFinished && (
               <button
                 onClick={onReplay}
-                className="rounded-md bg-emerald-700 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-emerald-800"
+                className="inline-flex items-center gap-1.5 rounded-md bg-emerald-700 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-emerald-800"
                 aria-label="Replay simulation"
               >
-                ↻ Replay
+                <ReplayIcon /> Replay
               </button>
             )}
             {!isFinished && simMin > 0 && (
               <button
                 onClick={onReplay}
-                className="rounded-md border border-neutral-200 bg-white px-2 py-2 text-xs text-neutral-600 transition-colors hover:bg-neutral-50"
+                className="inline-flex items-center justify-center rounded-md border border-neutral-100 bg-white px-2 py-2 text-neutral-600 transition-colors hover:bg-neutral-50"
                 title="Reset and play from the start"
                 aria-label="Reset and play from the start"
               >
-                ↻
+                <ReplayIcon />
               </button>
             )}
           </div>
@@ -246,7 +286,7 @@ export default function SimulationPanel({
             minute. Each track is a different district sampled from the
             hardest, the typical, and the easiest.
           </p>
-          <div className="flex flex-col gap-3 rounded-md border border-neutral-200 bg-white p-3">
+          <div className="flex flex-col gap-3 rounded-md border border-neutral-100 bg-white p-3">
             {representatives.map((rep) => (
               <KidTrack
                 key={rep.row.admin2_pcode}
@@ -260,18 +300,18 @@ export default function SimulationPanel({
       )}
 
       <div className="grid grid-cols-2 gap-2">
-        <div className="rounded-md bg-emerald-50 p-3">
-          <p className="text-[11px] text-emerald-700">Reached a school</p>
-          <p className="mt-0.5 text-xl font-bold tabular-nums text-emerald-800">
+        <div className="rounded-md bg-neutral-50 p-3">
+          <p className="text-[11px] text-neutral-500">Reached a school</p>
+          <p className="mt-0.5 text-xl font-bold tabular-nums text-emerald-700">
             {aggregate.arrivedPct}%
           </p>
         </div>
-        <div className="rounded-md bg-amber-50 p-3">
-          <p className="text-[11px] text-amber-700">Still walking</p>
-          <p className="mt-0.5 text-xl font-bold tabular-nums text-amber-800">
+        <div className="rounded-md bg-neutral-50 p-3">
+          <p className="text-[11px] text-neutral-500">Still walking</p>
+          <p className="mt-0.5 text-xl font-bold tabular-nums text-amber-700">
             {aggregate.remainingCount.toLocaleString()}
           </p>
-          <p className="text-[10px] text-amber-700/70">{narrative}</p>
+          <p className="text-[10px] text-neutral-400">{narrative}</p>
         </div>
       </div>
 

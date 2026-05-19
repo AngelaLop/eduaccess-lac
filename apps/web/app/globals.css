@@ -20,6 +20,15 @@
   --font-display: var(--font-geist-sans);
 }
 
+/* Fully squared design — no rounded corners anywhere (cards, buttons,
+   toggles, inputs, badges, map controls). One global override beats
+   hunting down every rounded-* utility across the components. */
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
+}
+
 html {
   min-height: 100%;
   background: linear-gradient(180deg, #fafcf9 0%, #f6f9f6 100%);

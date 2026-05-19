@@ -98,7 +98,7 @@ export default function EquityGapCard({ country, level, transport }: Props) {
   if (!gaps || gaps.length === 0) return null;
 
   return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-4">
+    <div className="rounded-lg border border-neutral-100 bg-white p-4">
       <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
         Access gaps · share within 30 min
       </p>

@@ -506,10 +506,10 @@ export default function AppShell({
       </div>
 
       {/* ── Side panel ──────────────────────────────────────────────────────── */}
-      <aside className="flex flex-1 flex-col overflow-hidden border-t border-neutral-200 bg-white md:flex-none md:basis-[35%] md:border-l md:border-t-0">
+      <aside className="flex flex-1 flex-col overflow-hidden border-t border-neutral-100 bg-white md:flex-none md:basis-[35%] md:border-l md:border-t-0">
 
         {/* Header + controls */}
-        <div className="shrink-0 border-b border-neutral-200 px-4 pb-2 pt-3 md:px-5 md:pb-3 md:pt-4">
+        <div className="shrink-0 border-b border-neutral-100 px-4 pb-2 pt-3 md:px-5 md:pb-3 md:pt-4">
           <div className="mb-2 flex items-center justify-between md:mb-3">
             <div>
               <h1 className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
@@ -537,7 +537,7 @@ export default function AppShell({
                 if (v === '__lac__') onBackToLac();
                 else onCountryChange(v as CountryIso);
               }}
-              className="w-full rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-emerald-700 outline-none transition-colors hover:border-neutral-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 md:w-auto"
+              className="w-full rounded-md border border-neutral-100 bg-white px-2.5 py-1.5 text-xs font-medium text-emerald-700 outline-none transition-colors hover:border-neutral-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 md:w-auto"
             >
               <option value="__lac__">← All of Latin America</option>
               {COUNTRY_ISOS.map((c) => (
@@ -612,7 +612,7 @@ export default function AppShell({
         </div>
 
         {/* Tab strip */}
-        <div className="shrink-0 border-b border-neutral-200 bg-white">
+        <div className="shrink-0 border-b border-neutral-100 bg-white">
           <div className="flex">
             {(['insight', 'ask', 'simulation'] as PanelTab[]).map((tab) => {
               const active = panelTab === tab;
@@ -626,7 +626,7 @@ export default function AppShell({
                   onClick={() => setPanelTab(tab)}
                   className={`relative flex flex-1 items-center justify-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition-colors ${
                     active
-                      ? 'border-emerald-700 bg-emerald-50/60 text-emerald-800'
+                      ? 'border-emerald-700 bg-neutral-100 text-emerald-800'
                       : 'border-transparent text-neutral-500 hover:bg-neutral-50 hover:text-neutral-800'
                   }`}
                 >
@@ -695,7 +695,7 @@ export default function AppShell({
                         key={p}
                         onClick={() => ask(p)}
                         disabled={isAsking}
-                        className="rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-left text-xs text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
+                        className="rounded-md border border-neutral-100 bg-white px-2.5 py-1.5 text-left text-xs text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
                       >
                         {p}
                       </button>
@@ -721,7 +721,7 @@ export default function AppShell({
                   onChange={(e) => setQuestion(e.target.value)}
                   placeholder={`Ask about school access in ${countryName}...`}
                   disabled={isAsking}
-                  className="flex-1 rounded-md border border-neutral-200 px-3 py-1.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 disabled:opacity-50"
+                  className="flex-1 rounded-md border border-neutral-100 px-3 py-1.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 disabled:opacity-50"
                 />
                 <button
                   type="submit"
@@ -807,7 +807,7 @@ function ChatBubble({ msg, onPromptClick }: ChatBubbleProps) {
 
   if (msg.kind === 'explainer') {
     return (
-      <div className="rounded-md border border-neutral-200 bg-neutral-50 px-3 py-3 text-sm text-neutral-700">
+      <div className="rounded-md border border-neutral-100 bg-neutral-50 px-3 py-3 text-sm text-neutral-700">
         {msg.narrative && <p>{msg.narrative}</p>}
       </div>
     );
@@ -815,7 +815,7 @@ function ChatBubble({ msg, onPromptClick }: ChatBubbleProps) {
 
   if (msg.kind === 'out_of_scope') {
     return (
-      <div className="rounded-md border border-neutral-200 bg-neutral-50 px-3 py-3 text-sm text-neutral-700">
+      <div className="rounded-md border border-neutral-100 bg-neutral-50 px-3 py-3 text-sm text-neutral-700">
         {msg.narrative && <p>{msg.narrative}</p>}
         {msg.scopeHint && (
           <p className="mt-2 text-xs text-neutral-500">{msg.scopeHint}</p>
@@ -828,7 +828,7 @@ function ChatBubble({ msg, onPromptClick }: ChatBubbleProps) {
             <button
               key={p}
               onClick={() => onPromptClick(p)}
-              className="rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-left text-xs text-neutral-700 transition-colors hover:border-emerald-300 hover:bg-emerald-50/50"
+              className="rounded-md border border-neutral-100 bg-white px-2.5 py-1.5 text-left text-xs text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-900/5"
             >
               {p}
             </button>
@@ -843,7 +843,7 @@ function ChatBubble({ msg, onPromptClick }: ChatBubbleProps) {
       {msg.narrative && <p className="text-sm text-neutral-700">{msg.narrative}</p>}
 
       {msg.rows && msg.rows.length > 0 && (
-        <div className="overflow-x-auto rounded-md border border-neutral-200">
+        <div className="overflow-x-auto rounded-md border border-neutral-100">
           <table className="w-full text-xs">
             <thead className="bg-neutral-50">
               <tr>
@@ -882,7 +882,7 @@ function ChatBubble({ msg, onPromptClick }: ChatBubbleProps) {
             {showSql ? '▲ Hide SQL' : '▼ Show SQL'}
           </button>
           {showSql && (
-            <pre className="mt-1 overflow-x-auto rounded-md border border-neutral-200 bg-neutral-50 p-2 text-xs text-neutral-600">
+            <pre className="mt-1 overflow-x-auto rounded-md border border-neutral-100 bg-neutral-50 p-2 text-xs text-neutral-600">
               {msg.sql}
             </pre>
           )}

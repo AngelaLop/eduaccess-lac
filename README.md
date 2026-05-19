@@ -24,7 +24,7 @@ Click a district. See how many high schoolers live more than 30 minutes from a s
 
 ## What works
 
-- **Regional + per-country.** The platform opens on a map of Latin America. Panama and Colombia are live; Costa Rica, Ecuador and Peru are wired into the schema.
+- **Five countries.** The platform opens on a map of Latin America and covers Panama, Colombia, Costa Rica, Ecuador and Peru — click any one to drop into its district view.
 - **Insight panel.** Click a district → hero metric, travel-time bands, a 3-dimension robustness card, and the national Policy Recommender ranking.
 - **Equity lens.** Urban/rural and wealth-quintile access gaps — per country (the "Access gaps" card) and across countries (the LAC map's Area gap / Wealth gap views).
 - **AI chat.** Plain-English questions → a two-tier LLM cascade → validated SQL → a table plus gold map highlights, with a collapsible "Show SQL" on every answer.
@@ -38,7 +38,7 @@ Click a district. See how many high schoolers live more than 30 minutes from a s
 | v1 | Week 6 | Panama pilot — choropleth, robustness card, AI chat |
 | v2 | Week 7 | Robustness Auditor — a cron worker on Railway |
 | v3 | Week 8 | Deterministic robustness explainer, security pass, inequality simulation |
-| v4 | Week 9 | Colombia online, Policy Recommender, equity lens, two-tier Ask |
+| v4 | Week 9 | Multi-country — five LAC countries; Policy Recommender, equity lens, two-tier Ask |
 
 Per-version retrospectives live in [`docs/`](./docs) (`v1-summary.md` → `v4-summary.md`).
 
@@ -76,7 +76,7 @@ the security model — is in [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).**
 - **Frontend:** Next.js 16 (App Router), TypeScript, Tailwind v4, MapLibre GL JS v5
 - **Database:** Supabase Postgres (RLS, anon key on frontend, service role on API + worker)
 - **Worker:** Node + TypeScript on Railway (cron)
-- **LLM:** Groq — Llama 3.1 8B (classify + guard) and Llama 3.3 70B (text→SQL), via the OpenAI-compatible SDK
+- **LLM:** Groq-hosted Llama — 3.1 8B (classify + guard) and 3.3 70B (text→SQL), called through the `openai` npm SDK pointed at Groq's OpenAI-compatible API
 - **Data:** IDB Accessibility Platform — FMM + OSRM travel times, WorldPop population, across the covered LAC countries
 - **Multi-model:** Claude Code (primary), Codex (second-pass review on sql-validator.ts and /api/ask)
 

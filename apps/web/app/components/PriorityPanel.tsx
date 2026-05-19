@@ -72,7 +72,7 @@ export default function PriorityPanel({
             <li key={entry.admin2_pcode}>
               <button
                 onClick={() => onSelectDist(entry.admin2_pcode)}
-                className="block w-full rounded-md border border-neutral-200 px-3 py-2 text-left transition-colors hover:bg-neutral-50"
+                className="block w-full rounded-md border border-neutral-100 px-3 py-2 text-left transition-colors hover:bg-neutral-50"
               >
                 <div className="mb-1 flex items-baseline justify-between gap-2">
                   <div className="min-w-0 truncate">

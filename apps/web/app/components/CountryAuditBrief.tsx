@@ -53,7 +53,7 @@ export default function CountryAuditBrief({ countryIso }: Props) {
 
   if (loading) {
     return (
-      <section className="rounded-md border border-neutral-200 bg-neutral-50 p-3">
+      <section className="rounded-md border border-neutral-100 bg-neutral-50 p-3">
         <div className="h-2 w-24 animate-pulse rounded bg-neutral-200" />
         <div className="mt-2 h-2 w-full animate-pulse rounded bg-neutral-200" />
         <div className="mt-1 h-2 w-5/6 animate-pulse rounded bg-neutral-200" />
@@ -72,7 +72,7 @@ export default function CountryAuditBrief({ countryIso }: Props) {
     : generated.toISOString().slice(0, 10);
 
   return (
-    <section className="rounded-md border border-neutral-200 bg-neutral-50 p-3">
+    <section className="rounded-md border border-neutral-100 bg-neutral-50 p-3">
       <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
         Data trust brief
       </p>

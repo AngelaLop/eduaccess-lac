@@ -111,7 +111,7 @@ export default function RobustnessCard({
 
   if (loading) {
     return (
-      <section className="rounded-md border border-neutral-200 bg-neutral-50 p-3">
+      <section className="rounded-md border border-neutral-100 bg-neutral-50 p-3">
         <div className="h-3 w-32 animate-pulse rounded bg-neutral-200" />
         <div className="mt-3 h-2 w-full animate-pulse rounded bg-neutral-200" />
         <div className="mt-2 h-2 w-full animate-pulse rounded bg-neutral-200" />
@@ -121,7 +121,7 @@ export default function RobustnessCard({
 
   if (!report) {
     return (
-      <section className="rounded-md border border-neutral-200 bg-neutral-50 p-3 text-xs">
+      <section className="rounded-md border border-neutral-100 bg-neutral-50 p-3 text-xs">
         <p className="font-semibold text-neutral-700">How much can we trust this?</p>
         <p className="mt-1 text-neutral-500">
           Robustness profile not yet computed for this cell. The Auditor
@@ -147,7 +147,7 @@ export default function RobustnessCard({
     : computedAt.toISOString().slice(0, 10);
 
   return (
-    <section className="rounded-md border border-neutral-200 bg-neutral-50 p-3">
+    <section className="rounded-md border border-neutral-100 bg-neutral-50 p-3">
       <div className="mb-3 flex items-baseline justify-between">
         <p className="text-sm font-semibold text-neutral-800">How much can we trust this?</p>
         <div className="flex items-baseline gap-1">
@@ -169,7 +169,7 @@ export default function RobustnessCard({
         ))}
       </ul>
 
-      <p className="border-t border-neutral-200 pt-2 text-xs leading-relaxed text-neutral-700">
+      <p className="border-t border-neutral-100 pt-2 text-xs leading-relaxed text-neutral-700">
         {report.narrative}
       </p>
 
@@ -181,7 +181,7 @@ export default function RobustnessCard({
         </ul>
       )}
 
-      <p className="mt-3 border-t border-neutral-200 pt-2 text-[10px] text-neutral-400">
+      <p className="mt-3 border-t border-neutral-100 pt-2 text-[10px] text-neutral-400">
         Computed by the Robustness Auditor
         {computedDate ? ` on ${computedDate}` : ''} · 3 numeric dimensions ·
         text generated from the scores by a rule-based explainer (no LLM

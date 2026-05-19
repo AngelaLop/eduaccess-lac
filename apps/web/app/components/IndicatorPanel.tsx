@@ -99,9 +99,9 @@ function DistrictDetail({
       {row ? (
         hasTravelData ? (
           <>
-            <div className="rounded-lg bg-emerald-50 p-4 text-center">
-              <p className="text-4xl font-bold text-emerald-800">{(row.pct_le30 ?? 0).toFixed(1)}%</p>
-              <p className="mt-1 text-sm text-emerald-700">
+            <div className="rounded-lg bg-neutral-100 p-4 text-center">
+              <p className="text-4xl font-bold text-neutral-900">{(row.pct_le30 ?? 0).toFixed(1)}%</p>
+              <p className="mt-1 text-sm text-neutral-600">
                 of {EDUCATION_LEVEL_LABELS[activeLevel].toLowerCase()} within 30 min by{' '}
                 {TRANSPORT_LABELS[selectedTransport].toLowerCase()}
               </p>
@@ -131,7 +131,7 @@ function DistrictDetail({
             />
           </>
         ) : (
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-center">
+          <div className="rounded-lg border border-neutral-100 bg-neutral-50 p-4 text-center">
             <p className="text-lg font-semibold text-neutral-600">No school-age population</p>
             <p className="mt-1 text-sm text-neutral-500">
               No {EDUCATION_LEVEL_SHORT_LABELS[activeLevel].toLowerCase()} population is recorded
@@ -198,10 +198,10 @@ function InsightLanding({
     <div className="flex flex-col gap-4">
       <button
         onClick={onOpenSim}
-        className="group flex items-center justify-between rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-left transition-colors hover:border-emerald-300 hover:bg-emerald-50/40"
+        className="group flex items-center justify-between rounded-md border border-neutral-100 bg-white px-3 py-2.5 text-left transition-colors hover:border-neutral-300 hover:bg-neutral-900/5"
       >
         <div>
-          <p className="text-sm font-semibold text-neutral-800 group-hover:text-emerald-800">
+          <p className="text-sm font-semibold text-neutral-800 group-hover:text-neutral-900">
             See inequality in motion
           </p>
           <p className="mt-0.5 text-[11px] leading-snug text-neutral-500">
@@ -209,17 +209,24 @@ function InsightLanding({
             amber keeps moving is where access fails.
           </p>
         </div>
-        <span className="ml-3 shrink-0 text-emerald-700 group-hover:text-emerald-800">▶</span>
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+          className="ml-3 h-3.5 w-3.5 shrink-0 text-emerald-700 group-hover:text-neutral-900"
+        >
+          <path d="M8 5v14l11-7z" />
+        </svg>
       </button>
 
-      <div className="rounded-lg bg-emerald-50 p-4 text-center">
-        <p className="text-4xl font-bold text-emerald-800">{stats.nationalPct}%</p>
-        <p className="mt-1 text-sm text-emerald-700">
+      <div className="rounded-lg bg-neutral-100 p-4 text-center">
+        <p className="text-4xl font-bold text-neutral-900">{stats.nationalPct}%</p>
+        <p className="mt-1 text-sm text-neutral-600">
           of {countryName}&apos;s {narrative} live within 30 min by {mode} of a school
         </p>
       </div>
 
-      <div className="rounded-lg border border-neutral-200 bg-white p-4">
+      <div className="rounded-lg border border-neutral-100 bg-white p-4">
         <p className="text-3xl font-bold text-neutral-900">
           {stats.totalUnderserved.toLocaleString()}
         </p>
@@ -250,7 +257,7 @@ function InsightLanding({
                   <li key={entry.row.admin2_pcode}>
                     <button
                       onClick={() => onSelectDist(entry.row.admin2_pcode)}
-                      className="block w-full rounded-md border border-neutral-200 px-3 py-2 text-left transition-colors hover:bg-neutral-50"
+                      className="block w-full rounded-md border border-neutral-100 px-3 py-2 text-left transition-colors hover:bg-neutral-50"
                     >
                       <div className="mb-1 flex items-baseline justify-between gap-2">
                         <div className="min-w-0 truncate">
@@ -341,7 +348,7 @@ export default function IndicatorPanel({
 
   if (!insightStats) {
     return (
-      <p className="rounded-md border border-neutral-200 bg-neutral-50 px-3 py-3 text-sm text-neutral-500">
+      <p className="rounded-md border border-neutral-100 bg-neutral-50 px-3 py-3 text-sm text-neutral-500">
         No districts with travel-time data for this view.
       </p>
     );

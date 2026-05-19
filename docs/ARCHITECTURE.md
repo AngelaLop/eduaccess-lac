@@ -2,8 +2,7 @@
 
 > v4. How the app fits together: a Next.js frontend, a two-tier constrained AI
 > chat, a Supabase Postgres database, and a Railway worker. Multi-country —
-> Panama and Colombia are live; the schema is built to absorb Costa Rica,
-> Ecuador and Peru as their data lands.
+> it covers five LAC countries: Panama, Colombia, Costa Rica, Ecuador and Peru.
 
 ## The three deployables
 

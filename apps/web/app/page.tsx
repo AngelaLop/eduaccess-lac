@@ -63,12 +63,14 @@ export default function Page() {
           href="/platform?country=PAN&tab=simulation"
           className="group mt-8 inline-flex items-center gap-2 text-sm font-normal text-neutral-500 transition-colors hover:text-emerald-700"
         >
-          <span
-            className="text-emerald-600 transition-colors group-hover:text-emerald-700"
-            aria-hidden
+          <svg
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+            className="h-3 w-3 shrink-0 text-emerald-600 transition-colors group-hover:text-emerald-700"
           >
-            ▶
-          </span>
+            <path d="M8 5v14l11-7z" />
+          </svg>
           <span>Watch how many kids walk to school in 60 minutes — in 20 seconds</span>
         </Link>
 

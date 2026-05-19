@@ -330,6 +330,23 @@ export default function CountryMap({
     (async () => {
       const gj = await loadCountryGeojson(country);
       if (cancelled || !mapRef.current) return;
+
+      // After a Fast-Refresh remount or a style swap the style can still be
+      // mid-load even though `load` already fired — addSource / addLayer throw
+      // "Style is not done loading" in that window. Wait for it to settle.
+      if (!map.isStyleLoaded()) {
+        await new Promise<void>((resolve) => {
+          const onData = () => {
+            if (map.isStyleLoaded()) {
+              map.off('styledata', onData);
+              resolve();
+            }
+          };
+          map.on('styledata', onData);
+        });
+        if (cancelled || !mapRef.current) return;
+      }
+
       geojsonRef.current = gj;
 
       if (map.getSource('districts')) {
@@ -546,7 +563,7 @@ export default function CountryMap({
       {showOverviewButton && (
         <button
           onClick={onResetView}
-          className="absolute right-3 top-24 z-10 flex items-center gap-1.5 rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-700 shadow-lg transition-colors hover:bg-neutral-50 hover:text-neutral-900"
+          className="absolute right-3 top-24 z-10 flex items-center gap-1.5 rounded-md border border-neutral-100 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-700 shadow-lg transition-colors hover:bg-neutral-50 hover:text-neutral-900"
           title="Back to country overview"
           aria-label="Back to country overview"
         >

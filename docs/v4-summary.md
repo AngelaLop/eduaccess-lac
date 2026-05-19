@@ -4,9 +4,9 @@
 
 ## What v4 is
 
-v4 is the version that **goes multi-country and finishes the TA's feedback loop**. v1–v3 were Panama-only. v4 brings Colombia online as country #2 on a new unified schema, ships the **Policy Recommender** — the per-district investment ranking the v1 feedback asked for — adds an **equity lens** (urban/rural and wealth breakdowns) across both the regional map and each country, and splits the AI chat into a **two-tier model cascade** that keeps the scarce 70B token budget for genuine data questions. A long tail of fixes came straight out of testing the platform on a large country: travel-time questions, accent-tolerant district lookup, a definitional "explainer" answer kind, and a simulation-finish polish for maps with 1,000+ districts. All work is on `main`, deployed to Vercel and Railway, CI green on every commit.
+v4 is the version that **goes multi-country and finishes the TA's feedback loop**. v1–v3 were Panama-only. v4 takes the platform to **five LAC countries — Panama, Colombia, Costa Rica, Ecuador and Peru** — on a new unified schema, ships the **Policy Recommender** — the per-district investment ranking the v1 feedback asked for — adds an **equity lens** (urban/rural and wealth breakdowns) across both the regional map and each country, and splits the AI chat into a **two-tier model cascade** that keeps the scarce 70B token budget for genuine data questions. A long tail of fixes came straight out of testing the platform on a large country: travel-time questions, accent-tolerant district lookup, a definitional "explainer" answer kind, and a simulation-finish polish for maps with 1,000+ districts. All work is on `main`, deployed to Vercel and Railway, CI green on every commit.
 
-## Block A — Colombia online (the multi-country foundation)
+## Block A — Five countries online (the multi-country foundation)
 
 v1–v3 ran on Panama-only tables (`panama_district_indicators`, `v_panama_indicators`). v4 replaces the live source with one unified, country-agnostic schema and keeps the old Panama tables untouched as legacy.
 
@@ -17,7 +17,7 @@ v1–v3 ran on Panama-only tables (`panama_district_indicators`, `v_panama_indic
 | Ingest | `data/seed/load_accessibility.py` | Loads the IDB `accessibility_fmm_scl.csv` / `accessibility_osrm_scl.csv` into Supabase, per country, delete-then-insert |
 | Indexes | `data/seed/v4_indexes.sql` | Partial index over the canonical slice — without it a Colombia-sized view query can exceed the API statement timeout |
 
-Colombia is **18× the district count of Panama** (1,122 vs 76), which is what surfaced most of the v4 bug tail. Costa Rica, Ecuador and Peru are in the source data and the schema absorbs them with zero new code; PAN + COL are the live, fully-loaded countries.
+All five countries — Panama, Colombia, Costa Rica, Ecuador and Peru — are loaded and live. Colombia alone is **18× the district count of Panama** (1,122 vs 76), which is what surfaced most of the v4 bug tail; the schema and views absorbed the other countries with zero new code.
 
 ## Block B — The LAC entry experience
 
@@ -96,4 +96,4 @@ Three deployables — `apps/web` on Vercel, `apps/worker` on Railway, Supabase P
 
 Open the platform → the LAC regional map → toggle **Area gap** / **Wealth gap** to compare all countries on inequality → click Colombia → the Insight tab shows the national priority ranking and the "Access gaps" card → ask *"how long does it take children to get to school?"* and get the travel-time bands → ask *"where should we build schools?"* and land on the priority ranking → run the Simulate tab and watch the three sampled districts finish with pinned, colour-matched labels.
 
-Every number has provenance, every recommendation has a confidence band, and the AI chat cannot touch a raw table or run arbitrary SQL. The TA's feedback is answered structurally, not cosmetically — and the platform now speaks for two countries with three more wired to follow.
+Every number has provenance, every recommendation has a confidence band, and the AI chat cannot touch a raw table or run arbitrary SQL. The TA's feedback is answered structurally, not cosmetically — and the platform now speaks for five Latin American countries.
