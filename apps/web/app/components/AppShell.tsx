@@ -21,7 +21,6 @@ import type {
 import {
   COUNTRIES,
   COUNTRY_ISOS,
-  DEFAULT_COUNTRY,
   EDUCATION_LEVELS,
   EDUCATION_LEVEL_SHORT_LABELS,
   TRANSPORT_LABELS,
@@ -86,8 +85,18 @@ export function underservedOf(r: IndicatorRow): number {
 
 // ── component ─────────────────────────────────────────────────────────────────
 
-export default function AppShell() {
-  const [country, setCountry] = useState<CountryIso>(DEFAULT_COUNTRY);
+interface Props {
+  country: CountryIso;
+  onCountryChange: (c: CountryIso) => void;
+  onBackToLac: () => void;
+}
+
+// Module-level: a deep-link's ?tab= / ?ask= is consumed once per page load —
+// not re-run when AppShell remounts after a trip back to the LAC overview.
+let tabBootstrapDone = false;
+let askFireDone = false;
+
+export default function AppShell({ country, onCountryChange, onBackToLac }: Props) {
   const [indicatorsByTransport, setIndicatorsByTransport] =
     useState<Record<TransportMode, IndicatorsByDist>>(EMPTY_INDICATORS);
   const [selectedTransport, setSelectedTransport] = useState<TransportMode>('walking');
@@ -109,23 +118,20 @@ export default function AppShell() {
   const simElapsedAtPauseRef = useRef<number>(0);
   const simulationActive = panelTab === 'simulation';
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const urlConsumedRef = useRef(false);
 
-  // URL-params bootstrap: ?tab=<insight|ask|simulation>, ?country=<PAN|COL>,
-  // ?ask=<prompt> opens Ask AND auto-fires the question.
+  // URL-params bootstrap: ?tab=<insight|ask|simulation>, ?ask=<prompt> opens
+  // Ask AND auto-fires the question. (?country= is consumed by PlatformEntry.)
   useEffect(() => {
-    if (urlConsumedRef.current) return;
+    if (tabBootstrapDone) return;
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
-    const ctry = params.get('country');
-    if (ctry && ctry in COUNTRIES) setCountry(ctry as CountryIso);
     const tab = params.get('tab');
     const askParam = params.get('ask');
     if (askParam) {
-      urlConsumedRef.current = true;
+      tabBootstrapDone = true;
       setPanelTab('ask');
     } else if (tab === 'ask' || tab === 'insight' || tab === 'simulation') {
-      urlConsumedRef.current = true;
+      tabBootstrapDone = true;
       setPanelTab(tab);
     }
   }, []);
@@ -226,7 +232,7 @@ export default function AppShell() {
   function dispatchAction(action: AskAction) {
     switch (action.type) {
       case 'set_country':
-        setCountry(action.country);
+        onCountryChange(action.country);
         break;
       case 'select_district':
         setSelectedDist(action.admin2_pcode);
@@ -276,7 +282,7 @@ export default function AppShell() {
       // the question there". Skip the navigation bubble; the re-ask answers.
       const switchAction = actions.find((a) => a.type === 'set_country');
       if (switchAction?.type === 'set_country' && !opts.reask) {
-        setCountry(switchAction.country);
+        onCountryChange(switchAction.country);
         // Await the re-ask so `isAsking` is cleared once, by the inner call's
         // finally — not mid-flight by this outer call's finally.
         await ask(q, { country: switchAction.country, reask: true });
@@ -392,14 +398,13 @@ export default function AppShell() {
     setSimMin(0);
   }, [panelTab]);
 
-  // Auto-fire ?ask=<prompt> from URL once on mount
-  const askFireRef = useRef(false);
+  // Auto-fire ?ask=<prompt> from URL once per page load
   useEffect(() => {
-    if (askFireRef.current) return;
+    if (askFireDone) return;
     if (typeof window === 'undefined') return;
     const askParam = new URLSearchParams(window.location.search).get('ask');
     if (askParam && askParam.trim()) {
-      askFireRef.current = true;
+      askFireDone = true;
       ask(askParam);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -455,16 +460,21 @@ export default function AppShell() {
             </Link>
           </div>
 
-          {/* Country switcher */}
+          {/* Country switcher — also the way back to the LAC overview */}
           <div className="mb-1.5 flex items-center gap-2 md:mb-2 md:gap-3">
             <span className="hidden w-16 shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 md:block">
               Country
             </span>
             <select
               value={country}
-              onChange={(e) => setCountry(e.target.value as CountryIso)}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v === '__lac__') onBackToLac();
+                else onCountryChange(v as CountryIso);
+              }}
               className="w-full rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-emerald-700 outline-none transition-colors hover:border-neutral-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 md:w-auto"
             >
+              <option value="__lac__">← All of Latin America</option>
               {COUNTRY_ISOS.map((c) => (
                 <option key={c} value={c}>
                   {COUNTRIES[c].name}

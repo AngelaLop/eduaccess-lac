@@ -2,14 +2,25 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import type { CountryIso } from '@/lib/types';
+
+export interface LandingPrompt {
+  text: string;
+  country: CountryIso;
+}
 
 interface Props {
-  prompts: readonly string[];
+  prompts: readonly LandingPrompt[];
 }
+
+const FALLBACK: LandingPrompt = {
+  text: 'Ask about school access in Latin America.',
+  country: 'PAN',
+};
 
 export default function LandingPromptCarousel({ prompts }: Props) {
   const safePrompts = useMemo(
-    () => (prompts.length > 0 ? [...prompts] : ['Ask about school access in Panama.']),
+    () => (prompts.length > 0 ? [...prompts] : [FALLBACK]),
     [prompts]
   );
   const [promptIndex, setPromptIndex] = useState(0);
@@ -17,12 +28,11 @@ export default function LandingPromptCarousel({ prompts }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const currentPrompt = safePrompts[promptIndex] ?? '';
-    const completedTyping = displayText === currentPrompt;
+    const currentText = safePrompts[promptIndex]?.text ?? '';
+    const completedTyping = displayText === currentText;
     const fullyDeleted = displayText.length === 0;
 
     let delay = isDeleting ? 34 : 58;
-
     if (!isDeleting && completedTyping) delay = 1550;
     if (isDeleting && fullyDeleted) delay = 320;
 
@@ -31,30 +41,28 @@ export default function LandingPromptCarousel({ prompts }: Props) {
         setIsDeleting(true);
         return;
       }
-
       if (isDeleting && fullyDeleted) {
         setIsDeleting(false);
         setPromptIndex((current) => (current + 1) % safePrompts.length);
         return;
       }
-
       setDisplayText((current) =>
         isDeleting
           ? current.slice(0, Math.max(0, current.length - 1))
-          : currentPrompt.slice(0, current.length + 1)
+          : currentText.slice(0, current.length + 1)
       );
     }, delay);
 
     return () => window.clearTimeout(timer);
   }, [displayText, isDeleting, promptIndex, safePrompts]);
 
-  const currentPrompt = safePrompts[promptIndex] ?? '';
+  const current = safePrompts[promptIndex] ?? FALLBACK;
 
   return (
     <div className="mx-auto w-full">
       <div className="flex items-center gap-3 rounded-full bg-white px-4 py-3 shadow-[0_22px_54px_rgba(16,33,28,0.055)] sm:gap-4 sm:px-5 sm:py-3.5">
         <Link
-          href="/platform?tab=ask"
+          href={`/platform?country=${current.country}&tab=ask`}
           className="flex min-w-0 flex-1 items-center gap-3 rounded-full transition-colors hover:bg-neutral-50 sm:gap-4"
           aria-label="Open the Ask tab"
         >
@@ -86,9 +94,9 @@ export default function LandingPromptCarousel({ prompts }: Props) {
         </Link>
 
         <Link
-          href={`/platform?ask=${encodeURIComponent(currentPrompt)}`}
+          href={`/platform?country=${current.country}&ask=${encodeURIComponent(current.text)}`}
           className="shrink-0 rounded-full bg-emerald-700 px-[18px] py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800 sm:px-5"
-          aria-label={`Ask: ${currentPrompt}`}
+          aria-label={`Ask: ${current.text}`}
         >
           Ask
         </Link>

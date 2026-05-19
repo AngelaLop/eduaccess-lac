@@ -1,9 +1,9 @@
-import AppShell from '../components/AppShell';
+import PlatformEntry from '../components/PlatformEntry';
 
 export default function PlatformPage() {
   return (
     <main className="h-dvh">
-      <AppShell />
+      <PlatformEntry />
     </main>
   );
 }

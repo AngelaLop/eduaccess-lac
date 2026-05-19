@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "EduAccess LAC",
   description:
-    "A policy intelligence platform for exploring school accessibility in Panama through maps, indicators, and transparent text-to-SQL analysis.",
+    "A policy intelligence platform for exploring school accessibility across Latin America through maps, indicators, and transparent text-to-SQL analysis.",
 };
 
 export default function RootLayout({

@@ -1,11 +1,15 @@
 import Link from 'next/link';
 import LandingPromptCarousel from './components/LandingPromptCarousel';
+import type { CountryIso } from '@/lib/types';
 
-const prompts = [
-  'Which districts have the weakest high-school walking access?',
-  'Where does missing travel-time data exceed 20%?',
-  'Compare primary and high-school access in Panama province.',
-  'Show districts with more than 1,000 students beyond 30 minutes.',
+// One prompt per country — the typewriter rotates through Latin America, and
+// each prompt deep-links straight into that country's platform view.
+const prompts: { text: string; country: CountryIso }[] = [
+  { text: 'Which Panama districts have the weakest high-school walking access?', country: 'PAN' },
+  { text: 'Where in Colombia do FMM and OSRM routing disagree most?', country: 'COL' },
+  { text: "Rank Costa Rica's provinces by 15-minute school access.", country: 'CRI' },
+  { text: 'Which Ecuador districts leave the most students beyond 30 minutes?', country: 'ECU' },
+  { text: 'Compare primary and upper-secondary access across Peru.', country: 'PER' },
 ];
 
 export default function Page() {
@@ -43,11 +47,11 @@ export default function Page() {
         </p>
 
         <h1 className="mt-6 max-w-3xl text-4xl font-medium tracking-[-0.05em] text-[#10211c] sm:text-5xl lg:text-[3.45rem] lg:leading-[1.04]">
-          How accessible are schools in Panama?
+          How accessible are schools across Latin America?
         </h1>
 
         <p className="mt-5 max-w-2xl text-base leading-7 text-neutral-500 sm:text-lg">
-          83 districts mapped by walking and motorized access for 4 student age groups.
+          Five Latin American countries mapped by walking and motorized access.
           Ask the AI a question — get the answer plus the data and confidence behind it.
         </p>
 
@@ -56,7 +60,7 @@ export default function Page() {
         </div>
 
         <Link
-          href="/platform?tab=simulation"
+          href="/platform?country=PAN&tab=simulation"
           className="group mt-8 inline-flex items-center gap-2 text-sm font-normal text-neutral-500 transition-colors hover:text-emerald-700"
         >
           <span
@@ -69,7 +73,7 @@ export default function Page() {
         </Link>
 
         <p className="mt-3 text-sm font-normal text-neutral-400">
-          Panama pilot built on IDB accessibility data.
+          Panama · Colombia · Costa Rica · Ecuador · Peru — built on IDB accessibility data.
         </p>
       </section>
     </main>

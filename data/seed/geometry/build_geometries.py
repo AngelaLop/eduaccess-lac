@@ -81,6 +81,46 @@ def build(country_iso: str, gdf: gpd.GeoDataFrame, names: dict[str, dict]) -> li
     return features
 
 
+def _round_geom(geom: dict, ndigits: int = 3) -> dict:
+    """Recursively round coordinate numbers — region-scale display needs no
+    more than ~3 decimal degrees (~100 m), and full float precision is what
+    bloats the file."""
+    def r(x):
+        if isinstance(x, (int, float)):
+            return round(x, ndigits)
+        return [r(v) for v in x]
+    return {"type": geom["type"], "coordinates": r(geom["coordinates"])}
+
+
+def build_lac_countries(gdf: gpd.GeoDataFrame, country_names: dict[str, str]) -> None:
+    """Dissolve the admin2 polygons into one polygon per LAC country, for the
+    region-level overview map. Every country in the shapefile is emitted — the
+    ones without accessibility data render grey on the map."""
+    dis = gdf.dissolve(by="ADM0_PCODE", as_index=False)
+    # Heavy simplification — region-scale view, country outlines only.
+    # preserve_topology=False allows real reduction (slivers are invisible here).
+    dis["geometry"] = dis["geometry"].simplify(0.08, preserve_topology=False)
+
+    features = []
+    for _, r in dis.iterrows():
+        iso = r["ADM0_PCODE"]
+        geom = json.loads(gpd.GeoSeries([r["geometry"]]).to_json())["features"][0]["geometry"]
+        features.append({
+            "type": "Feature",
+            "properties": {
+                "country_iso": iso,
+                "country_name": country_names.get(iso, iso),
+            },
+            "geometry": _round_geom(geom),
+        })
+
+    fc = {"type": "FeatureCollection", "features": features}
+    out = PUBLIC_DIR / "lac_countries.geojson"
+    out.write_text(json.dumps(fc), encoding="utf-8")
+    print(f"  LAC: {len(features)} countries -> {out.name} "
+          f"({out.stat().st_size / 1024:.0f} KB)")
+
+
 def push(country_iso: str, features: list[dict], client) -> None:
     rows = [{
         "country_iso": country_iso,
@@ -154,6 +194,12 @@ def main() -> None:
         feats = build(iso, gdf, names)
         if client is not None:
             push(iso, feats, client)
+
+    # Region-level overview geometry (one polygon per LAC country).
+    country_names = {
+        r["ADM0_PCODE"]: r["ADM0_EN"] for _, r in ndf.iterrows()
+    }
+    build_lac_countries(gdf, country_names)
 
 
 if __name__ == "__main__":
