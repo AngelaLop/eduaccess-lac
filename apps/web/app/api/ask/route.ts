@@ -142,7 +142,14 @@ country. Countries outside those five are out_of_scope.
 ============================================================
 KIND: "data"
 ============================================================
-Return exactly: {"kind":"data"}
+Return: {"kind":"data","topic":"district"|"equity"}
+
+Pick the topic:
+  "district" → the default. Rankings, filters, stats, comparisons, travel time,
+               national overviews — anything about districts or the country.
+  "equity"   → ONLY when the question is about how access differs by URBAN vs
+               RURAL area, or by WEALTH / INCOME / quintile (rich vs poor).
+               These draw on a separate population-subgroup breakdown.
 
 TRAVEL TIME IS DATA. Questions about how long it takes to get to school, how
 far away schools are, average travel/commute time, or distance ARE "data"
@@ -153,9 +160,13 @@ them "data" (NOT out_of_scope). A later step writes the query and the answer
 explains the reframe.
 
 Q: How long does it take on average to get to school?
-A: {"kind":"data"}
+A: {"kind":"data","topic":"district"}
 Q: How far do kids have to travel to reach a school?
-A: {"kind":"data"}
+A: {"kind":"data","topic":"district"}
+Q: Is school access worse for rural students?
+A: {"kind":"data","topic":"equity"}
+Q: How does access differ between the poorest and wealthiest areas?
+A: {"kind":"data","topic":"equity"}
 
 ============================================================
 KIND: "navigation"
@@ -169,6 +180,7 @@ Action shapes (must match exactly — never invent fields):
   { "type":"set_transport_mode", "mode":"walking"|"motorized" }
   { "type":"set_education_level", "level":"primaria"|"secbaja"|"secalta" }
   { "type":"focus_panel_tab", "tab":"insight"|"ask"|"simulation" }
+  { "type":"open_lac_overview" }
 
 For select_district, return the district name exactly as the user said it — the
 server resolves it to a code. District names repeat across provinces, so when
@@ -181,6 +193,13 @@ Chiriquí" — is navigation, NOT data. Use select_district (+ focus_panel_tab
 insight): the Insight panel shows that district's full travel-time bands and
 robustness detail. Only a question about the whole country in scope (e.g. "how
 is the country doing") is data.
+
+CROSS-COUNTRY COMPARISON: a question that compares or ranks MULTIPLE countries
+— "compare Panama and Colombia", "which country has the best access", "rank the
+five countries", "where is inequality worst across countries" — is navigation.
+Return a single open_lac_overview action: the LAC regional map compares every
+country by access, area gap and wealth gap. (A question about just ONE other
+country still uses set_country.)
 
 RECOMMENDATION QUESTIONS: "where should we build a school", "where should we
 invest", "which districts are the priority", "what should we do about <X>" are
@@ -209,6 +228,9 @@ A: {"kind":"navigation","narrative":"The Insight tab ranks districts by investme
 
 Q: What should we do about Buenavista?
 A: {"kind":"navigation","narrative":"Opening Buenavista with its priority and robustness detail.","actions":[{"type":"select_district","district":"Buenavista"},{"type":"focus_panel_tab","tab":"insight"}]}
+
+Q: Compare school access between Panama and Colombia
+A: {"kind":"navigation","narrative":"Opening the regional map — compare every country by access, area gap and wealth gap.","actions":[{"type":"open_lac_overview"}]}
 
 ============================================================
 KIND: "explainer"
@@ -414,6 +436,72 @@ A: {"sql":"SELECT ROUND(SUM(pct_le15 * pop_total) / NULLIF(SUM(pop_total),0),1) 
 `.trim();
 }
 
+// ── stage 2 prompt: equity SQL synthesis (urban/rural & wealth questions) ─────
+
+function buildEquitySqlPrompt(country: CountryIso, level: string, transport: string): string {
+  const countryName = COUNTRIES[country].name;
+  const levelLabel = LEVEL_LABEL[level] ?? level;
+  const modeLabel = MODE_LABEL[transport] ?? transport;
+  return `
+You write SQL for the EduAccess LAC platform's EQUITY view. The question is
+about how school access differs by area (urban/rural) or by wealth, for
+${countryName} (country_iso='${country}'). Write ONE SQL query. Return JSON only:
+
+  { "sql":"...", "narrative":"...", "resultShape":"..." }
+
+VIEW: v_equity — one row per
+  country_iso × idgeo × admin1 × education_level × mode × dimension × category.
+Travel-time accessibility from the FMM method, split by population subgroup.
+
+COLUMNS:
+  country_iso      TEXT    Country ('${country}'). MUST be filtered.
+  idgeo            TEXT    'country' (one national row) | 'admin1' (per province)
+  admin1_name      TEXT    Province name (empty string when idgeo = 'country')
+  education_level  TEXT    'primaria' | 'secbaja' | 'secalta'
+  mode             TEXT    'walking' | 'motorized'
+  dimension        TEXT    'area' | 'income'
+  category         TEXT    dimension='area'  → 'urban' | 'semiurban' | 'rural'
+                           dimension='income'→ 'quintile_1' … 'quintile_5'
+                           (quintile_1 = poorest, quintile_5 = wealthiest)
+  pop_total        INT     subgroup school-age population
+  pct_le15/30/60   NUMERIC % of that subgroup within 15 / 30 / 60 min (0-100)
+
+HARD RULES — any violation makes the SQL invalid:
+1. SELECT only. No INSERT/UPDATE/DELETE/DROP/CREATE/ALTER/TRUNCATE.
+2. Only reference v_equity. No other tables or views. No subqueries or CTEs.
+3. ALWAYS include "country_iso = '${country}'" in the WHERE clause.
+4. ALWAYS filter exactly ONE dimension: "dimension = 'area'" for urban/rural
+   questions, "dimension = 'income'" for wealth/quintile questions.
+5. ALWAYS filter education_level and mode (default to the ACTIVE CONTEXT below
+   when the question names neither).
+6. For a national answer filter "idgeo = 'country'"; for a per-province answer
+   filter "idgeo = 'admin1'". Never mix the two in one query.
+7. Include LIMIT N where N ≤ 50. No semicolons. No pg_* / information_schema.
+
+ACTIVE CONTEXT (default education_level / mode when the question names none):
+  education_level = '${level}'
+  mode = '${transport}'
+
+NARRATIVE RULE: name the education level ("${levelLabel}") and travel mode
+("${modeLabel}") the numbers describe. For income, remind the reader that
+quintile_1 is the poorest group and quintile_5 the wealthiest.
+
+resultShape: "comparison" for an area / income breakdown, "ranking" for a
+province ordering.
+
+Examples:
+
+Q: Is school access worse for rural students?
+A: {"sql":"SELECT category, pct_le15, pct_le30, pct_le60, pop_total FROM v_equity WHERE country_iso = '${country}' AND idgeo = 'country' AND dimension = 'area' AND education_level = '${level}' AND mode = '${transport}' ORDER BY pct_le30 DESC LIMIT 10","narrative":"School access for ${levelLabel} students by ${modeLabel}, split into urban, semiurban and rural areas.","resultShape":"comparison"}
+
+Q: How does access differ between the poorest and wealthiest?
+A: {"sql":"SELECT category, pct_le15, pct_le30, pct_le60, pop_total FROM v_equity WHERE country_iso = '${country}' AND idgeo = 'country' AND dimension = 'income' AND education_level = '${level}' AND mode = '${transport}' ORDER BY category LIMIT 10","narrative":"School access for ${levelLabel} students by ${modeLabel}, across income quintiles — quintile_1 is the poorest fifth, quintile_5 the wealthiest.","resultShape":"comparison"}
+
+Q: Which provinces have the widest urban-rural gap?
+A: {"sql":"SELECT admin1_name, MAX(pct_le30) FILTER (WHERE category = 'urban') AS urban_pct, MAX(pct_le30) FILTER (WHERE category = 'rural') AS rural_pct, MAX(pct_le30) FILTER (WHERE category = 'urban') - MAX(pct_le30) FILTER (WHERE category = 'rural') AS gap FROM v_equity WHERE country_iso = '${country}' AND idgeo = 'admin1' AND dimension = 'area' AND education_level = '${level}' AND mode = '${transport}' GROUP BY admin1_name ORDER BY gap DESC LIMIT 20","narrative":"Provinces ranked by the urban-minus-rural gap in 30-minute access for ${levelLabel} students, ${modeLabel}.","resultShape":"ranking"}
+`.trim();
+}
+
 // ── action validator ──────────────────────────────────────────────────────────
 
 const VALID_EDUCATION_LEVELS: EducationLevel[] = ['primaria', 'secbaja', 'secalta'];
@@ -484,6 +572,10 @@ function validateActions(raw: unknown, country: CountryIso): ActionValidation {
         validated.push({ type: 'focus_panel_tab', tab: tab as PanelTab });
         break;
       }
+      case 'open_lac_overview': {
+        validated.push({ type: 'open_lac_overview' });
+        break;
+      }
       default:
         return { ok: false, reason: `unknown action type: ${String(a.type)}` };
     }
@@ -549,7 +641,7 @@ function coerceResultShape(raw: unknown): ResultShape | undefined {
 
 const RequestSchema = z.object({
   question: z.string().min(1).max(500),
-  country: z.enum(['PAN', 'COL', 'CRI', 'ECU', 'PER']).default('PAN'),
+  country: z.enum(['PAN', 'COL', 'CRI', 'ECU', 'PER']).default('COL'),
   level: z.enum(['primaria', 'secbaja', 'secalta']).default('secalta'),
   transport: z.enum(['walking', 'motorized']).default('walking'),
 });
@@ -677,7 +769,15 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Stage 2: data — synthesize SQL with the 70b model ────────────────────
-  const sqlPrompt = buildSqlPrompt(country, level, transport);
+  // Equity questions (urban/rural, wealth) use a separate view + prompt; every
+  // other data question uses the per-district view. The validator and the
+  // country-scoping wrapper below are pinned to whichever view applies.
+  const topic = classification.topic === 'equity' ? 'equity' : 'district';
+  const viewName = topic === 'equity' ? 'v_equity' : 'v_indicators_adm2';
+  const sqlPrompt =
+    topic === 'equity'
+      ? buildEquitySqlPrompt(country, level, transport)
+      : buildSqlPrompt(country, level, transport);
   let sqlJson: Record<string, unknown>;
   try {
     const completion = await groq.chat.completions.create({
@@ -698,7 +798,7 @@ export async function POST(req: NextRequest) {
   let narrative = typeof sqlJson.narrative === 'string' ? sqlJson.narrative : '';
   let resultShape = coerceResultShape(sqlJson.resultShape);
 
-  let validation = validateSQL(sql, country);
+  let validation = validateSQL(sql, country, viewName);
 
   // One retry, telling the model what failed.
   if (!validation.ok) {
@@ -725,7 +825,7 @@ export async function POST(req: NextRequest) {
       sql = retryJson.sql.trim();
       narrative = typeof retryJson.narrative === 'string' ? retryJson.narrative : narrative;
       resultShape = coerceResultShape(retryJson.resultShape) ?? resultShape;
-      validation = validateSQL(sql, country);
+      validation = validateSQL(sql, country, viewName);
     } catch (err) {
       return handleLlmError(err);
     }
@@ -743,8 +843,8 @@ export async function POST(req: NextRequest) {
   // rows no matter what WHERE clause the LLM wrote — defence in depth around
   // checkCountryFilter. `country` is a validated enum, safe to interpolate.
   const scopedSql = sql.replace(
-    /\bFROM\s+v_indicators_adm2\b/i,
-    `FROM (SELECT * FROM v_indicators_adm2 WHERE country_iso = '${country}') v_indicators_adm2`
+    new RegExp(`\\bFROM\\s+${viewName}\\b`, 'i'),
+    `FROM (SELECT * FROM ${viewName} WHERE country_iso = '${country}') ${viewName}`
   );
 
   // Execute via the run_sql Postgres function (service_role only)

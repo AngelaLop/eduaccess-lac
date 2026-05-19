@@ -2,11 +2,19 @@
 
 /**
  * LacOverview — the platform's first view. Same map + right-panel layout as the
- * per-country shell: a region-level choropleth of Latin America on the left
- * (each country shaded by its country-total % within 30 min of a school), and
+ * per-country shell: a region-level choropleth of Latin America on the left and
  * a right panel with a region summary + a clickable country ranking. The five
  * countries with data are coloured / ranked; the rest of the 21 LAC countries
  * render grey. Click a country (map or list) to drop into its district view.
+ *
+ * Map view toggle — compares all countries on one map by:
+ *   access     → country-total % within 30 min of a school
+ *   area_gap   → urban % minus rural % (points)
+ *   wealth_gap → wealthiest-quintile % minus poorest-quintile % (points)
+ *
+ * Colour is DATA-RELATIVE: with only five countries the ramp is stretched to
+ * the actual min/max of whatever is shown, so the spread between countries is
+ * always visible. The legend prints those min/max values so it stays honest.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -26,26 +34,24 @@ import {
   type TransportMode,
 } from '@/lib/types';
 
-const COLOR_STEPS: [number, string][] = [
-  [0, '#7f1d1d'],
-  [20, '#dc2626'],
-  [40, '#f97316'],
-  [60, '#eab308'],
-  [80, '#16a34a'],
-];
+// Diverging ramps, low → high. Access: low access is red. Gap: a small gap is
+// good, so the ramp runs green → red as the gap widens.
+const ACCESS_RAMP = ['#b91c1c', '#f97316', '#eab308', '#65a30d', '#15803d'];
+const GAP_RAMP = ['#15803d', '#65a30d', '#eab308', '#f97316', '#b91c1c'];
 const NO_DATA_COLOR = '#d1d5db';
 
-const fillExpr: maplibregl.ExpressionSpecification = [
-  'case',
-  ['!=', ['feature-state', 'has_data'], 1],
-  NO_DATA_COLOR,
-  [
-    'step',
-    ['coalesce', ['feature-state', 'pct'], 0],
-    COLOR_STEPS[0][1],
-    ...COLOR_STEPS.slice(1).flatMap(([t, c]) => [t, c]),
-  ],
-] as unknown as maplibregl.ExpressionSpecification;
+// Stretch a ramp across [min, max] as a continuous interpolation, so the five
+// covered countries always span the full colour range.
+function rampFill(min: number, max: number, ramp: string[]): maplibregl.ExpressionSpecification {
+  const span = max - min || 1;
+  const stops = ramp.flatMap((c, i) => [min + (span * i) / (ramp.length - 1), c]);
+  return [
+    'case',
+    ['!=', ['feature-state', 'has_data'], 1],
+    NO_DATA_COLOR,
+    ['interpolate', ['linear'], ['coalesce', ['feature-state', 'pct'], min], ...stops],
+  ] as unknown as maplibregl.ExpressionSpecification;
+}
 
 // Countries without data render faint — they recede so the five covered
 // countries read as the active layer.
@@ -62,16 +68,53 @@ const WITH_DATA = new Set<string>(COUNTRY_ISOS);
 // back to the overview from a country lands flat, no replay.
 let introPlayed = false;
 
+// ── map view metric ──────────────────────────────────────────────────────────
+
+type Metric = 'access' | 'area_gap' | 'wealth_gap';
+
+const METRICS: Metric[] = ['access', 'area_gap', 'wealth_gap'];
+const METRIC_BUTTON: Record<Metric, string> = {
+  access: 'Access',
+  area_gap: 'Area gap',
+  wealth_gap: 'Wealth gap',
+};
+const METRIC_HELP: Record<Metric, string> = {
+  access: 'Each country shaded by its share of students within 30 min of a school.',
+  area_gap:
+    'Area gap: each country’s difference between urban and rural 30-min access.',
+  wealth_gap:
+    'Wealth gap: each country’s difference between the wealthiest fifth (quintile 5) and the poorest (quintile 1).',
+};
+
 interface Props {
   onSelectCountry: (iso: CountryIso) => void;
 }
 
 interface CountryStat {
-  pct: number;
+  /** % within 30 min — area=Total, quintile=Total */
+  accessPct?: number;
   pop: number;
+  urbanPct?: number;
+  ruralPct?: number;
+  /** quintile_1 = poorest fifth, quintile_5 = wealthiest fifth */
+  q1Pct?: number;
+  q5Pct?: number;
 }
 // keyed `${country_iso}:${level}:${mode}`
 type StatMap = Record<string, CountryStat>;
+
+// The value driving the choropleth + ranking for the active metric. null when
+// that country has no data for the metric (→ rendered grey).
+function metricValue(stat: CountryStat | undefined, metric: Metric): number | null {
+  if (!stat) return null;
+  if (metric === 'access') return stat.accessPct ?? null;
+  if (metric === 'area_gap') {
+    return stat.urbanPct != null && stat.ruralPct != null
+      ? stat.urbanPct - stat.ruralPct
+      : null;
+  }
+  return stat.q5Pct != null && stat.q1Pct != null ? stat.q5Pct - stat.q1Pct : null;
+}
 
 export default function LacOverview({ onSelectCountry }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -81,42 +124,59 @@ export default function LacOverview({ onSelectCountry }: Props) {
 
   const [level, setLevel] = useState<EducationLevel>('secalta');
   const [transport, setTransport] = useState<TransportMode>('walking');
+  const [metric, setMetric] = useState<Metric>('access');
   const [stats, setStats] = useState<StatMap>({});
 
   const statsRef = useRef<StatMap>(stats);
   const levelRef = useRef<EducationLevel>(level);
   const transportRef = useRef<TransportMode>(transport);
+  const metricRef = useRef<Metric>(metric);
   const onSelectRef = useRef(onSelectCountry);
   statsRef.current = stats;
   levelRef.current = level;
   transportRef.current = transport;
+  metricRef.current = metric;
   onSelectRef.current = onSelectCountry;
 
-  // ── load country totals (once) ────────────────────────────────────────────
+  // ── load country-level slices (once) ──────────────────────────────────────
+  // One broad query: country totals plus the urban/rural and quintile_1/_5
+  // rows, so all three map metrics derive from a single fetch.
   useEffect(() => {
     let cancelled = false;
     supabase
       .from('accessibility_indicators')
-      .select('country_iso, education_level, mode, value, population_base')
+      .select('country_iso, education_level, mode, area, quintile, value, population_base')
       .eq('idgeo', 'country')
       .eq('method', 'FMM')
       .eq('sector', 'Total')
-      .eq('area', 'Total')
-      .eq('quintile', 'Total')
       .eq('time_band', 'le30')
       .then(({ data, error }) => {
         if (cancelled) return;
         if (error) {
-          console.error('[LacOverview] country totals:', error);
+          console.error('[LacOverview] country slices:', error);
           return;
         }
         const next: StatMap = {};
         for (const r of (data as Record<string, unknown>[]) ?? []) {
           if (r.value == null) continue;
-          next[`${r.country_iso}:${r.education_level}:${r.mode}`] = {
-            pct: Number(r.value),
-            pop: Number(r.population_base ?? 0),
-          };
+          const key = `${r.country_iso}:${r.education_level}:${r.mode}`;
+          const cur = next[key] ?? { pop: 0 };
+          const val = Number(r.value);
+          const area = r.area;
+          const q = r.quintile;
+          if (area === 'Total' && q === 'Total') {
+            cur.accessPct = val;
+            cur.pop = Number(r.population_base ?? 0);
+          } else if (area === 'urban' && q === 'Total') {
+            cur.urbanPct = val;
+          } else if (area === 'rural' && q === 'Total') {
+            cur.ruralPct = val;
+          } else if (area === 'Total' && q === 'quintile_1') {
+            cur.q1Pct = val;
+          } else if (area === 'Total' && q === 'quintile_5') {
+            cur.q5Pct = val;
+          }
+          next[key] = cur;
         }
         setStats(next);
       });
@@ -125,36 +185,61 @@ export default function LacOverview({ onSelectCountry }: Props) {
     };
   }, []);
 
-  // ── region summary + country ranking for the active level/mode ────────────
+  // ── region summary + country ranking for the active level/mode/metric ─────
   const summary = useMemo(() => {
-    const rows = COUNTRY_ISOS.map((iso) => ({
-      iso,
-      stat: stats[`${iso}:${level}:${transport}`],
-    })).filter((r): r is { iso: CountryIso; stat: CountryStat } => r.stat !== undefined);
+    const entries = COUNTRY_ISOS.map((iso) => {
+      const stat = stats[`${iso}:${level}:${transport}`];
+      return { iso, stat, value: metricValue(stat, metric) };
+    }).filter(
+      (e): e is { iso: CountryIso; stat: CountryStat; value: number } => e.value !== null
+    );
 
-    let totalPop = 0;
-    let reached = 0;
-    for (const { stat } of rows) {
-      totalPop += stat.pop;
-      reached += stat.pop * (stat.pct / 100);
+    // access → weakest (lowest %) first; gaps → widest gap first.
+    const ranking = [...entries].sort((a, b) =>
+      metric === 'access' ? a.value - b.value : b.value - a.value
+    );
+
+    let headline = 0;
+    let underserved: number | null = null;
+    if (metric === 'access') {
+      let totalPop = 0;
+      let reached = 0;
+      for (const { stat, value } of entries) {
+        totalPop += stat.pop;
+        reached += stat.pop * (value / 100);
+      }
+      headline = totalPop > 0 ? Math.round((reached / totalPop) * 100) : 0;
+      underserved = Math.max(0, Math.round(totalPop - reached));
+    } else {
+      headline = entries.length
+        ? Math.round(entries.reduce((s, e) => s + e.value, 0) / entries.length)
+        : 0;
     }
-    const ranking = [...rows].sort((a, b) => a.stat.pct - b.stat.pct);
+
+    const values = ranking.map((r) => r.value);
+    const domain: [number, number] = values.length
+      ? [Math.min(...values), Math.max(...values)]
+      : [0, 1];
+
     return {
-      regionPct: totalPop > 0 ? Math.round((reached / totalPop) * 100) : 0,
-      underserved: Math.max(0, Math.round(totalPop - reached)),
+      headline,
+      underserved,
       ranking,
-      ready: rows.length > 0,
+      maxValue: Math.max(...values, 1),
+      domain,
+      ready: Object.keys(stats).length > 0,
     };
-  }, [stats, level, transport]);
+  }, [stats, level, transport, metric]);
 
   // ── feature-state ─────────────────────────────────────────────────────────
   function applyStates(map: maplibregl.Map) {
     if (!map.getSource('lac')) return;
     for (const iso of COUNTRY_ISOS) {
       const s = statsRef.current[`${iso}:${levelRef.current}:${transportRef.current}`];
+      const v = metricValue(s, metricRef.current);
       map.setFeatureState(
         { source: 'lac', id: iso },
-        { has_data: s ? 1 : 0, pct: s?.pct ?? 0 }
+        { has_data: v != null ? 1 : 0, pct: v ?? 0 }
       );
     }
   }
@@ -194,9 +279,18 @@ export default function LacOverview({ onSelectCountry }: Props) {
       const iso = f.properties?.country_iso as string;
       const name = (f.properties?.country_name as string | undefined) ?? iso;
       const s = statsRef.current[`${iso}:${levelRef.current}:${transportRef.current}`];
-      const line = s
-        ? `<strong>${s.pct.toFixed(1)}%</strong> within 30 min`
-        : '<span style="color:#a3a3a3;">Data coming soon</span>';
+      const m = metricRef.current;
+      const v = metricValue(s, m);
+      let line: string;
+      if (v == null) {
+        line = '<span style="color:#a3a3a3;">Data coming soon</span>';
+      } else if (m === 'access') {
+        line = `<strong>${v.toFixed(1)}%</strong> within 30 min`;
+      } else {
+        line = `<strong>${v.toFixed(0)} pts</strong> ${
+          m === 'area_gap' ? 'urban–rural' : 'wealth'
+        } gap`;
+      }
       popup
         .setLngLat(e.lngLat)
         .setHTML(
@@ -224,7 +318,8 @@ export default function LacOverview({ onSelectCountry }: Props) {
         type: 'fill',
         source: 'lac',
         paint: {
-          'fill-color': fillExpr,
+          // Real colours are set by the recolour effect once data lands.
+          'fill-color': NO_DATA_COLOR,
           'fill-opacity': fillOpacityExpr,
           'fill-color-transition': { duration: 0, delay: 0 },
         },
@@ -286,15 +381,28 @@ export default function LacOverview({ onSelectCountry }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Recolour + repaint when the data, level/mode, or map metric changes. The
+  // ramp is stretched to the current metric's min/max (summary.domain).
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapReady) return;
+    if (!map || !mapReady || !map.getLayer('lac-fill')) return;
+    const ramp = metric === 'access' ? ACCESS_RAMP : GAP_RAMP;
+    map.setPaintProperty(
+      'lac-fill',
+      'fill-color',
+      rampFill(summary.domain[0], summary.domain[1], ramp)
+    );
     applyStates(map);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stats, level, transport, mapReady]);
+  }, [stats, level, transport, metric, mapReady]);
 
   const narrative = EDUCATION_LEVEL_NARRATIVE[level];
   const mode = TRANSPORT_LABELS[transport].toLowerCase();
+  const isGap = metric !== 'access';
+  const gapLabel = metric === 'area_gap' ? 'urban–rural' : 'wealth';
+  const legendRamp = isGap ? GAP_RAMP : ACCESS_RAMP;
+  const fmtLegend = (v: number) =>
+    metric === 'access' ? `${Math.round(v)}%` : `${Math.round(v)} pts`;
 
   return (
     <div className="flex h-full flex-col md:flex-row">
@@ -320,6 +428,28 @@ export default function LacOverview({ onSelectCountry }: Props) {
             >
               ← Home
             </Link>
+          </div>
+
+          {/* Map view */}
+          <div className="mb-1.5 flex items-center gap-2 md:mb-2 md:gap-3">
+            <span className="hidden w-16 shrink-0 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 md:block">
+              Map view
+            </span>
+            <div className="flex w-full gap-0.5 rounded-md bg-neutral-100 p-0.5 md:w-auto">
+              {METRICS.map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMetric(m)}
+                  className={`flex-1 rounded px-2 py-1 text-xs font-medium whitespace-nowrap transition-colors md:flex-none ${
+                    metric === m
+                      ? 'bg-white text-emerald-700 shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-700'
+                  }`}
+                >
+                  {METRIC_BUTTON[m]}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Transport */}
@@ -366,23 +496,27 @@ export default function LacOverview({ onSelectCountry }: Props) {
             </div>
           </div>
 
-          {/* Legend */}
-          <div className="flex items-center gap-1">
-            <span className="mr-0.5 text-[10px] text-neutral-400">Worse</span>
-            {COLOR_STEPS.map(([, color]) => (
-              <span
-                key={color}
-                className="inline-block h-2 w-4 shrink-0 rounded-sm md:w-5"
-                style={{ backgroundColor: color }}
-              />
-            ))}
-            <span className="ml-0.5 mr-2 text-[10px] text-neutral-400 md:mr-3">Better</span>
+          {/* Legend — a continuous gradient stretched to the data's min/max */}
+          <div className="flex items-center gap-1.5">
+            <span className="w-12 shrink-0 text-right text-[10px] tabular-nums text-neutral-400">
+              {summary.ready ? fmtLegend(summary.domain[0]) : ''}
+            </span>
             <span
-              className="inline-block h-2 w-4 shrink-0 rounded-sm md:w-5"
+              className="h-2 flex-1 rounded-sm"
+              style={{ background: `linear-gradient(to right, ${legendRamp.join(', ')})` }}
+            />
+            <span className="w-12 shrink-0 text-[10px] tabular-nums text-neutral-400">
+              {summary.ready ? fmtLegend(summary.domain[1]) : ''}
+            </span>
+            <span
+              className="ml-1 inline-block h-2 w-4 shrink-0 rounded-sm"
               style={{ backgroundColor: NO_DATA_COLOR }}
             />
-            <span className="ml-0.5 text-[10px] text-neutral-400">Coming soon</span>
+            <span className="text-[10px] text-neutral-400">Soon</span>
           </div>
+          <p className="mt-1.5 text-[10px] leading-snug text-neutral-400">
+            {METRIC_HELP[metric]}
+          </p>
         </div>
 
         {/* Body */}
@@ -397,58 +531,87 @@ export default function LacOverview({ onSelectCountry }: Props) {
             </p>
           ) : (
             <div className="flex flex-col gap-4">
-              {/* Region summary */}
-              <div className="rounded-lg bg-emerald-50 p-4 text-center">
-                <p className="text-4xl font-bold text-emerald-800">{summary.regionPct}%</p>
-                <p className="mt-1 text-sm text-emerald-700">
-                  of {narrative} across the {summary.ranking.length} covered countries
-                  live within 30 min by {mode} of a school
-                </p>
-              </div>
+              {/* Headline summary */}
+              {metric === 'access' ? (
+                <>
+                  <div className="rounded-lg bg-emerald-50 p-4 text-center">
+                    <p className="text-4xl font-bold text-emerald-800">{summary.headline}%</p>
+                    <p className="mt-1 text-sm text-emerald-700">
+                      of {narrative} across the {summary.ranking.length} covered countries
+                      live within 30 min by {mode} of a school
+                    </p>
+                  </div>
 
-              <div className="rounded-lg border border-neutral-200 bg-white p-4">
-                <p className="text-3xl font-bold text-neutral-900">
-                  {summary.underserved.toLocaleString()}
-                </p>
-                <p className="mt-0.5 text-sm text-neutral-500">
-                  {narrative} more than 30 min by {mode} from any school
-                </p>
-              </div>
+                  <div className="rounded-lg border border-neutral-200 bg-white p-4">
+                    <p className="text-3xl font-bold text-neutral-900">
+                      {(summary.underserved ?? 0).toLocaleString()}
+                    </p>
+                    <p className="mt-0.5 text-sm text-neutral-500">
+                      {narrative} more than 30 min by {mode} from any school
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div className="rounded-lg bg-emerald-50 p-4 text-center">
+                  <p className="text-4xl font-bold text-emerald-800">{summary.headline} pts</p>
+                  <p className="mt-1 text-sm text-emerald-700">
+                    average {gapLabel} gap in 30-min access for {narrative} ({mode}) across the{' '}
+                    {summary.ranking.length} covered countries
+                  </p>
+                </div>
+              )}
 
               {/* Country ranking */}
               <div>
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
-                  Countries by school access — weakest first
+                  {metric === 'access'
+                    ? 'Countries by school access — weakest first'
+                    : `Countries by ${gapLabel} gap — widest first`}
                 </p>
                 <ol className="space-y-1.5">
-                  {summary.ranking.map((r, i) => (
-                    <li key={r.iso}>
-                      <button
-                        onClick={() => onSelectCountry(r.iso)}
-                        className="block w-full rounded-md border border-neutral-200 px-3 py-2 text-left transition-colors hover:border-emerald-300 hover:bg-emerald-50/50"
-                      >
-                        <div className="mb-1 flex items-baseline justify-between gap-2">
-                          <div className="min-w-0 truncate">
-                            <span className="mr-1.5 text-xs text-neutral-400">{i + 1}.</span>
-                            <span className="text-sm font-medium text-neutral-800">
-                              {COUNTRIES[r.iso].name}
+                  {summary.ranking.map((r, i) => {
+                    const barPct =
+                      metric === 'access'
+                        ? Math.max(r.value, 2)
+                        : Math.max((r.value / summary.maxValue) * 100, 2);
+                    return (
+                      <li key={r.iso}>
+                        <button
+                          onClick={() => onSelectCountry(r.iso)}
+                          className="block w-full rounded-md border border-neutral-200 px-3 py-2 text-left transition-colors hover:border-emerald-300 hover:bg-emerald-50/50"
+                        >
+                          <div className="mb-1 flex items-baseline justify-between gap-2">
+                            <div className="min-w-0 truncate">
+                              <span className="mr-1.5 text-xs text-neutral-400">{i + 1}.</span>
+                              <span className="text-sm font-medium text-neutral-800">
+                                {COUNTRIES[r.iso].name}
+                              </span>
+                            </div>
+                            <span className="shrink-0 text-sm font-bold text-neutral-900">
+                              {metric === 'access'
+                                ? `${r.value.toFixed(1)}%`
+                                : `${r.value.toFixed(0)} pts`}
                             </span>
                           </div>
-                          <span className="shrink-0 text-sm font-bold text-neutral-900">
-                            {r.stat.pct.toFixed(1)}%
-                          </span>
-                        </div>
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
-                          <div
-                            className="h-full rounded-full bg-emerald-600"
-                            style={{ width: `${Math.max(r.stat.pct, 2)}%` }}
-                          />
-                        </div>
-                      </button>
-                    </li>
-                  ))}
+                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+                            <div
+                              className="h-full rounded-full bg-emerald-600"
+                              style={{ width: `${barPct}%` }}
+                            />
+                          </div>
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ol>
               </div>
+
+              {metric === 'wealth_gap' && (
+                <p className="text-xs text-neutral-400">
+                  Wealth quintiles are country-relative — each country&apos;s own poorest vs
+                  wealthiest fifth. Peru&apos;s quintile data is not yet available.
+                </p>
+              )}
 
               <p className="text-xs text-neutral-400">
                 16 more Latin American countries — data coming soon.

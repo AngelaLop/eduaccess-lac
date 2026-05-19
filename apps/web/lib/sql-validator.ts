@@ -8,6 +8,8 @@ export type ValidationResult =
   | { ok: true }
   | { ok: false; reason: string };
 
+// The per-district view is the default; /api/ask passes 'v_equity' for the
+// equity question path. Both are server-chosen literals, never user input.
 const ALLOWED_VIEW = 'v_indicators_adm2';
 const MAX_LIMIT = 50;
 
@@ -114,20 +116,20 @@ export function checkNoSubqueries(sql: string): ValidationResult {
   return { ok: true };
 }
 
-export function checkAllowedView(sql: string): ValidationResult {
+export function checkAllowedView(sql: string, view: string = ALLOWED_VIEW): ValidationResult {
   // Block double-quoted identifiers — could mask relation names
   if (/"[^"]+"/.test(sql)) {
     return { ok: false, reason: 'Double-quoted identifiers are not allowed.' };
   }
 
   // Must have an explicit FROM <view> at the top level
-  if (!new RegExp(`\\bFROM\\s+${ALLOWED_VIEW}\\b`, 'i').test(sql)) {
-    return { ok: false, reason: `Query must use FROM ${ALLOWED_VIEW}.` };
+  if (!new RegExp(`\\bFROM\\s+${view}\\b`, 'i').test(sql)) {
+    return { ok: false, reason: `Query must use FROM ${view}.` };
   }
 
   // Strip parens so EXTRACT(… FROM col) doesn't trigger a false positive on the checks below
   const topLevel = stripParens(
-    sql.replace(new RegExp(`\\b${ALLOWED_VIEW}\\b`, 'gi'), '__VIEW__')
+    sql.replace(new RegExp(`\\b${view}\\b`, 'gi'), '__VIEW__')
   );
 
   // No other relation may follow FROM or JOIN
@@ -135,7 +137,7 @@ export function checkAllowedView(sql: string): ValidationResult {
     /\b(?:FROM|JOIN)\s+(?!__VIEW__)([a-zA-Z_][a-zA-Z0-9_]*)/i
   );
   if (otherRelation) {
-    return { ok: false, reason: `Only ${ALLOWED_VIEW} is allowed. Found: ${otherRelation[1]}` };
+    return { ok: false, reason: `Only ${view} is allowed. Found: ${otherRelation[1]}` };
   }
 
   // Block comma joins: FROM __VIEW__ [alias], other_table
@@ -246,13 +248,17 @@ export function checkFunctionAllowlist(sql: string): ValidationResult {
 }
 
 /** Run all checks in order. Returns the first failure or ok. */
-export function validateSQL(rawSql: string, country: string): ValidationResult {
+export function validateSQL(
+  rawSql: string,
+  country: string,
+  view: string = ALLOWED_VIEW
+): ValidationResult {
   const sql = stripComments(rawSql);
   const checks = [
     checkNoSemicolon(sql),
     checkStartsWithSelect(sql),
     checkNoSubqueries(sql),
-    checkAllowedView(sql),
+    checkAllowedView(sql, view),
     checkCountryFilter(sql, country),
     checkHasLimit(sql),
     checkNoDangerousFunctions(sql),

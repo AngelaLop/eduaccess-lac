@@ -1,6 +1,6 @@
 // ── Country ───────────────────────────────────────────────────────────────────
-// v4: the platform is multi-country. Panama is the default; Colombia is the
-// second country. The schema holds CRI/ECU/PER too once their data lands.
+// v4: the platform is multi-country. Colombia is the default country; the
+// schema holds Panama and CRI/ECU/PER too once their data lands.
 
 export type CountryIso = 'PAN' | 'COL' | 'CRI' | 'ECU' | 'PER';
 
@@ -55,7 +55,7 @@ export const COUNTRIES: Record<CountryIso, CountryConfig> = {
 // Ordered alphabetically by country name — drives the country dropdown.
 export const COUNTRY_ISOS: CountryIso[] = ['COL', 'CRI', 'ECU', 'PAN', 'PER'];
 
-export const DEFAULT_COUNTRY: CountryIso = 'PAN';
+export const DEFAULT_COUNTRY: CountryIso = 'COL';
 
 // ── Education level ─────────────────────────────────────────────────────────────
 // The unified dataset has three levels (no "all" aggregate).
@@ -120,7 +120,8 @@ export type AskAction =
   | { type: 'set_country'; country: CountryIso }
   | { type: 'set_transport_mode'; mode: TransportMode }
   | { type: 'set_education_level'; level: EducationLevel }
-  | { type: 'focus_panel_tab'; tab: PanelTab };
+  | { type: 'focus_panel_tab'; tab: PanelTab }
+  | { type: 'open_lac_overview' };
 
 export type AskResponseKind = 'data' | 'navigation' | 'out_of_scope' | 'explainer';
 

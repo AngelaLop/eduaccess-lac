@@ -61,6 +61,8 @@ const COLUMN_LABELS: Record<string, string> = {
   education_level: 'Level',
   mode: 'Transport',
   country_iso: 'Country',
+  category: 'Group',
+  dimension: 'Breakdown',
 };
 function colLabel(c: string): string {
   return COLUMN_LABELS[c] ?? c.replace(/_/g, ' ');
@@ -81,6 +83,13 @@ function formatCell(col: string, value: unknown): string {
   }
   if (col === 'mode') {
     return TRANSPORT_LABELS[value as TransportMode] ?? String(value);
+  }
+  // Equity 'category': quintile_3 → "Quintile 3"; urban/rural → capitalised.
+  if (col === 'category') {
+    const s = String(value);
+    const q = /^quintile_(\d)$/.exec(s);
+    if (q) return `Quintile ${q[1]}`;
+    return s.charAt(0).toUpperCase() + s.slice(1);
   }
   return String(value);
 }
@@ -281,6 +290,9 @@ export default function AppShell({
         break;
       case 'focus_panel_tab':
         setPanelTab(action.tab);
+        break;
+      case 'open_lac_overview':
+        onBackToLac();
         break;
     }
   }

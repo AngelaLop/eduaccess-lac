@@ -21,6 +21,7 @@ import type { InsightStats } from './AppShell';
 import RobustnessCard from './RobustnessCard';
 import PriorityPanel from './PriorityPanel';
 import CountryAuditBrief from './CountryAuditBrief';
+import EquityGapCard from './EquityGapCard';
 import { supabase } from '@/lib/supabase';
 
 // ── sub-components ────────────────────────────────────────────────────────────
@@ -283,6 +284,8 @@ function InsightLanding({
       <p className="text-xs text-neutral-400">
         Click any bar to focus that district on the map.
       </p>
+
+      <EquityGapCard country={country} level={selectedLevel} transport={selectedTransport} />
 
       <CountryAuditBrief countryIso={country} />
     </div>
