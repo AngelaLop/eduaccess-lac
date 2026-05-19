@@ -109,7 +109,7 @@ function DistrictDetail({
             <div className="grid grid-cols-2 gap-2">
               <Stat label="Within 15 min" value={`${(row.pct_le15 ?? 0).toFixed(1)}%`} />
               <Stat label="Within 60 min" value={`${(row.pct_le60 ?? 0).toFixed(1)}%`} />
-              <Stat label="Population" value={row.pop_total.toLocaleString()} />
+              <Stat label="Population" value={Math.round(row.pop_total).toLocaleString()} />
               <Stat label="Reachable in 30 min" value={popLe30(row).toLocaleString()} />
             </div>
 

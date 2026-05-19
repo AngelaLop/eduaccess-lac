@@ -27,7 +27,7 @@ import {
 } from '@/lib/types';
 
 const CountryMap = dynamic(() => import('./CountryMap'), { ssr: false });
-import SimulationPanel from './SimulationPanel';
+import SimulationPanel, { pickRepresentatives } from './SimulationPanel';
 
 const SIM_DURATION_MS = 20_000;
 const SIM_MINUTES = 60;
@@ -46,6 +46,34 @@ const LEGEND_STOPS = [
 ] as const;
 
 const NO_DATA_COLOR = '#d1d5db';
+
+// Friendly headers for the chat result table — raw SQL column names → labels.
+const COLUMN_LABELS: Record<string, string> = {
+  pct_le15: '% within 15 min',
+  pct_le30: '% within 30 min',
+  pct_le60: '% within 60 min',
+  pct_le30_osrm: '% within 30 min (OSRM)',
+  pop_total: 'Students',
+  admin2_name: 'District',
+  admin1_name: 'Province',
+  admin2_pcode: 'Code',
+  education_level: 'Level',
+  mode: 'Transport',
+  country_iso: 'Country',
+};
+function colLabel(c: string): string {
+  return COLUMN_LABELS[c] ?? c.replace(/_/g, ' ');
+}
+
+// pop_total is a WorldPop estimate — a float. Show it as a whole headcount.
+function formatCell(col: string, value: unknown): string {
+  if (value == null) return '';
+  if (col === 'pop_total') {
+    const n = Number(value);
+    if (Number.isFinite(n)) return Math.round(n).toLocaleString();
+  }
+  return String(value);
+}
 
 // ── types ─────────────────────────────────────────────────────────────────────
 
@@ -87,16 +115,20 @@ export function underservedOf(r: IndicatorRow): number {
 
 interface Props {
   country: CountryIso;
+  /** deep-link initial tab / question — set once by PlatformEntry */
+  initialTab?: PanelTab;
+  initialAsk?: string;
   onCountryChange: (c: CountryIso) => void;
   onBackToLac: () => void;
 }
 
-// Module-level: a deep-link's ?tab= / ?ask= is consumed once per page load —
-// not re-run when AppShell remounts after a trip back to the LAC overview.
-let tabBootstrapDone = false;
-let askFireDone = false;
-
-export default function AppShell({ country, onCountryChange, onBackToLac }: Props) {
+export default function AppShell({
+  country,
+  initialTab,
+  initialAsk,
+  onCountryChange,
+  onBackToLac,
+}: Props) {
   const [indicatorsByTransport, setIndicatorsByTransport] =
     useState<Record<TransportMode, IndicatorsByDist>>(EMPTY_INDICATORS);
   const [selectedTransport, setSelectedTransport] = useState<TransportMode>('walking');
@@ -108,7 +140,7 @@ export default function AppShell({ country, onCountryChange, onBackToLac }: Prop
   const [isAsking, setIsAsking] = useState(false);
   const [chatHighlights, setChatHighlights] = useState<string[]>([]);
   const [rankedHighlights, setRankedHighlights] = useState<RankedHighlight[] | null>(null);
-  const [panelTab, setPanelTab] = useState<PanelTab>('insight');
+  const [panelTab, setPanelTab] = useState<PanelTab>(initialTab ?? 'insight');
   const [askBadge, setAskBadge] = useState(false);
   const [simMin, setSimMin] = useState(0);
   const [simIsPlaying, setSimIsPlaying] = useState(false);
@@ -118,23 +150,6 @@ export default function AppShell({ country, onCountryChange, onBackToLac }: Prop
   const simElapsedAtPauseRef = useRef<number>(0);
   const simulationActive = panelTab === 'simulation';
   const chatEndRef = useRef<HTMLDivElement>(null);
-
-  // URL-params bootstrap: ?tab=<insight|ask|simulation>, ?ask=<prompt> opens
-  // Ask AND auto-fires the question. (?country= is consumed by PlatformEntry.)
-  useEffect(() => {
-    if (tabBootstrapDone) return;
-    if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab');
-    const askParam = params.get('ask');
-    if (askParam) {
-      tabBootstrapDone = true;
-      setPanelTab('ask');
-    } else if (tab === 'ask' || tab === 'insight' || tab === 'simulation') {
-      tabBootstrapDone = true;
-      setPanelTab(tab);
-    }
-  }, []);
 
   // Load indicators whenever the country changes.
   useEffect(() => {
@@ -220,6 +235,16 @@ export default function AppShell({ country, onCountryChange, onBackToLac }: Prop
 
   const highlightedDists = chatHighlights;
   const distIndicators = selectedDist ? (indicators[selectedDist] ?? null) : null;
+
+  // When the simulation finishes, surface the three sampled districts (the kid
+  // tracks) on the map so the user can place them geographically.
+  const simHighlights = useMemo(
+    () =>
+      simulationActive && simIsFinished
+        ? pickRepresentatives(indicators, selectedLevel).map((r) => r.row.admin2_pcode)
+        : [],
+    [simulationActive, simIsFinished, indicators, selectedLevel]
+  );
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -398,15 +423,13 @@ export default function AppShell({ country, onCountryChange, onBackToLac }: Prop
     setSimMin(0);
   }, [panelTab]);
 
-  // Auto-fire ?ask=<prompt> from URL once per page load
+  // Auto-fire the deep-link ?ask= once, on mount. initialAsk is set only on a
+  // fresh deep-link entry — PlatformEntry clears it on any in-app navigation.
+  const askFiredRef = useRef(false);
   useEffect(() => {
-    if (askFireDone) return;
-    if (typeof window === 'undefined') return;
-    const askParam = new URLSearchParams(window.location.search).get('ask');
-    if (askParam && askParam.trim()) {
-      askFireDone = true;
-      ask(askParam);
-    }
+    if (askFiredRef.current) return;
+    askFiredRef.current = true;
+    if (initialAsk && initialAsk.trim()) ask(initialAsk);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -416,7 +439,10 @@ export default function AppShell({ country, onCountryChange, onBackToLac }: Prop
     <div className="flex h-full flex-col md:flex-row">
       {/* ── Map ─────────────────────────────────────────────────────────────── */}
       <div className="relative h-[42vh] shrink-0 md:h-auto md:min-h-0 md:flex-1 md:basis-[65%]">
-        {isLoading && (
+        {/* Opaque loader only on the very first load (no map yet). On a
+            country switch, the map flies the camera and the choropleth
+            recolours as data arrives — no full-screen flash. */}
+        {isLoading && Object.keys(indicators).length === 0 && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-neutral-100">
             <p className="animate-pulse text-sm text-neutral-500">Loading map data...</p>
           </div>
@@ -437,6 +463,7 @@ export default function AppShell({ country, onCountryChange, onBackToLac }: Prop
           }}
           simulationActive={simulationActive}
           simulationSimMin={simMin}
+          simHighlights={simHighlights}
         />
       </div>
 
@@ -776,7 +803,7 @@ function ChatBubble({ msg, onPromptClick }: ChatBubbleProps) {
               <tr>
                 {msg.columns?.map((c) => (
                   <th key={c} className="whitespace-nowrap px-2 py-1.5 text-left font-medium text-neutral-500">
-                    {c}
+                    {colLabel(c)}
                   </th>
                 ))}
               </tr>
@@ -786,7 +813,7 @@ function ChatBubble({ msg, onPromptClick }: ChatBubbleProps) {
                 <tr key={i} className="border-t border-neutral-100 hover:bg-neutral-50">
                   {msg.columns?.map((c) => (
                     <td key={c} className="whitespace-nowrap px-2 py-1.5 text-neutral-700">
-                      {String(row[c] ?? '')}
+                      {formatCell(c, row[c])}
                     </td>
                   ))}
                 </tr>

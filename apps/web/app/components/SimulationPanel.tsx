@@ -46,12 +46,12 @@ function pctArrivedAt(t: number, r: IndicatorRow): number {
   return le60;
 }
 
-interface Representative {
+export interface Representative {
   row: IndicatorRow;
   label: string;
 }
 
-function pickRepresentatives(
+export function pickRepresentatives(
   indicators: IndicatorsByDist,
   level: EducationLevel
 ): Representative[] {

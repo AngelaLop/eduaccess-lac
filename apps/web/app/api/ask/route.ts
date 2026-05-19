@@ -237,6 +237,11 @@ When the user ranks by an access metric (pct_le15, pct_le30, pct_le60), add
 "AND pop_total > 0" to the WHERE clause so districts with no school-age
 population don't pollute the ranking with a meaningless 0%.
 
+POPULATION RULE:
+Whenever the SELECT returns a district-level access metric (pct_le15/30/60),
+also SELECT pop_total. A bare "0%" is meaningless without the population
+behind it — 0% of 40 students reads very differently from 0% of 4,000.
+
 resultShape values:
   "ranking"    → top-N / bottom-N / ORDER BY ... LIMIT
   "filter"     → WHERE filter, returns matching rows without rank semantics
@@ -246,10 +251,10 @@ resultShape values:
 Examples:
 
 Q: Top 5 districts with the worst walking access for upper-secondary students
-A: {"sql":"SELECT admin2_pcode, admin2_name, admin1_name, pct_le30 FROM v_indicators_adm2 WHERE country_iso = '${country}' AND education_level = 'secalta' AND mode = 'walking' AND pop_total > 0 ORDER BY pct_le30 ASC LIMIT 5","narrative":"The 5 districts with the lowest share of upper-secondary students within a 30-minute walk of a school.","resultShape":"ranking"}
+A: {"sql":"SELECT admin2_pcode, admin2_name, admin1_name, pct_le30, pop_total FROM v_indicators_adm2 WHERE country_iso = '${country}' AND education_level = 'secalta' AND mode = 'walking' AND pop_total > 0 ORDER BY pct_le30 ASC LIMIT 5","narrative":"The 5 districts with the lowest share of upper-secondary students within a 30-minute walk of a school.","resultShape":"ranking"}
 
 Q: Districts where FMM and OSRM disagree most on 30-minute walking access
-A: {"sql":"SELECT admin2_pcode, admin2_name, pct_le30, pct_le30_osrm, ABS(pct_le30 - pct_le30_osrm) AS gap FROM v_indicators_adm2 WHERE country_iso = '${country}' AND education_level = '${level}' AND mode = 'walking' AND pct_le30_osrm IS NOT NULL ORDER BY gap DESC LIMIT 20","narrative":"Districts where the two routing methods disagree most on walking access.","resultShape":"comparison"}
+A: {"sql":"SELECT admin2_pcode, admin2_name, pct_le30, pct_le30_osrm, pop_total, ABS(pct_le30 - pct_le30_osrm) AS gap FROM v_indicators_adm2 WHERE country_iso = '${country}' AND education_level = '${level}' AND mode = 'walking' AND pct_le30_osrm IS NOT NULL ORDER BY gap DESC LIMIT 20","narrative":"Districts where the two routing methods disagree most on walking access.","resultShape":"comparison"}
 
 Q: Rank provinces by average % within 15 min of a school
 A: {"sql":"SELECT admin1_name, ROUND(AVG(pct_le15),1) AS avg_pct_le15, COUNT(DISTINCT admin2_pcode) AS n_districts FROM v_indicators_adm2 WHERE country_iso = '${country}' AND education_level = '${level}' AND mode = '${transport}' AND pop_total > 0 GROUP BY admin1_name ORDER BY avg_pct_le15 DESC LIMIT 20","narrative":"Province ranking by average share within a 15-minute walk of a school.","resultShape":"ranking"}

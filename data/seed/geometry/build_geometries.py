@@ -30,6 +30,11 @@ from pathlib import Path
 import geopandas as gpd
 import pandas as pd
 
+try:
+    import topojson
+except ImportError:  # required for topology-aware simplification — see main()
+    topojson = None
+
 SHP = Path(
     r"C:\Users\lopez\github\IDB\accessibility_platform"
     r"\data\bounderys\LAC\level 2\lac-level-2.shp"
@@ -39,13 +44,13 @@ SHP = Path(
 NAMES_CSV = SHP.with_suffix(".csv")
 PUBLIC_DIR = Path(__file__).parents[3] / "apps" / "web" / "public"
 
-# country_iso -> (admin2_pcode prefix, output filename, simplify tolerance °)
+# country_iso -> (admin2_pcode prefix, output filename, toposimplify tolerance °)
 COUNTRIES = {
-    "PAN": ("PA", "panama_districts.geojson", 0.003),
-    "COL": ("CO", "colombia_districts.geojson", 0.013),
-    "CRI": ("CR", "costa_rica_districts.geojson", 0.003),
-    "ECU": ("EC", "ecuador_districts.geojson", 0.009),
-    "PER": ("PE", "peru_districts.geojson", 0.011),
+    "PAN": ("PA", "panama_districts.geojson", 0.002),
+    "COL": ("CO", "colombia_districts.geojson", 0.005),
+    "CRI": ("CR", "costa_rica_districts.geojson", 0.002),
+    "ECU": ("EC", "ecuador_districts.geojson", 0.004),
+    "PER": ("PE", "peru_districts.geojson", 0.005),
 }
 
 
@@ -55,13 +60,18 @@ def build(country_iso: str, gdf: gpd.GeoDataFrame, names: dict[str, dict]) -> li
     if sub.empty:
         sys.exit(f"ERROR: no {prefix}* features in shapefile")
 
-    # simplify in WGS84 (preserve topology so polygons stay watertight)
-    sub["geometry"] = sub["geometry"].simplify(tol, preserve_topology=True)
+    # Topology-aware simplification. A border shared by two neighbouring
+    # districts is a single arc that is simplified ONCE — so adjacent
+    # districts stay watertight. A plain per-polygon .simplify() simplifies
+    # each shared edge twice (differently) and leaves white gaps between them.
+    topo = topojson.Topology(sub[["ADM2_PCODE", "geometry"]], prequantize=False)
+    simplified = topo.toposimplify(tol).to_gdf()
 
     features = []
-    for _, r in sub.iterrows():
+    for _, r in simplified.iterrows():
         pcode = r["ADM2_PCODE"]
         nm = names.get(pcode, {})
+        geom = json.loads(gpd.GeoSeries([r["geometry"]]).to_json())["features"][0]["geometry"]
         features.append({
             "type": "Feature",
             "properties": {
@@ -69,8 +79,7 @@ def build(country_iso: str, gdf: gpd.GeoDataFrame, names: dict[str, dict]) -> li
                 "admin2_name": nm.get("admin2_name"),
                 "admin1_name": nm.get("admin1_name"),
             },
-            "geometry": json.loads(gpd.GeoSeries([r["geometry"]]).to_json())
-                            ["features"][0]["geometry"],
+            "geometry": _round_geom(geom, 5),
         })
 
     fc = {"type": "FeatureCollection", "features": features}
@@ -174,6 +183,8 @@ def main() -> None:
     ap.add_argument("--push", action="store_true")
     args = ap.parse_args()
 
+    if topojson is None:
+        sys.exit("ERROR: topojson not installed. Run: pip install topojson")
     if not SHP.exists():
         sys.exit(f"ERROR: shapefile not found: {SHP}")
     PUBLIC_DIR.mkdir(parents=True, exist_ok=True)

@@ -50,6 +50,8 @@ interface Props {
   onResetView: () => void;
   simulationActive: boolean;
   simulationSimMin: number;
+  // districts to outline once the simulation finishes (the kid-track samples)
+  simHighlights: string[];
 }
 
 // bbox of any GeoJSON geometry → [minX, minY, maxX, maxY]
@@ -115,6 +117,7 @@ export default function CountryMap({
   onResetView,
   simulationActive,
   simulationSimMin,
+  simHighlights,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -362,6 +365,20 @@ export default function CountryMap({
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rankedHighlights, mapReady]);
+
+  // ── simulation finished → spotlight the sampled districts ─────────────────
+  // Same treatment as a ranking result: the sampled districts stay bright, the
+  // rest dim. Only meaningful while the Simulate tab is active.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady || !simulationActive || !map.getLayer('districts-fill')) return;
+    if (simHighlights.length > 0) {
+      applyFillOpacity(map, null, simHighlights);
+    } else {
+      map.setPaintProperty('districts-fill', 'fill-opacity', 0.88);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [simHighlights, simulationActive, mapReady]);
 
   // ── highlight opacity ─────────────────────────────────────────────────────
   useEffect(() => {
