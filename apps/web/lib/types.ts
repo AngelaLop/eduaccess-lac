@@ -122,7 +122,7 @@ export type AskAction =
   | { type: 'set_education_level'; level: EducationLevel }
   | { type: 'focus_panel_tab'; tab: PanelTab };
 
-export type AskResponseKind = 'data' | 'navigation' | 'out_of_scope';
+export type AskResponseKind = 'data' | 'navigation' | 'out_of_scope' | 'explainer';
 
 export type ResultShape = 'ranking' | 'filter' | 'comparison' | 'aggregate';
 

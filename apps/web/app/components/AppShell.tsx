@@ -54,6 +54,7 @@ const COLUMN_LABELS: Record<string, string> = {
   pct_le60: '% within 60 min',
   pct_le30_osrm: '% within 30 min (OSRM)',
   pop_total: 'Students',
+  children_underserved: 'Beyond 30 min',
   admin2_name: 'District',
   admin1_name: 'Province',
   admin2_pcode: 'Code',
@@ -65,12 +66,21 @@ function colLabel(c: string): string {
   return COLUMN_LABELS[c] ?? c.replace(/_/g, ' ');
 }
 
-// pop_total is a WorldPop estimate — a float. Show it as a whole headcount.
+// pop_total is a WorldPop estimate — a float. Show headcounts as whole numbers
+// with thousands separators (children_underserved is a derived headcount too).
+const HEADCOUNT_COLS = new Set(['pop_total', 'children_underserved']);
 function formatCell(col: string, value: unknown): string {
   if (value == null) return '';
-  if (col === 'pop_total') {
+  if (HEADCOUNT_COLS.has(col)) {
     const n = Number(value);
     if (Number.isFinite(n)) return Math.round(n).toLocaleString();
+  }
+  // Raw codes ('secalta', 'walking') read poorly in a results table.
+  if (col === 'education_level') {
+    return EDUCATION_LEVEL_SHORT_LABELS[value as EducationLevel] ?? String(value);
+  }
+  if (col === 'mode') {
+    return TRANSPORT_LABELS[value as TransportMode] ?? String(value);
   }
   return String(value);
 }
@@ -337,12 +347,20 @@ export default function AppShell({
           seen.add(c);
           ordered.push(c);
         }
-        setChatHighlights(ordered);
-        setSelectedDist(null);
-        if (data.resultShape === 'ranking') {
-          setRankedHighlights(ordered.map((admin2_pcode, i) => ({ admin2_pcode, rank: i + 1 })));
-        } else {
+        if (ordered.length === 1) {
+          // A single-district answer: select it so the map zooms in to the
+          // district, not just tints it. Multi-row results stay highlighted.
+          setSelectedDist(ordered[0]);
+          setChatHighlights([]);
           setRankedHighlights(null);
+        } else {
+          setChatHighlights(ordered);
+          setSelectedDist(null);
+          if (data.resultShape === 'ranking') {
+            setRankedHighlights(ordered.map((admin2_pcode, i) => ({ admin2_pcode, rank: i + 1 })));
+          } else {
+            setRankedHighlights(null);
+          }
         }
       } else {
         setRankedHighlights(null);
@@ -763,6 +781,14 @@ function ChatBubble({ msg, onPromptClick }: ChatBubbleProps) {
     return (
       <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
         {msg.error}
+      </div>
+    );
+  }
+
+  if (msg.kind === 'explainer') {
+    return (
+      <div className="rounded-md border border-neutral-200 bg-neutral-50 px-3 py-3 text-sm text-neutral-700">
+        {msg.narrative && <p>{msg.narrative}</p>}
       </div>
     );
   }

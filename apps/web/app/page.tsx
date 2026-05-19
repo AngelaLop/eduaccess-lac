@@ -6,7 +6,7 @@ import type { CountryIso } from '@/lib/types';
 // each prompt deep-links straight into that country's platform view.
 const prompts: { text: string; country: CountryIso }[] = [
   { text: 'Which Panama districts have the weakest high-school walking access?', country: 'PAN' },
-  { text: 'Where in Colombia do FMM and OSRM routing disagree most?', country: 'COL' },
+  { text: 'How long does it take Colombian children to get to school?', country: 'COL' },
   { text: "Rank Costa Rica's provinces by 15-minute school access.", country: 'CRI' },
   { text: 'Which Ecuador districts leave the most students beyond 30 minutes?', country: 'ECU' },
   { text: 'Compare primary and upper-secondary access across Peru.', country: 'PER' },
