@@ -58,9 +58,11 @@ data/scratch/
 *.dbf
 *.prj
 
-# Agent transcripts
+# Agent transcripts + context files (kept local only)
 .claude/
 .agents/
+CLAUDE.md
+AGENTS.md
 
 # Screenshots of credentials — never commit
 keys.png

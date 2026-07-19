@@ -78,7 +78,6 @@ the security model — is in [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).**
 - **Worker:** Node + TypeScript on Railway (cron)
 - **LLM:** Groq-hosted Llama — 3.1 8B (classify + guard) and 3.3 70B (text→SQL), called through the `openai` npm SDK pointed at Groq's OpenAI-compatible API
 - **Data:** IDB Accessibility Platform — FMM + OSRM travel times, WorldPop population, across the covered LAC countries
-- **Multi-model:** Claude Code (primary), Codex (second-pass review on sql-validator.ts and /api/ask)
 
 ---
 
@@ -110,7 +109,6 @@ GROQ_GUARD_MODEL=llama-3.1-8b-instant
 - Per-version summaries — [`v1`](./docs/v1-summary.md) · [`v2`](./docs/v2-summary.md) · [`v3`](./docs/v3-summary.md) · [`v4`](./docs/v4-summary.md)
 - [`docs/SECURITY_AUDIT.md`](./docs/SECURITY_AUDIT.md) — security audit findings
 - [`docs/Feedback_1.md`](./docs/Feedback_1.md) — TA feedback that shaped the robustness work
-- [`CLAUDE.md`](./CLAUDE.md) · [`AGENTS.md`](./AGENTS.md) — agent context files
 - [`data/seed/`](./data/seed) — Supabase schema + migrations
 
 ---
