@@ -47,15 +47,15 @@ Per-version retrospectives live in [`docs/`](./docs) (`v1-summary.md` → `v4-su
 ## Architecture
 
 Three deployables — a Next.js frontend on Vercel, a cron worker on Railway, and a
-Supabase Postgres database — plus Groq-hosted Llama models for the AI chat.
+Supabase Postgres database — plus Groq-hosted open models for the AI chat.
 
 ```
 [Browser]  marketing landing → LAC regional map → per-country workspace
     │              MapLibre choropleth + Insight / Ask / Simulate panels
     ▼
 [Vercel — /api/ask]  two-tier LLM cascade
-    Stage 1  llama-3.1-8b   classify + prompt-injection guard
-    Stage 2  llama-3.3-70b  text → SQL (data questions only)
+    Stage 1  gpt-oss-20b    classify + prompt-injection guard
+    Stage 2  gpt-oss-120b   text → SQL (data questions only)
     sql-validator.ts  →  run_sql() Postgres function
     ▼
 [Supabase]  accessibility_indicators (FMM + OSRM routing, multi-country)
@@ -76,7 +76,7 @@ the security model — is in [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).**
 - **Frontend:** Next.js 16 (App Router), TypeScript, Tailwind v4, MapLibre GL JS v5
 - **Database:** Supabase Postgres (RLS, anon key on frontend, service role on API + worker)
 - **Worker:** Node + TypeScript on Railway (cron)
-- **LLM:** Groq-hosted Llama — 3.1 8B (classify + guard) and 3.3 70B (text→SQL), called through the `openai` npm SDK pointed at Groq's OpenAI-compatible API
+- **LLM:** Groq-hosted `openai/gpt-oss-20b` (classify + guard) and `openai/gpt-oss-120b` (text→SQL), called through the `openai` npm SDK pointed at Groq's OpenAI-compatible API
 - **Data:** IDB Accessibility Platform — FMM + OSRM travel times, WorldPop population, across the covered LAC countries
 
 ---
@@ -95,8 +95,8 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 GROQ_API_KEY=
-GROQ_MODEL=llama-3.3-70b-versatile
-GROQ_GUARD_MODEL=llama-3.1-8b-instant
+GROQ_MODEL=openai/gpt-oss-120b
+GROQ_GUARD_MODEL=openai/gpt-oss-20b
 ```
 
 ---

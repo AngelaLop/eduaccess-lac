@@ -13,7 +13,7 @@
 import { sb } from './supabase.js';
 import { groq, MODEL } from './llm.js';
 
-export const PROMPT_VERSION = 2; // v4: 3-dimension robustness model
+export const PROMPT_VERSION = 3; // model migration: llama-3.3-70b → gpt-oss-120b (regenerate cached briefs)
 
 const SYSTEM_PROMPT = `
 You are the Country Audit Brief writer for the EduAccess LAC platform.

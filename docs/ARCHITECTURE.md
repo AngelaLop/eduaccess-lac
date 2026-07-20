@@ -50,7 +50,7 @@ graph TD
         RPC{{run_sql function}}
     end
 
-    Groq[[Groq — llama-3.1-8b + llama-3.3-70b]]
+    Groq[[Groq — gpt-oss-20b + gpt-oss-120b]]
 
     User --> Landing --> LAC --> Shell
     Shell <--> Map
@@ -110,11 +110,11 @@ panel content and chat all read from it.
 A question becomes a map highlight (or a UI action) without the LLM ever
 touching raw tables or running arbitrary SQL. Two models, by cost:
 
-- **Stage 1 — `llama-3.1-8b-instant`**: a cheap classifier + prompt-injection
+- **Stage 1 — `openai/gpt-oss-20b`**: a cheap classifier + prompt-injection
   guard. Sorts the question into `data` / `navigation` / `explainer` /
   `out_of_scope`. Navigation, explainer and out-of-scope are answered here —
   the big model is never hit.
-- **Stage 2 — `llama-3.3-70b`**: SQL synthesis, for `data` questions only. A
+- **Stage 2 — `openai/gpt-oss-120b`**: SQL synthesis, for `data` questions only. A
   `topic` tag splits these into `district` (→ `v_indicators_adm2`) and
   `equity` (→ `v_equity`); each has its own SQL-only prompt.
 

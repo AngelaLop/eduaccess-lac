@@ -1,19 +1,21 @@
 /**
  * POST /api/ask  { question, country, level, transport }
- * → AskResponse — one of three kinds: data | navigation | out_of_scope
+ * → AskResponse — one of four kinds: data | navigation | explainer | out_of_scope
  *
  * v4 two-tier cascade:
- *   Stage 1 — a small, cheap model (llama-3.1-8b-instant) classifies the
- *             question into data | navigation | out_of_scope and acts as the
- *             prompt-injection / relevance guard. Navigation and out_of_scope
- *             are answered here — they never reach the big model.
- *   Stage 2 — only for data questions, the big model (llama-3.3-70b) writes
- *             the SQL. Its prompt is SQL-only (no nav/scope sections).
+ *   Stage 1 — a small, cheap model (GROQ_GUARD_MODEL, default gpt-oss-20b)
+ *             classifies the question into data | navigation | explainer |
+ *             out_of_scope and acts as the prompt-injection / relevance guard.
+ *             Everything but data is answered here — it never reaches the big
+ *             model.
+ *   Stage 2 — only for data questions, the big model (GROQ_MODEL, default
+ *             gpt-oss-120b) writes the SQL. Its prompt is SQL-only (no
+ *             nav/scope sections).
  *
- * This keeps the scarce 70b token budget for genuine data questions; chatter,
- * navigation and injection attempts are absorbed by the 8b model.
+ * This keeps the scarce big-model token budget for genuine data questions;
+ * chatter, navigation and injection attempts are absorbed by the small model.
  *
- * The 70b never touches raw tables: validateSQL gates the query and /api/ask
+ * The SQL model never touches raw tables: validateSQL gates the query and /api/ask
  * wraps the view in a country-scoped subquery before run_sql executes it.
  *
  * Codex second-pass review target.
@@ -33,8 +35,8 @@ import { COUNTRIES, type CountryIso, type AskAction, type AskResponse, type Educ
 const askRateLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 30 });
 
 // Stage 1 = cheap classifier + guard; stage 2 = SQL synthesis.
-const GUARD_MODEL = process.env.GROQ_GUARD_MODEL ?? 'llama-3.1-8b-instant';
-const SQL_MODEL = process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile';
+const GUARD_MODEL = process.env.GROQ_GUARD_MODEL ?? 'openai/gpt-oss-20b';
+const SQL_MODEL = process.env.GROQ_MODEL ?? 'openai/gpt-oss-120b';
 
 // ── district roster ───────────────────────────────────────────────────────────
 
@@ -684,8 +686,9 @@ export async function POST(req: NextRequest) {
   }
   const groq = new OpenAI({ apiKey, baseURL: 'https://api.groq.com/openai/v1' });
 
-  // ── Stage 1: classify with the cheap 8b model (also the injection guard).
-  // Navigation and out_of_scope are fully answered here — the 70b is never hit.
+  // ── Stage 1: classify with the small model (also the injection guard).
+  // Navigation and out_of_scope are fully answered here — the big model is
+  // never hit.
   let classification: Record<string, unknown>;
   try {
     const completion = await groq.chat.completions.create({
@@ -727,7 +730,7 @@ export async function POST(req: NextRequest) {
 
   // ── kind: explainer ──────────────────────────────────────────────────────
   // Definitional / help answer — fully handled by the cheap stage-1 model,
-  // never reaches the 70b. Narrative only, no SQL, no figures.
+  // never reaches the SQL model. Narrative only, no SQL, no figures.
   if (kind === 'explainer') {
     const narrative = typeof classification.narrative === 'string' ? classification.narrative.trim() : '';
     if (!narrative) {
@@ -768,7 +771,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(unknownResponse, { status: 200 });
   }
 
-  // ── Stage 2: data — synthesize SQL with the 70b model ────────────────────
+  // ── Stage 2: data — synthesize SQL with the big model ────────────────────
   // Equity questions (urban/rural, wealth) use a separate view + prompt; every
   // other data question uses the per-district view. The validator and the
   // country-scoping wrapper below are pinned to whichever view applies.

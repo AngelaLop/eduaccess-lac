@@ -27,8 +27,8 @@ The platform now opens on a **regional view of Latin America** instead of droppi
 
 `/api/ask` was one 70B call per question. v4 splits it by cost:
 
-- **Stage 1 — `llama-3.1-8b-instant`** — a cheap classifier and prompt-injection guard. Sorts every question into `data` / `navigation` / `explainer` / `out_of_scope`. Navigation, explainer and out-of-scope are answered here; the 70B is never touched.
-- **Stage 2 — `llama-3.3-70b`** — SQL synthesis, for `data` questions only. A `topic` tag routes to the right view (`district` → `v_indicators_adm2`, `equity` → `v_equity`).
+- **Stage 1 — `openai/gpt-oss-20b`** — a cheap classifier and prompt-injection guard. Sorts every question into `data` / `navigation` / `explainer` / `out_of_scope`. Navigation, explainer and out-of-scope are answered here; the big model is never touched. (Originally `llama-3.1-8b-instant`; migrated when Groq deprecated the Llama models — see `model-migration-report.md`.)
+- **Stage 2 — `openai/gpt-oss-120b`** — SQL synthesis, for `data` questions only. A `topic` tag routes to the right view (`district` → `v_indicators_adm2`, `equity` → `v_equity`). (Originally `llama-3.3-70b-versatile`.)
 
 Security is unchanged in shape — the SQL validator, the per-IP rate limiter and the constrained view still gate everything — but chatter, navigation and injection attempts no longer burn 70B tokens.
 
@@ -90,7 +90,7 @@ The v1 feedback (Shubham) was: *"think about how you'll use agents for each part
 
 ## Architecture
 
-Three deployables — `apps/web` on Vercel, `apps/worker` on Railway, Supabase Postgres — with Groq-hosted Llama models (8B classifier, 70B SQL synthesis). The full picture — system diagrams, the two-tier chat request flow, the database schema, the security model — is in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+Three deployables — `apps/web` on Vercel, `apps/worker` on Railway, Supabase Postgres — with Groq-hosted gpt-oss models (20B classifier, 120B SQL synthesis). The full picture — system diagrams, the two-tier chat request flow, the database schema, the security model — is in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
 ## Demo readiness
 
