@@ -164,7 +164,7 @@ Per-district, ranks intervention archetypes: **build primary**, **build secondar
 | Map basemap | Maptiler free tier or Carto Voyager | No Mapbox token cost |
 | DB | Supabase | Course-standard; Postgres + RLS + Realtime |
 | Worker | Railway, Nixpacks build, `restartPolicyType = NEVER` | Exits cleanly after each audit |
-| LLM (chat / Ask) | Two-tier Groq Llama: `llama-3.1-8b-instant` guard + classify, `llama-3.3-70b` SQL synth | Free tier; small model relieves quota + hosts the injection guard |
+| LLM (chat / Ask) | Two-tier Groq gpt-oss: `openai/gpt-oss-20b` guard + classify, `openai/gpt-oss-120b` SQL synth | Free tier; small model relieves quota + hosts the injection guard |
 | LLM (agents — country brief, recommender narrative) | Groq Llama 3.3 70b | Free, already wired; rankings/scores are deterministic so the LLM only writes bounded, cached, versioned prose |
 | Robustness + recommender ranking | Deterministic (pure SQL / numeric logic) | Free, idempotent, versionable, defensible to a minister |
 | Service role key | Railway + Vercel server functions only, never `NEXT_PUBLIC_` | Week 4 rule |

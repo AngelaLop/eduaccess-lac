@@ -65,7 +65,7 @@ Env vars (see `.env.example`):
 - `SUPABASE_URL` (or `NEXT_PUBLIC_SUPABASE_URL`)
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `GROQ_API_KEY`
-- `GROQ_MODEL` (optional, defaults to `llama-3.3-70b-versatile`)
+- `GROQ_MODEL` (optional, defaults to `openai/gpt-oss-120b`)
 - `AUDIT_COUNTRY` (optional, limit the run to one `country_iso`)
 - `AUDIT_CELL_LIMIT` (optional, smoke testing — N cells per country)
 - `AUDIT_DRY_RUN` (optional, skip LLM + writes)

@@ -600,12 +600,32 @@ function trimScopeHint(hint: unknown): string {
 
 interface MaybeApiError {
   status?: number;
+  code?: string;
   message?: string;
 }
 
+// Model IDs are env vars, and Groq retires models on roughly a yearly cycle, so
+// "the configured model no longer exists" is a real, recurring failure mode. It
+// used to land in the same generic 502 as a Groq outage, which is how the
+// 2026-08-16 llama shutdown ran unnoticed for weeks. Log the provider status and
+// code, and give the dead-model case its own branch.
 function handleLlmError(err: unknown): NextResponse {
-  console.error('[ask] LLM error:', err);
   const e = err as MaybeApiError;
+  console.error('[ask] LLM error:', {
+    status: e?.status,
+    code: e?.code,
+    message: e?.message,
+  });
+  if (e?.status === 404 || e?.code === 'model_decommissioned' || e?.code === 'model_not_found') {
+    console.error(
+      '[ask] provider rejected the configured model. Check GROQ_MODEL / GROQ_GUARD_MODEL against',
+      'https://console.groq.com/docs/deprecations'
+    );
+    return NextResponse.json(
+      { error: 'The chat model is misconfigured on the server. Nothing wrong with your question.' },
+      { status: 502 }
+    );
+  }
   if (e?.status === 429) {
     const retryAfter = parseRetryAfter(e.message ?? '');
     return NextResponse.json(
